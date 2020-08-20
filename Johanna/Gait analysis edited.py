@@ -3,6 +3,8 @@
 
 
 import csv
+import numpy as np
+import matplotlib.pyplot as plt
 
 """This code is used in the Gait analysis tests"""
 
@@ -40,24 +42,24 @@ else:
         
 #fname_trial1="mg1963 levelwalking03a.csv" # Name of the CSV file "... .csv"
 
-Trial1=[] # Initialisation of list Trial 1 
+Trial1=[]; # Initialisation of list Trial 1 
 k = 0 # Initialisation of iterable k 
 with open(fname_trial1, "r", newline ='') as f1: 
-        reader = csv.reader(f1, delimiter=',') # Read CSV file /!\ Always check delimiter
+        reader = csv.reader(f1, delimiter=','); # Read CSV file /!\ Always check delimiter
         for row in reader:
-                temporary_line = []
+                temporary_line = [];
                 if k > 4: # First five lines contain str (=character) :Column ..., MB0...:..., X/Y/Z
                         for element in row:
                                 if element != '':  
-                                        temporary_line.append(float(element))
+                                        temporary_line.append(float(element));
                                 else:
-                                        temporary_line.append(0)
+                                        temporary_line.append(0);
                         if len(temporary_line) > 0:
-                                Trial1.append(temporary_line) # Any non-empty and non-zero element is added to the list Trial 1 as a float (=decimal number)
+                                Trial1.append(temporary_line); # Any non-empty and non-zero element is added to the list Trial 1 as a float (=decimal number)
                 k+=1
-import numpy as np
-array_trial1 = np.asarray(Trial1)
-print(array_trial1)
+
+array_trial1 = np.asarray(Trial1);
+#print(array_trial1)
 min_value_ankle_trial1 = np.amin(array_trial1[:,column_ankle]) # Min ankle value for trial 1
 max_value_ankle_trial1 = np.amax(array_trial1[:,column_ankle]) # Max ankle value for trial 1
 ROM_value_ankle_trial1= max_value_ankle_trial1 - min_value_ankle_trial1 # ROM ankle value for trial 1
@@ -89,17 +91,6 @@ print("Max: ",max_value_hip_trial1)
 print("ROM", ROM_value_hip_trial1)
 print()
 
-
-#Trial 2 
-
-# if limb=='L': # Conditional statement based on the operated limb
-#         column_ankle_trial2 = 20 # Left Ankle Column - 1 /!\ Always check column as missing markers lead to missing data
-#         column_knee_trial2= 113 # Left Knee Column - 1 /!\ Always check column as missing markers lead to missing data
-#         column_hip_trial2= 101 # Left Hip Column - 1 /!\ Always check column as missing markers lead to missing data
-# else:
-#         column_ankle_trial2= 221 # Right Ankle Column - 1 /!\ Always check column as missing markers lead to missing data
-#         column_knee_trial2= 314 # Right Knee Column - 1 /!\ Always check column as missing markers lead to missing data
-#         column_hip_trial2= 302 # Right Hip Column - 1 /!\ Always check column as missing markers lead to missing data
 
 fname_trial2="mg1963 levelwalking03a.csv" # Name of the CSV file "... .csv"
 
@@ -154,16 +145,6 @@ print("Max: ",max_value_hip_trial2)
 print("ROM", ROM_value_hip_trial2)
 print()
 
-# Trial 3 
-
-# if limb=='L': # Conditional statement based on the operated limb
-#         column_ankle_trial3 = 20 # Left Ankle Column - 1 /!\ Always check column as missing markers lead to missing data
-#         column_knee_trial3= 113 # Left Knee Column - 1 /!\ Always check column as missing markers lead to missing data
-#         column_hip_trial3= 101 # Left Hip Column - 1 /!\ Always check column as missing markers lead to missing data
-# else:
-#         column_ankle_trial3= 221 # Right Ankle Column - 1 /!\ Always check column as missing markers lead to missing data
-#         column_knee_trial3= 314 # Right Knee Column - 1 /!\ Always check column as missing markers lead to missing data
-#         column_hip_trial3= 302 # Right Hip Column - 1 /!\ Always check column as missing markers lead to missing data
 
 fname_trial3="mg1963 levelwalking03a.csv" # Name of the CSV file "... .csv"
 
@@ -261,13 +242,9 @@ print("Mean ROM :", np.mean(ROM_hip))
 print("SD : ", np.std(ROM_hip))
 print()
 
-print()
-print("Ankle: ", "Mean min :", np.mean(min_ankle), "/ SD :", np.std(min_ankle), "-  Mean max :", np.mean(max_ankle), "/ SD :", np.std(max_ankle), "-  Mean ROM :", np.mean(ROM_ankle), "/ SD: ", np.std(ROM_ankle))
-print("Knee: ", "Mean min :", np.mean(min_knee), "/ SD :", np.std(min_knee), "-  Mean max :", np.mean(max_knee), "/ SD :", np.std(max_knee), "-  Mean ROM :", np.mean(ROM_knee), "/ SD: ", np.std(ROM_knee))
-print("Hip: ", "Mean min :", np.mean(min_hip), "/ SD :", np.std(min_hip), "-  Mean max :", np.mean(max_hip), "/ SD :", np.std(max_hip), "-  Mean ROM :", np.mean(ROM_hip), "/ SD: ", np.std(ROM_hip))
 
 # Gait cycle graphs
-import matplotlib.pyplot as plt
+
 
 array_T_trial1 = array_trial1[:,0]
 T_trial1=[] # Time as percentage gait cycle
@@ -292,6 +269,7 @@ for i in range (n3):
 ankle_trial1=array_trial1[:,column_ankle]
 ankle_trial2=array_trial2[:,column_ankle]
 ankle_trial3=array_trial3[:,column_ankle]
+
 
 plt.figure('MB067: Ankle ROM')
 plt.plot(T_trial1, ankle_trial1, label='Trial 1')
@@ -322,6 +300,7 @@ plt.show()
 hip_trial1=array_trial1[:,column_hip]
 hip_trial2=array_trial2[:,column_hip]
 hip_trial3=array_trial3[:,column_hip]
+
 
 plt.figure('MB067: Hip ROM')
 plt.plot(T_trial1, hip_trial1, label='Trial 1')
