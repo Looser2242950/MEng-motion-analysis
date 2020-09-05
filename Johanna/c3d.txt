@@ -1,0 +1,32 @@
+https://medium.com/@yvanscher/explanation-of-the-c3d-file-format-c8e065300510
+http://biomechanical-toolkit.github.io/docs/Wrapping/Python/_getting_started.html
+
+Using BTK package
+downloaded btk-0.4.dev0-py37he350917_0.tar.bz2 from https://anaconda.org/conda-forge/btk/files (this just went into downloads?)
+
+on anaconda prompt ran
+conda install -c conda-forge btk which added btk
+environment location: C:\Users\johan\anaconda3
+
+In code:
+import sys
+import btk
+reader = btk.btkAcquisitionFileReader()
+reader.SetFilename("MB 022 Gait 02.c3d") # set a filename to the reader
+reader.Update()
+acq = reader.GetOutput() # acq is the btk aquisition object
+
+
+lknee = acq.GetPoint("LKneeAngles")
+lknee_values = lknee.GetValues() 
+print(lknee_values)
+
+lhip = acq.GetPoint("LHipAngles")
+lhip_values = lhip.GetValues() 
+print(lhip_values)
+
+lankle = acq.GetPoint("LAnkleAngles")
+lankle_values = lankle.GetValues() 
+print(lankle_values)
+
+
