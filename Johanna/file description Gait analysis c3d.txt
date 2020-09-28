@@ -1,0 +1,74 @@
+Documentation for "gait analysis c3d.py"
+
+Purpose of this code is to extract the valuable data from the c3d gait analysis files, manipulate them, and add the data into the sqlite database
+
+LAST UPDATED: 15/09/2020
+
+KEY VARIABLES:
+
+Motion_Analysis.db =	 			database for Motion analysis data
+patientID =					Patient ID
+GaitAnalysis_Max_Min = 				Table in Motion_Analysis.db which holds max and min values
+trial1c3d, trial2c3d, trial3c3d = 		name of the c3d files containing data of trial 1,2, 3
+t1_lknee, t1_lhip, t1_lankle... = 		seperated values for trial one for each limb and each joint
+t1_max_lk, t1_max_lh,t1_max_la,... = 		Max values for each trial, limb and joint
+t1_min_lk, t1_min_lh,t1_min_la,... =		Min values for each trial, limb and joint
+av_max_rk, av_min_rk,..... = 			Average values for max an min for each limb and each joint
+
+
+DOCUMENTATION:
+
+Packages used:
+import csv
+import numpy as np
+import matplotlib.pyplot as plt
+import sys
+import btk
+import sqlite3
+
+
+SQlite is initialised and the table GaitAnalysis_Max_Min is created with the following columns containing the following datatypes:
+Patient_ID INTEGER, 
+Trial_number INTEGER, 
+Trial_Type TEXT
+max_knee_left REAL, 
+min_knee_left REAL,
+max_hip_left REAL, 
+min_hip_left REAL,
+max_ankle_left REAL, 
+min_ankle_left REAL, 
+max_knee_right REAL, 
+min_knee_right REAL,
+max_hip_right REAL, 
+min_hip_right REAL,
+max_ankle_right REAL, 
+min_ankle_right REAL
+
+VitalData table
+Patient_ID INTEGER, 
+Trial_Type TEXT
+av_min_leftk REAL, 
+av_min_lefth REAL, 
+av_min_lefta REAL, 
+av_min_rightk REAL,
+av_min_righth REAL, 
+av_min_righta REAL,
+av_max_leftk REAL, 
+av_max_lefth REAL,
+av_max_lefta REAL, 
+av_max_rightk REAL,
+av_max_righth REAL,
+av_max_righta REAL
+
+The patient ID, Trial Type and limb are inputted by the user
+**This should potentially be ammended to add these in a GUI or with more loops to ensure spelling is correct**
+
+File uses data aquired directly from the c3d file using the btk package. The file names are inputted in in their c3d format. 
+The extractvalues function is used to extract the values from each trial into seperate arrays for each limb and each joint (18 arrays)
+**Currently set with default as a sample c3d file which needs to be removed before the final product**
+
+The max and min values for each of the 18 arrays are calculated to give 36 new variables. These values are rounded to 3 decimals. 
+The average of the max and min for each limb are calculated and also rounded to 3 decimal points.
+
+The data is loaded into the two tables
+
