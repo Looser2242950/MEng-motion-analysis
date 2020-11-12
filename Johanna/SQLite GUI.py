@@ -101,27 +101,27 @@ scroll_y.pack(side = RIGHT, fill = BOTH)
 mycanvas.configure(width = 860, height = 500)
 mycanvas.configure(yscrollcommand = scroll_y.set)
 mycanvas.bind('<Configure>', lambda e: mycanvas.configure(scrollregion = mycanvas.bbox("all")) )
-ScrollFrame = Frame(mycanvas, bg = "red")
+ScrollFrame = Frame(mycanvas, bg = "DodgerBlue4")
 ScrollFrame.pack(fill = BOTH)
 mycanvas.create_window((0,0), window = ScrollFrame, anchor = "nw")
 
-FrameLabel = Frame(ScrollFrame, bg = "LightSalmon1", bd = 6)
+FrameLabel = Frame(ScrollFrame, bg = "DodgerBlue3", bd = 6)
 FrameLabel.pack()
-FrameTrial1 = Frame(ScrollFrame, bg = "light blue", bd = 6)
+FrameTrial1 = Frame(ScrollFrame, bg = "ivory3", bd = 6)
 FrameTrial1.pack()
-FrameTrial2 = Frame(ScrollFrame, bg = "light pink", bd = 6)
+FrameTrial2 = Frame(ScrollFrame, bg = "ghost white", bd = 6)
 FrameTrial2.pack()
-FrameTrial3 = Frame(ScrollFrame, bg = "pale green", bd = 6)
+FrameTrial3 = Frame(ScrollFrame, bg = "ivory3", bd = 6)
 FrameTrial3.pack()
-FrameTrial4 = Frame(ScrollFrame, bg = "light blue", bd = 6)
+FrameTrial4 = Frame(ScrollFrame, bg = "ghost white", bd = 6)
 FrameTrial4.pack()
-FrameTrial5 = Frame(ScrollFrame, bg = "light pink", bd = 6)
+FrameTrial5 = Frame(ScrollFrame, bg = "ivory3", bd = 6)
 FrameTrial5.pack()
-FrameTrial6 = Frame(ScrollFrame, bg = "pale green", bd = 6)
+FrameTrial6 = Frame(ScrollFrame, bg = "ghost white", bd = 6)
 FrameTrial6.pack()
-FrameInfo = Frame(ScrollFrame, bg = "plum2", bd = 6)
+FrameInfo = Frame(ScrollFrame, bg = "DodgerBlue3", bd = 6)
 FrameInfo.pack()
-FrameClose = Frame(ScrollFrame, bg = "LightSalmon2")
+FrameClose = Frame(ScrollFrame, bg = "DeepSkyBlue2")
 FrameClose.pack()
 
 
@@ -250,7 +250,9 @@ def extractintoDict(filename, TrialNum):
                 patient["Gait"][TrialNum]["lfootoffFrame"].append(eventnum.GetFrame()-patient["Gait"][TrialNum]["startframe"])
             else:
                 patient["Gait"][TrialNum]["rfootoffFrame"].append(eventnum.GetFrame()-patient["Gait"][TrialNum]["startframe"])
-    
+
+    for event in ["lfootstrikeFrame", "rfootstrikeFrame", "lfootoffFrame", "rfootoffFrame"]:
+        patient["Gait"][TrialNum][event].sort()   
     
     if len(patient["Gait"][TrialNum]["lfootstrikeFrame"])>1:
         patient["Gait"][TrialNum]["Left"]["KneeAngle"] = cutcycle(patient["Gait"][TrialNum]["lfootstrikeFrame"], patient["Gait"][TrialNum]["Left"]["KneeAngle"])
@@ -447,99 +449,99 @@ patient["Gait"] = {}
 label_info1 = Label(FrameLabel, 
                     text = """Please select at least 3 Gait trials. 
                     Ensure a minimum of 3 complete gait cycles on each limb. """, 
-                    height = 2)
+                   bg = "ivory3", height = 2)
 label_info1.grid()
 label_info2 = Label(FrameLabel, 
                     text = "Input the patient data and select Accept to enter into the database.", 
-                    height = 2)
+                    bg = "ivory3", height = 2)
 label_info2.grid()
 
 
 #FRAMES 2-7: INDIVIDUAL TRIAL SELECTIONS
-button_explore1 = Button(FrameTrial1, text = "Select Trial 1", 
+button_explore1 = Button(FrameTrial1, text = "Select Trial 1",  width = 12, bg = "ghost white",
                          command = lambda : [browseFiles1(), extractintoDict(filename1, "Trial 1"), 
                                              cleanvalues1(), new_index(filename1, "Trial 1")])  
-label_file_explorer1 = Label(FrameTrial1,  text = "", width = 80, height = 4 ,  fg = "blue") 
-button_explore1.grid(column = 1, row = 1) 
-label_file_explorer1.grid(column = 2, row = 1, columnspan = 7) 
-label_clean1 = Label(FrameTrial1, text="",  width = 20)
+label_file_explorer1 = Label(FrameTrial1,  text = "", width = 80, height = 3 ,  fg = "blue" , bg = "ghost white") 
+button_explore1.grid(column = 1, row = 1, rowspan = 2) 
+label_file_explorer1.grid(column = 2, row = 1, columnspan = 7, rowspan = 2) 
+label_clean1 = Label(FrameTrial1, text="",  width = 25, bg = "ivory3")
 label_clean1.grid(column = 10, row = 1)
-label_clean1r = Label(FrameTrial1, text="",  width = 20)
+label_clean1r = Label(FrameTrial1, text="",  width = 25, bg = "ivory3")
 label_clean1r.grid(column = 10, row = 2)
 
 
 
-button_explore2 = Button(FrameTrial2, text = "Select Trial 2", 
+button_explore2 = Button(FrameTrial2, text = "Select Trial 2",   width = 12,
                          command = lambda : [browseFiles2(), extractintoDict(filename2, "Trial 2"), 
                                              cleanvalues2(), new_index(filename2, "Trial 2")])  
-label_file_explorer2 = Label(FrameTrial2,  text = "", width = 80, height = 4,  fg = "blue") 
-button_explore2.grid(column = 1 , row = 1) 
-label_file_explorer2.grid(column = 2, row = 1, columnspan = 7) 
-label_clean2 = Label(FrameTrial2, text=" ",  width = 20)
+label_file_explorer2 = Label(FrameTrial2,  text = "", width = 80, height = 3,  fg = "blue", bg = "ivory2") 
+button_explore2.grid(column = 1 , row = 1, rowspan = 2)
+label_file_explorer2.grid(column = 2, row = 1, columnspan = 7, rowspan = 2) 
+label_clean2 = Label(FrameTrial2, text=" ",  width = 25, bg = "ghost white")
 label_clean2.grid(column = 10, row = 1)
-label_clean2r = Label(FrameTrial2, text="",  width = 20)
+label_clean2r = Label(FrameTrial2, text="",  width = 25, bg = "ghost white")
 label_clean2r.grid(column = 10, row = 2)
 
 
 
-button_explore3 = Button(FrameTrial3, text = "Select Trial 3", 
+button_explore3 = Button(FrameTrial3, text = "Select Trial 3",  width = 12, bg = "ghost white",
                          command = lambda : [browseFiles3(), extractintoDict(filename3, "Trial 3"), 
                                              cleanvalues3(), new_index(filename3, "Trial 3") ])  
-label_file_explorer3 = Label(FrameTrial3,  text = "", width = 80, height = 4,  fg = "blue") 
-button_explore3.grid(column = 1 , row = 1) 
-label_file_explorer3.grid(column = 2, row = 1, columnspan = 7) 
-label_clean3 = Label(FrameTrial3, text=" ",  width = 20)
+label_file_explorer3 = Label(FrameTrial3,  text = "", width = 80, height = 3,  fg = "blue", bg = "ghost white") 
+button_explore3.grid(column = 1 , row = 1, rowspan = 2) 
+label_file_explorer3.grid(column = 2, row = 1, columnspan = 7, rowspan = 2) 
+label_clean3 = Label(FrameTrial3, text=" ",  width = 25, bg = "ivory3")
 label_clean3.grid(column = 10, row = 1)
-label_clean3r = Label(FrameTrial3, text="",  width = 20)
+label_clean3r = Label(FrameTrial3, text="",  width = 25, bg = "ivory3")
 label_clean3r.grid(column = 10, row = 2)
 
 
 
-button_explore4 = Button(FrameTrial4, text = "Select Trial 4", 
+button_explore4 = Button(FrameTrial4, text = "Select Trial 4",   width = 12,
                          command = lambda : [browseFiles4(), extractintoDict(filename4, "Trial 4"), 
                                              cleanvalues4(), new_index(filename4, "Trial 4")])  
-label_file_explorer4 = Label(FrameTrial4,  text = "", width = 80, height = 4,  fg = "blue") 
-button_explore4.grid(column = 1 , row = 1) 
-label_file_explorer4.grid(column = 2, row = 1, columnspan = 7) 
-label_clean4 = Label(FrameTrial4, text=" ",  width = 20)
+label_file_explorer4 = Label(FrameTrial4,  text = "", width = 80, height = 3,  fg = "blue", bg = "ivory2") 
+button_explore4.grid(column = 1 , row = 1, rowspan = 2) 
+label_file_explorer4.grid(column = 2, row = 1, columnspan = 7, rowspan = 2) 
+label_clean4 = Label(FrameTrial4, text=" ",  width = 25, bg = "ghost white")
 label_clean4.grid(column = 10, row = 1)
-label_clean4r = Label(FrameTrial4, text="",  width = 20)
+label_clean4r = Label(FrameTrial4, text="",  width = 25, bg = "ghost white")
 label_clean4r.grid(column = 10, row = 2)
 
 
-button_explore5 = Button(FrameTrial5, text = "Select Trial 5", 
+button_explore5 = Button(FrameTrial5, text = "Select Trial 5",   width = 12,bg = "ghost white",
                          command = lambda : [browseFiles5(), extractintoDict(filename5, "Trial 5"), 
                                              cleanvalues5(), new_index(filename4, "Trial 4")])  
-label_file_explorer5 = Label(FrameTrial5,  text = "", width = 80, height = 4,  fg = "blue") 
-button_explore5.grid(column = 1 , row = 1) 
-label_file_explorer5.grid(column = 2, row = 1, columnspan = 7) 
-label_clean5 = Label(FrameTrial5, text=" ",  width = 20)
+label_file_explorer5 = Label(FrameTrial5,  text = "", width = 80, height = 3,  fg = "blue", bg = "ghost white") 
+button_explore5.grid(column = 1 , row = 1, rowspan = 2) 
+label_file_explorer5.grid(column = 2, row = 1, columnspan = 7, rowspan = 2) 
+label_clean5 = Label(FrameTrial5, text=" ",  width = 25, bg = "ivory3")
 label_clean5.grid(column = 10, row = 1)
-label_clean5r = Label(FrameTrial5, text="",  width = 20)
+label_clean5r = Label(FrameTrial5, text="",  width = 25, bg = "ivory3")
 label_clean5r.grid(column = 10, row = 2)
 
 
 
-button_explore6 = Button(FrameTrial6, text = "Select Trial 6", 
+button_explore6 = Button(FrameTrial6, text = "Select Trial 6",  width = 12,
                          command = lambda : [browseFiles6(), extractintoDict(filename6, "Trial 6"), 
                                              cleanvalues6(), new_index(filename4, "Trial 4")])  
-label_file_explorer6 = Label(FrameTrial6,  text = "", width = 80, height = 4,  fg = "blue") 
-button_explore6.grid(column = 1 , row = 1) 
-label_file_explorer6.grid(column = 2, row = 1, columnspan = 7) 
-label_clean6 = Label(FrameTrial6, text=" ",  width = 20)
+label_file_explorer6 = Label(FrameTrial6,  text = "", width = 80, height = 3,  fg = "blue", bg = "ivory2") 
+button_explore6.grid(column = 1 , row = 1, rowspan = 2) 
+label_file_explorer6.grid(column = 2, row = 1, columnspan = 7, rowspan = 2) 
+label_clean6 = Label(FrameTrial6, text=" ",  width = 25, bg = "ghost white")
 label_clean6.grid(column = 10, row = 1)
-label_clean6r = Label(FrameTrial6, text="",  width = 20)
+label_clean6r = Label(FrameTrial6, text="",  width = 25, bg = "ghost white")
 label_clean6r.grid(column = 10, row = 2)
 
 
 
 #FRAME 8: INPuT PATIENT DATA
-labelID = Label(FrameInfo,  text = "Patient ID: ") 
+labelID = Label(FrameInfo,  text = "Patient ID: ", bg = "ivory3") 
 labelID.grid(column = 1, row = 1)
 vID = StringVar()
-entryID = Entry(FrameInfo,  textvariable = vID,   fg = "red", width = 20) 
+entryID = Entry(FrameInfo,  textvariable = vID,   fg = "purple4", width = 20) 
 entryID.grid(column = 2, row = 1, columnspan = 3)
-labelDom = Label(FrameInfo,  text = "Dominant Limb: ") 
+labelDom = Label(FrameInfo,  text = "Dominant Limb: ", bg = "ivory3") 
 labelDom.grid(column = 1, row = 2)
 vDom = StringVar()
 vDom.set(0)
@@ -575,7 +577,7 @@ class Pattype:
             self.radioboth.configure(state = "normal")
             
     def __init__(self, master):
-        self.label_type = Label(FrameInfo, text = "Patient Type: ")
+        self.label_type = Label(FrameInfo, text = "Patient Type: ", bg = "ivory3")
         self.label_type.grid(column = 1, row = 3)
         global vtype
         vtype = StringVar()
@@ -584,14 +586,14 @@ class Pattype:
         self.optiontype.config(width = 20)
         self.optiontype.grid(column = 2, row = 3, columnspan  =3)
         
-        self.date_label = Label(FrameInfo, text = "Number of months Post - Op: ")
+        self.date_label = Label(FrameInfo, text = "Number of months Post - Op: ", bg = "ivory3")
         self.date_label.grid(column = 1, row  = 4)
         global vmonth
         vmonth = IntVar()
-        self.month_entry = Entry(FrameInfo, textvariable = vmonth, width = 20)
+        self.month_entry = Entry(FrameInfo, textvariable = vmonth, width = 20, fg = "purple4")
         self.month_entry.grid(column = 2, row = 4, columnspan  = 3)
         
-        self.limb_label = Label(FrameInfo, text = "Affected Limb: ")
+        self.limb_label = Label(FrameInfo, text = "Affected Limb: ", bg = "ivory3")
         self.limb_label.grid(column = 1, row  = 5)
         global vlimb
         vlimb = StringVar()
@@ -604,8 +606,6 @@ class Pattype:
         self.radioboth.grid(column = 4, row = 5)     
 Pattype(FrameInfo)
 
-"""Update index value"""
-
 
 
 
@@ -615,7 +615,8 @@ def enter_patient_data():
               Filename_Gait_Trial_1, Filename_Gait_Trial_2, Filename_Gait_Trial_3,
               Filename_Gait_Trial_4, Filename_Gait_Trial_5, Filename_Gait_Trial_6)
               VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
-              (vID.get(), vDom.get(), vtype.get(), vmonth.get(), vlimb.get(), filename1, filename2, filename3, filename4, filename5, filename6))
+              (vID.get(), vDom.get(), vtype.get(), vmonth.get(), vlimb.get(),
+               filename1, filename2, filename3, filename4, filename5, filename6))
 
 def enter_Gait_Table (numTrials):
     for TrialNum in numTrials:
