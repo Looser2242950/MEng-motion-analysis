@@ -1,7 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Nov  4 10:32:42 2020
+Created on Mon Nov 16 23:21:12 2020
 
+@author: johan
+"""
+
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Nov  4 10:32:42 2020
 @author: johan
 """
 
@@ -698,14 +704,19 @@ def enter_Gait_Table (numTrials):
                           ))
 
 
-                        
+def writetodict():
+    name = str(vID.get()) + str(vtype.get()) + str(vmonth.get()) + ".json"
+    with open(name, 'w') as f:
+        json.dump(patient, f, indent = 5)                        
 
 #FRAME 9: ACCEPT OR CANCEL
-buttonaccept = Button(FrameClose, text = "Accept", 
-                      command  = lambda: [enter_patient_data(), enter_Gait_Table(numTrialslist), close_window()])
+buttonaccept = Button(FrameClose, text = "Accept",
+                      command = lambda: [enter_patient_data(), 
+                                         enter_Gait_Table(numTrialslist), 
+                                         close_window(), writetodict()])
 buttonaccept.grid(column = 1, row = 1, padx = 10, pady = 20)
 buttoncancel = Button(FrameClose, text = "Cancel", command = lambda: close_window())
-buttoncancel.grid(column=2, row  = 1, padx = 10)
+buttoncancel.grid(column=2, row = 1, padx = 10)
 
 
 
@@ -717,11 +728,6 @@ root.mainloop()
 
 
 
-
-"""Write Dict to JSON"""
-name = str(vID.get()) + str(vtype.get()) + str(vmonth.get()) + ".json"
-with open(name, 'w') as f:
-      json.dump(patient, f, indent = 5)
 
 
 
@@ -774,7 +780,3 @@ selectall3()
 """Close SQLite Connection"""
 conn.commit()
 conn.close()     
-
-
-
-
