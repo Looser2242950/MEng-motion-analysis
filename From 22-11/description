@@ -1,0 +1,11 @@
+Gait GUI SQLite.py
+  Creates its own GUI and own database fully functioning uing dict. Includes max/min
+
+StepUp GUI SQLite.py
+  Creates its own GUI and own database fully functioning uing dict. Includes max/min
+
+maxmin table test
+  Creates max min table for Gait from uploaded JSON files
+
+Stepping test
+  Messing about with btk
