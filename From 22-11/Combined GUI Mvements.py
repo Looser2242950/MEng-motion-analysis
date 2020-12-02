@@ -520,11 +520,11 @@ label_file_explorer12StepUp = Label(FrameTrial12StepUp,  text = "", width = 50, 
 label_file_explorer12StepUp.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
 
 StepUp= {}
-def browseFilesStepUp(): 
+StepUp["Left"] = {}
+StepUp["Right"] = {}
+def browseFilesStepUp(Limb): 
     #TriallistStepUp.clear()
     suc.set(1)
-    global filelistStepUp
-    global TriallistStepUp
     TriallistStepUp = []
     filenames = (filedialog.askopenfilenames(
         title = "Select a File", 
@@ -533,38 +533,49 @@ def browseFilesStepUp():
     #creates a tuple therefore must tur into a list
     filelistStepUp = list(filenames)
     length = len(filelistStepUp)
+
     for i in range(length):
-        TriallistStepUp.append("Trial "+str(i+1))
-        StepUp[TriallistStepUp[i]]={}
         filelistStepUp[i]=os.path.basename(filelistStepUp[i])
-        StepUp[TriallistStepUp[i]].update({"Filename": filelistStepUp[i]})
-        if i == 0:
-            label_file_explorer1StepUp.configure(text="File Opened: "+filelistStepUp[i])
-        if i == 1:
-            label_file_explorer2StepUp.configure(text="File Opened: "+filelistStepUp[i])
-        if i == 2:
-            label_file_explorer3StepUp.configure(text="File Opened: "+filelistStepUp[i])
-        if i == 3:
-            label_file_explorer4StepUp.configure(text="File Opened: "+filelistStepUp[i])
-        if i == 4:
-            label_file_explorer5StepUp.configure(text="File Opened: "+filelistStepUp[i])
-        if i == 5:
-            label_file_explorer6StepUp.configure(text="File Opened: "+filelistStepUp[i])
-        if i == 6:
-            label_file_explorer7StepUp.configure(text="File Opened: "+filelistStepUp[i])
-        if i == 7:
-            label_file_explorer8StepUp.configure(text="File Opened: "+filelistStepUp[i])
-        if i == 8:
-            label_file_explorer9StepUp.configure(text="File Opened: "+filelistStepUp[i])
-        if i == 9:
-            label_file_explorer10StepUp.configure(text="File Opened: "+filelistStepUp[i])
-        if i == 10:
-            label_file_explorer11StepUp.configure(text="File Opened: "+filelistStepUp[i])
-        if i == 11:
-            label_file_explorer12StepUp.configure(text="File Opened: "+filelistStepUp[i])
+        if Limb == "Left":
+            StepUp["Left"][TriallistStepUp[i]].update({"Filename": filelistStepUp[i]})
+            TriallistStepUp.append("Trial "+str(i+1))
+            StepUp["Left"][TriallistStepUp[i]]={}
+            if i == 0:
+                label_file_explorer1StepUp.configure(text="File Opened: "+filelistStepUp[i])
+            if i == 1:
+                label_file_explorer2StepUp.configure(text="File Opened: "+filelistStepUp[i])
+            if i == 2:
+                label_file_explorer3StepUp.configure(text="File Opened: "+filelistStepUp[i])
+            if i == 3:
+                label_file_explorer4StepUp.configure(text="File Opened: "+filelistStepUp[i])
+            if i == 4:
+                label_file_explorer5StepUp.configure(text="File Opened: "+filelistStepUp[i])
+            if i == 5:
+                label_file_explorer6StepUp.configure(text="File Opened: "+filelistStepUp[i])
+            global filelistStepUpLeft
+            filelistStepUpLeft = filelistStepUp
+        if Limb == "Right":
+            StepUp["Right"][TriallistStepUp[i]].update({"Filename": filelistStepUp[i]})
+            TriallistStepUp.append("Trial "+str(i+1))
+            StepUp["Right"][TriallistStepUp[i]]={}
+            if i == 6:
+                label_file_explorer7StepUp.configure(text="File Opened: "+filelistStepUp[i])
+            if i == 7:
+                label_file_explorer8StepUp.configure(text="File Opened: "+filelistStepUp[i])
+            if i == 8:
+                label_file_explorer9StepUp.configure(text="File Opened: "+filelistStepUp[i])
+            if i == 9:
+                label_file_explorer10StepUp.configure(text="File Opened: "+filelistStepUp[i])
+            if i == 10:
+                label_file_explorer11StepUp.configure(text="File Opened: "+filelistStepUp[i])
+            if i == 11:
+                label_file_explorer12StepUp.configure(text="File Opened: "+filelistStepUp[i])
+            global filelistStepUpRight
+            filelistStepUpRight = filelistStepUp
     print(filelistStepUp)
     print(length)
     print(TriallistStepUp)
+
 
 #EXCTRACT AND NORMALISE DATA
 # def cutcycle(footstrike, data):
@@ -629,7 +640,7 @@ def extract_all_StepUp_files():
         extractintoDictStepUp(filelistStepUp[i], TriallistStepUp[i])
 
 button_exploreStepUpLeft = Button(SelectFrameStepUpLeft, text = "Select up to 6 LEFT Trials",  width = 40, bg = "ghost white",
-                          command = lambda : [browseFilesStepUp(), extract_all_StepUp_files()])  
+                          command = lambda : [browseFilesStepUp(), extract_all_StepUp_files("Lim")])  
 button_exploreStepUpLeft.pack(pady=20)
 button_exploreStepUpRight = Button(SelectFrameStepUpRight, text = "Select up to 6 Right Trials",  width = 40, bg = "ghost white",
                           command = lambda : [browseFilesStepUp(), extract_all_StepUp_files()])  
