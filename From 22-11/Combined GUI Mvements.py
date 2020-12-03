@@ -14,7 +14,7 @@ from tkinter import *
 from tkinter import filedialog 
 import os.path 
 from tkinter import ttk
-
+import tkinter.font as font
 
 root = Tk()
 
@@ -25,14 +25,18 @@ tab2 = ttk.Frame(tab_parent)
 tab3 = ttk.Frame(tab_parent)
 tab4 = ttk.Frame(tab_parent)
 tab5 = ttk.Frame(tab_parent)
+tab6 = ttk.Frame(tab_parent)
+tab7 = ttk.Frame(tab_parent)
 tab_parent.add(tab1, text = "Patient Data")
 tab_parent.add(tab2, text = "Gait")
 tab_parent.add(tab3, text = "Step Up")
 tab_parent.add(tab4, text = "Step Down")
 tab_parent.add(tab5, text = "Sit Stand Sit")
+tab_parent.add(tab6, text = "Single Leg Balance")
+tab_parent.add(tab7, text = "Ramp Walk")
 tab_parent.pack(expand=1, fill="both")
 
-
+myFont = font.Font(family = "Helvetica", size=20)
 
 """TAB 1"""
 FrameTop = Frame(tab1, bg = "DodgerBlue3", bd = 6)
@@ -62,8 +66,6 @@ radiomale = Radiobutton(FrameInfo, text="Male",variable= vSex, value="Male")
 radiomale.grid(column = 2, row = 2)
 radiofemale = Radiobutton(FrameInfo, text="Female",variable= vSex, value="Female")
 radiofemale.grid(column = 3, row = 2)
-radioother = Radiobutton(FrameInfo, text="Other",variable= vSex, value="Other")
-radioother.grid(column = 4, row = 2)
 labelDom = Label(FrameInfo,  text = "Dominant Limb: ", bg = "ivory3") 
 labelDom.grid(column = 1, row = 3, pady = 5)
 vDom = StringVar()
@@ -162,11 +164,16 @@ buttonaccept.pack(side = RIGHT, anchor = CENTER, padx = 10, pady = 20)
 
 
 """Tab 2: Gait"""
-
+InfoFrameGait = Frame(tab2,bg = "DodgerBlue3", bd = 6)
+InfoFrameGait.pack(fill = BOTH)
 SelectFrameGait = Frame(tab2,bg = "DodgerBlue3", bd = 6)
 SelectFrameGait.pack(fill = BOTH)
 TrialFrameGait= Frame(tab2,bg = "DodgerBlue3")
 TrialFrameGait.pack(fill = BOTH)
+
+labelGait = Label(InfoFrameGait, text = "Gait")
+labelGait["font"] = myFont
+labelGait.pack()
 
 #Display filenames + whether clean or not    
 FrameTrial1Gait = Frame(TrialFrameGait, bg = "ivory3", bd = 6)
@@ -364,8 +371,11 @@ def extractintoDict(filename, TrialNum):
         Gait[TrialNum]["Left"]["AnklePower"] = cutcycle(Gait[TrialNum]["lfootstrikeFrame"], Gait[TrialNum]["Left"]["AnklePower"])
     
         Gait[TrialNum]["Left"]["FootProgressAngle"] =cutcycle(Gait[TrialNum]["lfootstrikeFrame"], Gait[TrialNum]["Left"]["FootProgressAngle"])
-        Gait[TrialNum]["Left"]["GRF"] =cutcycle(Gait[TrialNum]["lfootstrikeFrame"], Gait[TrialNum]["Left"]["GRF"])
-        Gait[TrialNum]["Left"]["NGRF"] =cutcycle(Gait[TrialNum]["lfootstrikeFrame"], Gait[TrialNum]["Left"]["NGRF"])
+        try:
+            Gait[TrialNum]["Left"]["GRF"] =cutcycle(Gait[TrialNum]["lfootstrikeFrame"], Gait[TrialNum]["Left"]["GRF"])
+            Gait[TrialNum]["Left"]["NGRF"] =cutcycle(Gait[TrialNum]["lfootstrikeFrame"], Gait[TrialNum]["Left"]["NGRF"])
+        except:
+            pass
         Gait[TrialNum]["Left"]["pelvisAngle"] =cutcycle(Gait[TrialNum]["lfootstrikeFrame"], Gait[TrialNum]["Left"]["pelvisAngle"])  
         Gait[TrialNum]["Left"]["COM"] =cutcycle(Gait[TrialNum]["lfootstrikeFrame"], Gait[TrialNum]["Left"]["COM"])
 
@@ -396,8 +406,11 @@ def extractintoDict(filename, TrialNum):
         Gait[TrialNum]["Right"]["AnklePower"] = cutcycle(Gait[TrialNum]["rfootstrikeFrame"], Gait[TrialNum]["Right"]["AnklePower"])
         
         Gait[TrialNum]["Right"]["FootProgressAngle"] =cutcycle(Gait[TrialNum]["rfootstrikeFrame"], Gait[TrialNum]["Right"]["FootProgressAngle"])
-        Gait[TrialNum]["Right"]["GRF"] =cutcycle(Gait[TrialNum]["rfootstrikeFrame"], Gait[TrialNum]["Right"]["GRF"])
-        Gait[TrialNum]["Right"]["NGRF"] =cutcycle(Gait[TrialNum]["rfootstrikeFrame"], Gait[TrialNum]["Right"]["NGRF"])
+        try:
+            Gait[TrialNum]["Right"]["GRF"] =cutcycle(Gait[TrialNum]["rfootstrikeFrame"], Gait[TrialNum]["Right"]["GRF"])
+            Gait[TrialNum]["Right"]["NGRF"] =cutcycle(Gait[TrialNum]["rfootstrikeFrame"], Gait[TrialNum]["Right"]["NGRF"])
+        except:
+            pass
         Gait[TrialNum]["Right"]["pelvisAngle"] =cutcycle(Gait[TrialNum]["rfootstrikeFrame"], Gait[TrialNum]["Right"]["pelvisAngle"])
         Gait[TrialNum]["Right"]["COM"] =cutcycle(Gait[TrialNum]["rfootstrikeFrame"], Gait[TrialNum]["Right"]["COM"])
         
@@ -424,13 +437,13 @@ def extract_all_Gait_files():
         
 button_exploreGait = Button(SelectFrameGait, text = "Select up to 6 Trials",  width = 40, bg = "ghost white",
                           command = lambda : [browseFilesGait(), extract_all_Gait_files()])  
-button_exploreGait.pack(pady=20)
+button_exploreGait.pack(pady=10)
  
 
 """Tab 3: Stepup"""
 
 InfoFrameStepUp = Frame(tab3,bg = "DodgerBlue3", bd = 6)
-InfoFrameStepUp.grid(column = 1, row = 2)
+InfoFrameStepUp.grid(column = 1, row = 2, columnspan = 2, sticky=NSEW)
 TrialFrameMainStepUp= Frame(tab3,bg = "DodgerBlue3")
 TrialFrameMainStepUp.grid(column = 1, row = 3, columnspan = 2)
 
@@ -445,6 +458,11 @@ TrialFrameMainStepUp.grid(column = 1, row = 3, columnspan = 2)
 # TrialFrameStepUp = Frame(mycanvas, bg = "red")
 # TrialFrameStepUp.pack(expand =True, fill = BOTH)
 # mycanvas.create_window((0,0), window = TrialFrameStepUp,anchor = "nw")
+
+labelStepUp = Label(InfoFrameStepUp, text = "StepUp")
+labelStepUp["font"] = myFont
+labelStepUp.pack()
+
 
 TrialFrameStepUp=TrialFrameMainStepUp
 FrameStepUpLeft = Frame(TrialFrameStepUp)
@@ -525,7 +543,11 @@ StepUp["Right"] = {}
 def browseFilesStepUp(Limb): 
     #TriallistStepUp.clear()
     suc.set(1)
+    global TriallistStepUp
+    global filelistStepUp
     TriallistStepUp = []
+    filelistStepUp = []
+
     filenames = (filedialog.askopenfilenames(
         title = "Select a File", 
         filetypes = (("C3D files","*.c3d*"),
@@ -533,11 +555,11 @@ def browseFilesStepUp(Limb):
     #creates a tuple therefore must tur into a list
     filelistStepUp = list(filenames)
     length = len(filelistStepUp)
-
+    print(filelistStepUp)
+    print (length)
     for i in range(length):
         filelistStepUp[i]=os.path.basename(filelistStepUp[i])
         if Limb == "Left":
-            StepUp["Left"][TriallistStepUp[i]].update({"Filename": filelistStepUp[i]})
             TriallistStepUp.append("Trial "+str(i+1))
             StepUp["Left"][TriallistStepUp[i]]={}
             if i == 0:
@@ -555,20 +577,19 @@ def browseFilesStepUp(Limb):
             global filelistStepUpLeft
             filelistStepUpLeft = filelistStepUp
         if Limb == "Right":
-            StepUp["Right"][TriallistStepUp[i]].update({"Filename": filelistStepUp[i]})
             TriallistStepUp.append("Trial "+str(i+1))
             StepUp["Right"][TriallistStepUp[i]]={}
-            if i == 6:
+            if i == 0:
                 label_file_explorer7StepUp.configure(text="File Opened: "+filelistStepUp[i])
-            if i == 7:
+            if i == 1:
                 label_file_explorer8StepUp.configure(text="File Opened: "+filelistStepUp[i])
-            if i == 8:
+            if i == 2:
                 label_file_explorer9StepUp.configure(text="File Opened: "+filelistStepUp[i])
-            if i == 9:
+            if i == 3:
                 label_file_explorer10StepUp.configure(text="File Opened: "+filelistStepUp[i])
-            if i == 10:
+            if i == 4:
                 label_file_explorer11StepUp.configure(text="File Opened: "+filelistStepUp[i])
-            if i == 11:
+            if i == 5:
                 label_file_explorer12StepUp.configure(text="File Opened: "+filelistStepUp[i])
             global filelistStepUpRight
             filelistStepUpRight = filelistStepUp
@@ -576,15 +597,8 @@ def browseFilesStepUp(Limb):
     print(length)
     print(TriallistStepUp)
 
-
-#EXCTRACT AND NORMALISE DATA
-# def cutcycle(footstrike, data):
-#     footstrike1 = footstrike[0]
-#     footstrike2 = footstrike[1]
-#     data1 = (data[footstrike1:footstrike2])
-#     return data1
     
-def extractintoDictStepUp(filename, TrialNum):     
+def extractintoDictStepUp(filename, TrialNum, Limb):     
     reader = btk.btkAcquisitionFileReader()
     reader.SetFilename(filename) # set a filename to the reader
     reader.Update()
@@ -617,45 +631,252 @@ def extractintoDictStepUp(filename, TrialNum):
         except:
             pass
         return x
-    StepUp[TrialNum].update({"Left": extractvalues(trialacq)})
-    StepUp[TrialNum].update({"Right": extractvalues(trialacq)})
-    StepUp[TrialNum].update({"lfootstrikeFrame":[]})
-    StepUp[TrialNum].update({"rfootstrikeFrame":[]})
-    StepUp[TrialNum].update({"lfootoffFrame":[]})
-    StepUp[TrialNum].update({"rfootoffFrame":[]})
-    StepUp[TrialNum].update({"startframe":trialacq.GetFirstFrame()})#first frame of data
-    # #instantiate the nested dict to input in the footstrike etc
-  
-    for LR in ['Right','Left']:
-        for key in StepUp[TrialNum][LR].keys():
-            arr = StepUp[TrialNum][LR][key]
-            StepUp[TrialNum][LR][key] = {
+    if Limb == "Left":
+        StepUp["Left"].update({TrialNum:extractvalues(trialacq)})
+        for key in StepUp["Left"][TrialNum].keys():
+            arr = StepUp["Left"][TrialNum][key]
+            StepUp["Left"][TrialNum][key] = {
                     'x':arr[:,0].tolist(),
                     'y':arr[:,1].tolist(),
                     'z':arr[:,2].tolist()
                     }
+        StepUp["Left"][TrialNum].update({"Filename": filename})
+        
+    if Limb== "Right":
+        StepUp["Right"].update({TrialNum:extractvalues(trialacq)})
+        for key in StepUp["Right"][TrialNum].keys():
+            arr = StepUp["Right"][TrialNum][key]
+            StepUp["Right"][TrialNum][key] = {
+                    'x':arr[:,0].tolist(),
+                    'y':arr[:,1].tolist(),
+                    'z':arr[:,2].tolist()
+                    }
+        StepUp["Right"][TrialNum].update({"Filename": filename})
 
-def extract_all_StepUp_files():
+def extract_all_StepUp_files(Limb):
     for i in range(len(TriallistStepUp)):
-        extractintoDictStepUp(filelistStepUp[i], TriallistStepUp[i])
+        extractintoDictStepUp(filelistStepUp[i], TriallistStepUp[i], Limb)
 
 button_exploreStepUpLeft = Button(SelectFrameStepUpLeft, text = "Select up to 6 LEFT Trials",  width = 40, bg = "ghost white",
-                          command = lambda : [browseFilesStepUp(), extract_all_StepUp_files("Lim")])  
-button_exploreStepUpLeft.pack(pady=20)
-button_exploreStepUpRight = Button(SelectFrameStepUpRight, text = "Select up to 6 Right Trials",  width = 40, bg = "ghost white",
-                          command = lambda : [browseFilesStepUp(), extract_all_StepUp_files()])  
-button_exploreStepUpRight.pack(pady=20)
+                          command = lambda : [browseFilesStepUp("Left"), extract_all_StepUp_files("Left")])  
+button_exploreStepUpLeft.pack(pady=10)
+button_exploreStepUpRight = Button(SelectFrameStepUpRight, text = "Select up to 6 RIGHT Trials",  width = 40, bg = "ghost white",
+                          command = lambda : [browseFilesStepUp("Right"),extract_all_StepUp_files("Right")])  
+button_exploreStepUpRight.pack(pady=10)
+
+"""Tab 4: StepDown"""
+
+InfoFrameStepDown = Frame(tab4,bg = "DodgerBlue3", bd = 6)
+InfoFrameStepDown.grid(column = 1, row = 2, columnspan = 2, sticky = NSEW)
+TrialFrameMainStepDown= Frame(tab4,bg = "DodgerBlue3")
+TrialFrameMainStepDown.grid(column = 1, row = 3, columnspan = 2)
+
+TrialFrameStepDown=TrialFrameMainStepDown
+FrameStepDownLeft = Frame(TrialFrameStepDown)
+FrameStepDownLeft.pack(side = LEFT, expand =True, fill = BOTH)
+FrameStepDownRight = Frame(TrialFrameStepDown)
+FrameStepDownRight.pack(side = RIGHT, expand =True, fill = BOTH)
+
+labelStepDown = Label(InfoFrameStepDown, text = "StepDown")
+labelStepDown["font"] = myFont
+labelStepDown.pack()
+
+#Display filenames + whether clean or not    
+SelectFrameStepDownLeft = Frame(FrameStepDownLeft, bg = "DodgerBlue3", bd = 6)
+SelectFrameStepDownLeft.pack(expand =True, fill = BOTH)
+FrameTrial1StepDown = Frame(FrameStepDownLeft, bg = "ivory3", bd = 6)
+FrameTrial1StepDown.pack()
+FrameTrial2StepDown = Frame(FrameStepDownLeft, bg = "ghost white", bd = 6)
+FrameTrial2StepDown.pack()
+FrameTrial3StepDown = Frame(FrameStepDownLeft, bg = "ivory3", bd = 6)
+FrameTrial3StepDown.pack()
+FrameTrial4StepDown = Frame(FrameStepDownLeft, bg = "ghost white", bd = 6)
+FrameTrial4StepDown.pack()
+FrameTrial5StepDown = Frame(FrameStepDownLeft, bg = "ivory3", bd = 6)
+FrameTrial5StepDown.pack()
+FrameTrial6StepDown = Frame(FrameStepDownLeft, bg = "ghost white", bd = 6)
+FrameTrial6StepDown.pack()
+
+SelectFrameStepDownRight = Frame(FrameStepDownRight, bg = "DodgerBlue3", bd = 6)
+SelectFrameStepDownRight.pack(expand =True, fill = BOTH)
+FrameTrial7StepDown = Frame(FrameStepDownRight, bg = "ivory3", bd = 6)
+FrameTrial7StepDown.pack()
+FrameTrial8StepDown = Frame(FrameStepDownRight, bg = "ghost white", bd = 6)
+FrameTrial8StepDown.pack()
+FrameTrial9StepDown = Frame(FrameStepDownRight, bg = "ivory3", bd = 6)
+FrameTrial9StepDown.pack()
+FrameTrial10StepDown = Frame(FrameStepDownRight, bg = "ghost white", bd = 6)
+FrameTrial10StepDown.pack()
+FrameTrial11StepDown = Frame(FrameStepDownRight, bg = "ivory3", bd = 6)
+FrameTrial11StepDown.pack()
+FrameTrial12StepDown = Frame(FrameStepDownRight, bg = "ghost white", bd = 6)
+FrameTrial12StepDown.pack()
+
+label_file_explorer1StepDown = Label(FrameTrial1StepDown,  text = "", width = 50, height = 2 ,  fg = "blue" , bg = "ghost white") 
+label_file_explorer1StepDown.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
+
+label_file_explorer2StepDown = Label(FrameTrial2StepDown,  text = "", width = 50, height = 2 ,  fg = "blue" , bg = "ghost white") 
+label_file_explorer2StepDown.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
+
+label_file_explorer3StepDown = Label(FrameTrial3StepDown,  text = "", width = 50, height = 2 ,  fg = "blue" , bg = "ghost white") 
+label_file_explorer3StepDown.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
+
+label_file_explorer4StepDown = Label(FrameTrial4StepDown,  text = "", width = 50, height = 2 ,  fg = "blue" , bg = "ghost white") 
+label_file_explorer4StepDown.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
+
+label_file_explorer5StepDown = Label(FrameTrial5StepDown,  text = "", width = 50, height = 2 ,  fg = "blue" , bg = "ghost white") 
+label_file_explorer5StepDown.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
+
+label_file_explorer6StepDown = Label(FrameTrial6StepDown,  text = "", width = 50, height = 2 ,  fg = "blue" , bg = "ghost white") 
+label_file_explorer6StepDown.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
+
+label_file_explorer7StepDown = Label(FrameTrial7StepDown,  text = "", width = 50, height = 2 ,  fg = "blue" , bg = "ghost white") 
+label_file_explorer7StepDown.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
+
+label_file_explorer8StepDown = Label(FrameTrial8StepDown,  text = "", width = 50, height = 2 ,  fg = "blue" , bg = "ghost white") 
+label_file_explorer8StepDown.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
+
+label_file_explorer9StepDown = Label(FrameTrial9StepDown,  text = "", width = 50, height = 2 ,  fg = "blue" , bg = "ghost white") 
+label_file_explorer9StepDown.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
+
+label_file_explorer10StepDown = Label(FrameTrial10StepDown,  text = "", width = 50, height = 2 ,  fg = "blue" , bg = "ghost white") 
+label_file_explorer10StepDown.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
+
+label_file_explorer11StepDown = Label(FrameTrial11StepDown,  text = "", width = 50, height = 2 ,  fg = "blue" , bg = "ghost white") 
+label_file_explorer11StepDown.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
+
+label_file_explorer12StepDown = Label(FrameTrial12StepDown,  text = "", width = 50, height = 2 ,  fg = "blue" , bg = "ghost white") 
+label_file_explorer12StepDown.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
+
+StepDown= {}
+StepDown["Left"] = {}
+StepDown["Right"] = {}
+def browseFilesStepDown(Limb): 
+    #TriallistStepDown.clear()
+    sdc.set(1)
+    global TriallistStepDown
+    global filelistStepDown
+    TriallistStepDown = []
+    filelistStepDown = []
+
+    filenames = (filedialog.askopenfilenames(
+        title = "Select a File", 
+        filetypes = (("C3D files","*.c3d*"),
+                      ("all files", "*.*"))))
+    #creates a tuple therefore must tur into a list
+    filelistStepDown = list(filenames)
+    length = len(filelistStepDown)
+    print(filelistStepDown)
+    print (length)
+    for i in range(length):
+        filelistStepDown[i]=os.path.basename(filelistStepDown[i])
+        if Limb == "Left":
+            TriallistStepDown.append("Trial "+str(i+1))
+            StepDown["Left"][TriallistStepDown[i]]={}
+            if i == 0:
+                label_file_explorer1StepDown.configure(text="File Opened: "+filelistStepDown[i])
+            if i == 1:
+                label_file_explorer2StepDown.configure(text="File Opened: "+filelistStepDown[i])
+            if i == 2:
+                label_file_explorer3StepDown.configure(text="File Opened: "+filelistStepDown[i])
+            if i == 3:
+                label_file_explorer4StepDown.configure(text="File Opened: "+filelistStepDown[i])
+            if i == 4:
+                label_file_explorer5StepDown.configure(text="File Opened: "+filelistStepDown[i])
+            if i == 5:
+                label_file_explorer6StepDown.configure(text="File Opened: "+filelistStepDown[i])
+            global filelistStepDownLeft
+            filelistStepDownLeft = filelistStepDown
+        if Limb == "Right":
+            TriallistStepDown.append("Trial "+str(i+1))
+            StepDown["Right"][TriallistStepDown[i]]={}
+            if i == 0:
+                label_file_explorer7StepDown.configure(text="File Opened: "+filelistStepDown[i])
+            if i == 1:
+                label_file_explorer8StepDown.configure(text="File Opened: "+filelistStepDown[i])
+            if i == 2:
+                label_file_explorer9StepDown.configure(text="File Opened: "+filelistStepDown[i])
+            if i == 3:
+                label_file_explorer10StepDown.configure(text="File Opened: "+filelistStepDown[i])
+            if i == 4:
+                label_file_explorer11StepDown.configure(text="File Opened: "+filelistStepDown[i])
+            if i == 5:
+                label_file_explorer12StepDown.configure(text="File Opened: "+filelistStepDown[i])
+            global filelistStepDownRight
+            filelistStepDownRight = filelistStepDown
+    print(filelistStepDown)
+    print(length)
+    print(TriallistStepDown)
+
+    
+def extractintoDictStepDown(filename, TrialNum, Limb):     
+    reader = btk.btkAcquisitionFileReader()
+    reader.SetFilename(filename) # set a filename to the reader
+    reader.Update()
+    trialacq = reader.GetOutput() # is the btk aquisition object
+    def extractvalues(trial):
+        #extracts al the arrays
+        #can be used for all trials, just needs to be instantiated with the correct trial
+        x = dict();  
+        x["KneeAngle"]= (trial.GetPoint("LKneeAngles")).GetValues()
+        x["KneeForce"]= (trial.GetPoint("LKneeForce")).GetValues()
+        x["KneeMoment"]= (trial.GetPoint("LKneeMoment")).GetValues()
+        x["KneePower"]= (trial.GetPoint("LKneePower")).GetValues() 
+        x["HipAngle"]= ((trial.GetPoint("LHipAngles")).GetValues())
+        x["HipForce"]= (trial.GetPoint("LHipForce")).GetValues()
+        x["HipMoment"]= (trial.GetPoint("LHipMoment")).GetValues()
+        x["HipPower"]= (trial.GetPoint("LHipPower")).GetValues() 
+        x["AnkleAngle"]= (trial.GetPoint("LAnkleAngles")).GetValues()
+        x["AnkleForce"]= (trial.GetPoint("LAnkleForce")).GetValues()
+        x["AnkleMoment"]= (trial.GetPoint("LAnkleMoment")).GetValues()
+        x["AnklePower"]= (trial.GetPoint("LAnklePower")).GetValues()    
+        x["FootProgressAngle"] = (trial.GetPoint("LFootProgressAngles")).GetValues()
+        x["pelvisAngle"] = (trial.GetPoint("LPelvisAngles")).GetValues() 
+        x["COM"] = (trial.GetPoint("CentreOfMass")).GetValues()
+        try:
+            x["GRF"] = (trial.GetPoint("LGroundReactionForce")).GetValues()
+        except:
+            pass
+        try:    
+            x["NGRF"] = (trial.GetPoint("LNormalisedGRF")).GetValues()
+        except:
+            pass
+        return x
+    if Limb == "Left":
+        StepDown["Left"].update({TrialNum:extractvalues(trialacq)})
+        for key in StepDown["Left"][TrialNum].keys():
+            arr = StepDown["Left"][TrialNum][key]
+            StepDown["Left"][TrialNum][key] = {
+                    'x':arr[:,0].tolist(),
+                    'y':arr[:,1].tolist(),
+                    'z':arr[:,2].tolist()
+                    }
+        StepDown["Left"][TrialNum].update({"Filename": filename})
+        
+    if Limb== "Right":
+        StepDown["Right"].update({TrialNum:extractvalues(trialacq)})
+        for key in StepDown["Right"][TrialNum].keys():
+            arr = StepDown["Right"][TrialNum][key]
+            StepDown["Right"][TrialNum][key] = {
+                    'x':arr[:,0].tolist(),
+                    'y':arr[:,1].tolist(),
+                    'z':arr[:,2].tolist()
+                    }
+        StepDown["Right"][TrialNum].update({"Filename": filename})
+
+def extract_all_StepDown_files(Limb):
+    for i in range(len(TriallistStepDown)):
+        extractintoDictStepDown(filelistStepDown[i], TriallistStepDown[i], Limb)
+
+button_exploreStepDownLeft = Button(SelectFrameStepDownLeft, text = "Select up to 6 LEFT Trials",  width = 40, bg = "ghost white",
+                          command = lambda : [browseFilesStepDown("Left"), extract_all_StepDown_files("Left")])  
+button_exploreStepDownLeft.pack(pady=10)
+button_exploreStepDownRight = Button(SelectFrameStepDownRight, text = "Select up to 6 RIGHT Trials",  width = 40, bg = "ghost white",
+                          command = lambda : [browseFilesStepDown("Right"),extract_all_StepDown_files("Right")])  
+button_exploreStepDownRight.pack(pady=10)
 
 
-
-
-
-
-
-
-
-
-
+#, extract_all_StepUp_files()
 
 
 
@@ -678,6 +899,7 @@ button_exploreStepUpRight.pack(pady=20)
 
 
 root.mainloop()
+
 ID = vID.get()
 Type = vType.get()
 Month = str(vMonth.get()) + " Month(s)"
@@ -687,14 +909,26 @@ patient["ID"] = vID.get()
 patient["Sex"]= vSex.get()
 patient["Dominant Limb"] = vDom.get()
 patient["Affected Limb"] = vAffect.get()
+patient["Type"] = Type
 patient[Type]= {}
+
 # patient["Type"] = vType.get()
 if Type == "Post-op":
     patient[Type][Month]={}
     patient[Type][Month].update({"Month Post-op": vMonth.get()})
     patient[Type][Month].update({"Gait":Gait})
     patient[Type][Month].update({"StepUp":StepUp})
+    patient[Type][Month].update({"StepDown":StepDown})
 else:
     patient[Type].update({"Gait":Gait})
     patient[Type].update({"StepUp":StepUp})
+    patient[Type].update({"StepDown":StepDown})
+
+
+def writetodict():
+    name = ID + Type + str(vMonth.get()) + ".json"
+    with open(name, 'w') as f:
+        json.dump(patient, f, indent = 5)    
+writetodict()
+
 
