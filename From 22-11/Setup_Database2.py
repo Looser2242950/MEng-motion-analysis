@@ -21,11 +21,18 @@ c=conn.cursor()
 def create_patient_data_table():
     c.execute("""CREATE TABLE IF NOT EXISTS Patient_Data
               (ID TEXT PRIMARY KEY, Dominant_Limb TEXT, Patient_Type TEXT, 
-              Month TEXT, Affected_Limb TEXT,
+              Sex TEXT, Month TEXT, Affected_Limb TEXT,
               Filename_Gait_Trial_1 TEXT, Filename_Gait_Trial_2 TEXT, Filename_Gait_Trial_3 TEXT,
-              Filename_Gait_Trial_4 TEXT,Filename_Gait_Trial_5 TEXT, Filename_Gait_Trial_6 TEXT
+              Filename_Gait_Trial_4 TEXT,Filename_Gait_Trial_5 TEXT, Filename_Gait_Trial_6 TEXT,
+              Filename_StepUp_Left_Trial_1 TEXT, Filename_StepUp_Left_Trial_2 TEXT, Filename_StepUp_Left_Trial_3 TEXT,
+              Filename_StepUp_Right_Trial_1 TEXT,Filename_StepUp_Right_Trial_2 TEXT, Filename_StepUp_Right_Trial_3 TEXT,
+              Filename_StepDown_Left_Trial_1 TEXT, Filename_StepDown_Left_Trial_2 TEXT, Filename_StepDown_Left_Trial_3 TEXT,
+              Filename_StepDown_Right_Trial_1 TEXT,Filename_StepDown_Right_Trial_2 TEXT, Filename_StepDown_Right_Trial_3 TEXT
               )""")
-              #add Filename_STS_Trial_1,.... for different movements             
+              #add Filename_STS_Trial_1,.... for different movements   
+              
+              
+              
 def create_Gait_Table():
         c.execute("""CREATE TABLE IF NOT EXISTS Gait_Table
               (Filename TEXT, Complete_Left_Cycle TEXT, Complete_Right_Cycle TEXT,
@@ -82,3 +89,129 @@ create_patient_data_table()
 create_Gait_Table()
 columns_Gait_Table()
 
+
+
+def create_StepUp_Table():
+        c.execute("""CREATE TABLE IF NOT EXISTS StepUp_Table
+              (filename_StepUp TEXT)""")            
+def columns_StepUp_Table():
+     for LR in ["Left", "Right"]:
+         for axis in ["x", "y", "z"]:
+             c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Knee_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Knee_Moment_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Knee_Force_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Knee_Power_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Hip_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Hip_Moment_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Hip_Force_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Hip_Power_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Ankle_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Ankle_Moment_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Ankle_Force_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Ankle_Power_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Foot_Progression_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_pelvis_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_COM_{axis} TEXT""")       
+             c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_GRF_{axis} TEXT""") 
+             c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_COM_{axis} TEXT""") 
+
+
+def create_StepUp_Max_Table():
+        c.execute("""CREATE TABLE IF NOT EXISTS StepUp_Max_Table
+              (filename_StepUp TEXT, Limb TEXT)""")            
+def columns_StepUp_Max_Table():
+    for axis in ["x", "y", "z"]:
+        for function in ["max", "min"]:
+           c.execute(f"""ALTER TABLE StepUp_Max_Table ADD COLUMN {function}_Knee_Angle_{axis} TEXT""")
+           c.execute(f"""ALTER TABLE StepUp_Max_Table ADD COLUMN {function}_Knee_Moment_{axis} TEXT""")
+           c.execute(f"""ALTER TABLE StepUp_Max_Table ADD COLUMN {function}_Knee_Force_{axis} TEXT""")
+           c.execute(f"""ALTER TABLE StepUp_Max_Table ADD COLUMN {function}_Knee_Power_{axis} TEXT""")
+           c.execute(f"""ALTER TABLE StepUp_Max_Table ADD COLUMN {function}_Hip_Angle_{axis} TEXT""")
+           c.execute(f"""ALTER TABLE StepUp_Max_Table ADD COLUMN {function}_Hip_Moment_{axis} TEXT""")
+           c.execute(f"""ALTER TABLE StepUp_Max_Table ADD COLUMN {function}_Hip_Force_{axis} TEXT""")
+           c.execute(f"""ALTER TABLE StepUp_Max_Table ADD COLUMN {function}_Hip_Power_{axis} TEXT""")
+           c.execute(f"""ALTER TABLE StepUp_Max_Table ADD COLUMN {function}_Ankle_Angle_{axis} TEXT""")
+           c.execute(f"""ALTER TABLE StepUp_Max_Table ADD COLUMN {function}_Ankle_Moment_{axis} TEXT""")
+           c.execute(f"""ALTER TABLE StepUp_Max_Table ADD COLUMN {function}_Ankle_Force_{axis} TEXT""")
+           c.execute(f"""ALTER TABLE StepUp_Max_Table ADD COLUMN {function}_Ankle_Power_{axis} TEXT""")
+           c.execute(f"""ALTER TABLE StepUp_Max_Table ADD COLUMN {function}_Foot_Progression_Angle_{axis} TEXT""")
+           c.execute(f"""ALTER TABLE StepUp_Max_Table ADD COLUMN {function}_pelvis_Angle_{axis} TEXT""")
+           c.execute(f"""ALTER TABLE StepUp_Max_Table ADD COLUMN {function}_COM_{axis} TEXT""")   
+           try:
+               c.execute(f"""ALTER TABLE StepUp_Max_Table ADD COLUMN {function}_GRF_{axis} TEXT""")
+               c.execute(f"""ALTER TABLE StepUp_Max_Table ADD COLUMN {function}_COM_{axis} TEXT""") 
+           except:
+               pass
+
+create_StepUp_Max_Table()
+columns_StepUp_Max_Table()              
+create_patient_data_table()
+create_StepUp_Table()
+columns_StepUp_Table()
+
+
+
+def create_StepDown_Table():
+        c.execute("""CREATE TABLE IF NOT EXISTS StepDown_Table
+              (filename_StepDown TEXT)""")            
+def columns_StepDown_Table():
+     for LR in ["Left", "Right"]:
+         for axis in ["x", "y", "z"]:
+             c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Knee_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Knee_Moment_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Knee_Force_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Knee_Power_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Hip_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Hip_Moment_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Hip_Force_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Hip_Power_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Ankle_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Ankle_Moment_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Ankle_Force_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Ankle_Power_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Foot_Progression_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_pelvis_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_COM_{axis} TEXT""")       
+             try:
+                 c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_GRF_{axis} TEXT""") 
+                 c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_COM_{axis} TEXT""") 
+             except:
+                 pass
+
+def create_StepDown_Max_Table():
+        c.execute("""CREATE TABLE IF NOT EXISTS StepDown_Max_Table
+              (filename_StepDown TEXT, Limb TEXT)""")            
+def columns_StepDown_Max_Table():
+    for axis in ["x", "y", "z"]:
+        for function in ["max", "min"]:
+           c.execute(f"""ALTER TABLE StepDown_Max_Table ADD COLUMN {function}_Knee_Angle_{axis} TEXT""")
+           c.execute(f"""ALTER TABLE StepDown_Max_Table ADD COLUMN {function}_Knee_Moment_{axis} TEXT""")
+           c.execute(f"""ALTER TABLE StepDown_Max_Table ADD COLUMN {function}_Knee_Force_{axis} TEXT""")
+           c.execute(f"""ALTER TABLE StepDown_Max_Table ADD COLUMN {function}_Knee_Power_{axis} TEXT""")
+           c.execute(f"""ALTER TABLE StepDown_Max_Table ADD COLUMN {function}_Hip_Angle_{axis} TEXT""")
+           c.execute(f"""ALTER TABLE StepDown_Max_Table ADD COLUMN {function}_Hip_Moment_{axis} TEXT""")
+           c.execute(f"""ALTER TABLE StepDown_Max_Table ADD COLUMN {function}_Hip_Force_{axis} TEXT""")
+           c.execute(f"""ALTER TABLE StepDown_Max_Table ADD COLUMN {function}_Hip_Power_{axis} TEXT""")
+           c.execute(f"""ALTER TABLE StepDown_Max_Table ADD COLUMN {function}_Ankle_Angle_{axis} TEXT""")
+           c.execute(f"""ALTER TABLE StepDown_Max_Table ADD COLUMN {function}_Ankle_Moment_{axis} TEXT""")
+           c.execute(f"""ALTER TABLE StepDown_Max_Table ADD COLUMN {function}_Ankle_Force_{axis} TEXT""")
+           c.execute(f"""ALTER TABLE StepDown_Max_Table ADD COLUMN {function}_Ankle_Power_{axis} TEXT""")
+           c.execute(f"""ALTER TABLE StepDown_Max_Table ADD COLUMN {function}_Foot_Progression_Angle_{axis} TEXT""")
+           c.execute(f"""ALTER TABLE StepDown_Max_Table ADD COLUMN {function}_pelvis_Angle_{axis} TEXT""")
+           c.execute(f"""ALTER TABLE StepDown_Max_Table ADD COLUMN {function}_COM_{axis} TEXT""")   
+           try:
+               c.execute(f"""ALTER TABLE StepDown_Max_Table ADD COLUMN {function}_GRF_{axis} TEXT""")
+               c.execute(f"""ALTER TABLE StepDown_Max_Table ADD COLUMN {function}_COM_{axis} TEXT""") 
+           except:
+               pass
+
+create_StepDown_Max_Table()
+columns_StepDown_Max_Table()              
+create_patient_data_table()
+create_StepDown_Table()
+columns_StepDown_Table()
+
+
+"""Close SQLite Connection"""
+conn.commit()
+conn.close()     
