@@ -22,8 +22,8 @@ plt.rcParams['figure.dpi'] = 300
 plt.rcParams['figure.constrained_layout.use'] = False
 
 """Start SQLite Connection""" 
-##conn = sqlite3.connect(':memory:')
-conn = sqlite3.connect('MotionAnalysis22.db')
+conn = sqlite3.connect(':memory:')
+#conn = sqlite3.connect('MotionAnalysis106.db')
 c=conn.cursor()
 root = Tk()
 
@@ -441,14 +441,14 @@ button_exploreGait.pack(pady=10)
 
 
 
-
-
 root.mainloop()
 
 
 
 
-ID = str(123)
+
+
+ID = str(123545)
 
 
 def create_Mean_Gait_Table():
@@ -476,60 +476,90 @@ def columns_Mean_Gait_Table():
              c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_pelvis_Angle_{axis} TEXT""")
              c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_COM_{axis} TEXT""")   
 
-def enter_Mean_Gait_Table (limb_av):
+def enter_Mean_Gait_Table (limb_avl, limb_avr):
     c.execute("""INSERT INTO Mean_Gait_Table 
              (ID)VALUES (?)""", (ID,))
-    if limb_av == "Left Average":
-        LR = "Left"
-    else:
-        LR = "Right"
-        for axis in ["x", "y", "z"]:
-            c.execute(f"""UPDATE Mean_Gait_Table
-                      SET 
-                      {LR}_Knee_Angle_{axis} = ?,
-                      {LR}_Knee_Moment_{axis} = ?,
-                      {LR}_Knee_Force_{axis} = ?,
-                      {LR}_Knee_Power_{axis} = ?,
-                      {LR}_Hip_Angle_{axis} = ?,
-                      {LR}_Hip_Moment_{axis} = ?,
-                      {LR}_Hip_Force_{axis} = ?,
-                      {LR}_Hip_Power_{axis} = ?,
-                      {LR}_Ankle_Angle_{axis} = ?,
-                      {LR}_Ankle_Moment_{axis} = ?,
-                      {LR}_Ankle_Force_{axis} = ?,
-                      {LR}_Ankle_Power_{axis} =  ?,
-                      {LR}_Foot_Progression_Angle_{axis} = ?,
-                      {LR}_GRF_{axis} =  ?,
-                      {LR}_NGRF_{axis} =  ?,
-                      {LR}_pelvis_Angle_{axis} =  ?,
-                      {LR}_COM_{axis} =  ? 
-                      WHERE ID = ?
-                      """,(
-                      (str(limb_av["KneeAngle"][axis])[1:-1]),
-                      (str(limb_av["KneeMoment"][axis])[1:-1]),
-                      (str(limb_av["KneeForce"][axis])[1:-1]),
-                      (str(limb_av["KneePower"][axis])[1:-1]),
-                      (str(limb_av["HipAngle"][axis])[1:-1]),
-                      (str(limb_av["HipMoment"][axis])[1:-1]),
-                      (str(limb_av["HipForce"][axis])[1:-1]),
-                      (str(limb_av["HipPower"][axis])[1:-1]),
-                      (str(limb_av["AnkleAngle"][axis])[1:-1]),
-                      (str(limb_av["AnkleMoment"][axis])[1:-1]),
-                      (str(limb_av["AnkleForce"][axis])[1:-1]),
-                      (str(limb_av["AnklePower"][axis])[1:-1]),
-                      (str(limb_av["FootProgressAngle"][axis])[1:-1]),
-                      (str(limb_av["GRF"][axis])[1:-1]),
-                      (str(limb_av["NGRF"][axis])[1:-1]),
-                      (str(limb_av["pelvisAngle"][axis])[1:-1]),
-                      (str(limb_av["COM"][axis])[1:-1]),
-                      ID
-                      ))
+    for axis in ["x", "y", "z"]:
+        c.execute(f"""UPDATE Mean_Gait_Table
+                  SET 
+                  Left_Knee_Angle_{axis} = ?,
+                  Left_Knee_Moment_{axis} = ?,
+                  Left_Knee_Force_{axis} = ?,
+                  Left_Knee_Power_{axis} = ?,
+                  Left_Hip_Angle_{axis} = ?,
+                  Left_Hip_Moment_{axis} = ?,
+                  Left_Hip_Force_{axis} = ?,
+                  Left_Hip_Power_{axis} = ?,
+                  Left_Ankle_Angle_{axis} = ?,
+                  Left_Ankle_Moment_{axis} = ?,
+                  Left_Ankle_Force_{axis} = ?,
+                  Left_Ankle_Power_{axis} =  ?,
+                  Left_Foot_Progression_Angle_{axis} = ?,
+                  Left_GRF_{axis} =  ?,
+                  Left_NGRF_{axis} =  ?,
+                  Left_pelvis_Angle_{axis} =  ?,
+                  Left_COM_{axis} =  ?,
+                  Right_Knee_Angle_{axis} = ?,
+                  Right_Knee_Moment_{axis} = ?,
+                  Right_Knee_Force_{axis} = ?,
+                  Right_Knee_Power_{axis} = ?,
+                  Right_Hip_Angle_{axis} = ?,
+                  Right_Hip_Moment_{axis} = ?,
+                  Right_Hip_Force_{axis} = ?,
+                  Right_Hip_Power_{axis} = ?,
+                  Right_Ankle_Angle_{axis} = ?,
+                  Right_Ankle_Moment_{axis} = ?,
+                  Right_Ankle_Force_{axis} = ?,
+                  Right_Ankle_Power_{axis} =  ?,
+                  Right_Foot_Progression_Angle_{axis} = ?,
+                  Right_GRF_{axis} =  ?,
+                  Right_NGRF_{axis} =  ?,
+                  Right_pelvis_Angle_{axis} =  ?,
+                  Right_COM_{axis} =  ? 
+                  WHERE ID = ?
+                  """,(
+                  (str(limb_avl["KneeAngle"][axis])[1:-1]),
+                  (str(limb_avl["KneeMoment"][axis])[1:-1]),
+                  (str(limb_avl["KneeForce"][axis])[1:-1]),
+                  (str(limb_avl["KneePower"][axis])[1:-1]),
+                  (str(limb_avl["HipAngle"][axis])[1:-1]),
+                  (str(limb_avl["HipMoment"][axis])[1:-1]),
+                  (str(limb_avl["HipForce"][axis])[1:-1]),
+                  (str(limb_avl["HipPower"][axis])[1:-1]),
+                  (str(limb_avl["AnkleAngle"][axis])[1:-1]),
+                  (str(limb_avl["AnkleMoment"][axis])[1:-1]),
+                  (str(limb_avl["AnkleForce"][axis])[1:-1]),
+                  (str(limb_avl["AnklePower"][axis])[1:-1]),
+                  (str(limb_avl["FootProgressAngle"][axis])[1:-1]),
+                  (str(limb_avl["GRF"][axis])[1:-1]),
+                  (str(limb_avl["NGRF"][axis])[1:-1]),
+                  (str(limb_avl["pelvisAngle"][axis])[1:-1]),
+                  (str(limb_avl["COM"][axis])[1:-1]),
+                  (str(limb_avr["KneeAngle"][axis])[1:-1]),
+                  (str(limb_avr["KneeMoment"][axis])[1:-1]),
+                  (str(limb_avr["KneeForce"][axis])[1:-1]),
+                  (str(limb_avr["KneePower"][axis])[1:-1]),
+                  (str(limb_avr["HipAngle"][axis])[1:-1]),
+                  (str(limb_avr["HipMoment"][axis])[1:-1]),
+                  (str(limb_avr["HipForce"][axis])[1:-1]),
+                  (str(limb_avr["HipPower"][axis])[1:-1]),
+                  (str(limb_avr["AnkleAngle"][axis])[1:-1]),
+                  (str(limb_avr["AnkleMoment"][axis])[1:-1]),
+                  (str(limb_avr["AnkleForce"][axis])[1:-1]),
+                  (str(limb_avr["AnklePower"][axis])[1:-1]),
+                  (str(limb_avr["FootProgressAngle"][axis])[1:-1]),
+                  (str(limb_avr["GRF"][axis])[1:-1]),
+                  (str(limb_avr["NGRF"][axis])[1:-1]),
+                  (str(limb_avr["pelvisAngle"][axis])[1:-1]),
+                  (str(limb_avr["COM"][axis])[1:-1]),
+                  ID
+                  ))
 
 
-create_Mean_Gait_Table()
-columns_Mean_Gait_Table()
-enter_Mean_Gait_Table(Gait["Left Average"])
-enter_Mean_Gait_Table(Gait["Right Average"])
+#create_Mean_Gait_Table()
+#columns_Mean_Gait_Table()
+enter_Mean_Gait_Table(Gait["Left Average"],Gait["Right Average"])
+# enter_Mean_Gait_Table(Gait["Right Average"])
 
 
 def create_Gait_Max_Min_Table():
@@ -559,25 +589,22 @@ def columns_Gait_Max_Min_Table():
                    c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_pelvis_Angle_{axis}_{phase} REAL""")
                    c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_COM_{axis}_{phase} REAL""")   
 
-def enter_Gait_extrema (limbav, limb):  
+def enter_Gait_extrema ():  
     c.execute("""INSERT INTO Gait_Max_Min_Table 
               (ID) 
               VALUES (?)""", (ID,))
-    print(limb)
     for phase in ["stance", "swing"]:
 #does not include a row for inclmplete cycles                      
-        if phase == "stance" and limb == "Left":
-            start = 0
-            end = Gait["Left Average"]["FootOff"]
-        if phase == "stance" and limb == "Right":
-            start = 0
-            end = Gait["Right Average"]["FootOff"]
-        if phase == "swing" and limb == "Left":
-            start = Gait["Left Average"]["FootOff"]
-            end = -1
-        if phase == "swing" and limb == "Right":
-            start = Gait["Right Average"]["FootOff"]
-            end = -1
+        if phase == "stance":
+            startl = 0
+            endl = Gait["Left Average"]["FootOff"]
+            startr = 0
+            endr = Gait["Right Average"]["FootOff"]
+        if phase == "swing":
+            startl = Gait["Left Average"]["FootOff"]
+            endl = -1
+            startr = Gait["Right Average"]["FootOff"]
+            endr = -1
         for axis in ["x", "y", "z"]:
             for function in ["max", "min"]:
                 if function=="max":
@@ -586,139 +613,174 @@ def enter_Gait_extrema (limbav, limb):
                     fun = min
                 c.execute(f"""UPDATE Gait_Max_Min_Table
                           SET 
-                          {function}_{limb}_Knee_Angle_{axis}_{phase} = ?,
-                          {function}_{limb}_Knee_Moment_{axis}_{phase} = ?,
-                          {function}_{limb}_Knee_Force_{axis}_{phase} = ?,
-                          {function}_{limb}_Knee_Power_{axis}_{phase} = ?,
-                          {function}_{limb}_Hip_Angle_{axis}_{phase} = ?,
-                          {function}_{limb}_Hip_Moment_{axis}_{phase} = ?,
-                          {function}_{limb}_Hip_Force_{axis}_{phase} = ?,
-                          {function}_{limb}_Hip_Power_{axis}_{phase} = ?,
-                          {function}_{limb}_Ankle_Angle_{axis}_{phase} = ?,
-                          {function}_{limb}_Ankle_Moment_{axis}_{phase} = ?,
-                          {function}_{limb}_Ankle_Force_{axis}_{phase} = ?,
-                          {function}_{limb}_Ankle_Power_{axis}_{phase} =  ?,
-                          {function}_{limb}_Foot_Progression_Angle_{axis}_{phase} = ?,
-                          {function}_{limb}_GRF_{axis}_{phase} =  ?,
-                          {function}_{limb}_NGRF_{axis}_{phase} =  ?,
-                          {function}_{limb}_pelvis_Angle_{axis}_{phase} =  ?,
-                          {function}_{limb}_COM_{axis}_{phase} =  ?
+                          {function}_Left_Knee_Angle_{axis}_{phase} = ?,
+                          {function}_Left_Knee_Moment_{axis}_{phase} = ?,
+                          {function}_Left_Knee_Force_{axis}_{phase} = ?,
+                          {function}_Left_Knee_Power_{axis}_{phase} = ?,
+                          {function}_Left_Hip_Angle_{axis}_{phase} = ?,
+                          {function}_Left_Hip_Moment_{axis}_{phase} = ?,
+                          {function}_Left_Hip_Force_{axis}_{phase} = ?,
+                          {function}_Left_Hip_Power_{axis}_{phase} = ?,
+                          {function}_Left_Ankle_Angle_{axis}_{phase} = ?,
+                          {function}_Left_Ankle_Moment_{axis}_{phase} = ?,
+                          {function}_Left_Ankle_Force_{axis}_{phase} = ?,
+                          {function}_Left_Ankle_Power_{axis}_{phase} =  ?,
+                          {function}_Left_Foot_Progression_Angle_{axis}_{phase} = ?,
+                          {function}_Left_GRF_{axis}_{phase} =  ?,
+                          {function}_Left_NGRF_{axis}_{phase} =  ?,
+                          {function}_Left_pelvis_Angle_{axis}_{phase} =  ?,
+                          {function}_Left_COM_{axis}_{phase} =  ?,
+                          {function}_Right_Knee_Angle_{axis}_{phase} = ?,
+                          {function}_Right_Knee_Moment_{axis}_{phase} = ?,
+                          {function}_Right_Knee_Force_{axis}_{phase} = ?,
+                          {function}_Right_Knee_Power_{axis}_{phase} = ?,
+                          {function}_Right_Hip_Angle_{axis}_{phase} = ?,
+                          {function}_Right_Hip_Moment_{axis}_{phase} = ?,
+                          {function}_Right_Hip_Force_{axis}_{phase} = ?,
+                          {function}_Right_Hip_Power_{axis}_{phase} = ?,
+                          {function}_Right_Ankle_Angle_{axis}_{phase} = ?,
+                          {function}_Right_Ankle_Moment_{axis}_{phase} = ?,
+                          {function}_Right_Ankle_Force_{axis}_{phase} = ?,
+                          {function}_Right_Ankle_Power_{axis}_{phase} =  ?,
+                          {function}_Right_Foot_Progression_Angle_{axis}_{phase} = ?,
+                          {function}_Right_GRF_{axis}_{phase} =  ?,
+                          {function}_Right_NGRF_{axis}_{phase} =  ?,
+                          {function}_Right_pelvis_Angle_{axis}_{phase} =  ?,
+                          {function}_Right_COM_{axis}_{phase} =  ?
                           WHERE ID = ?
                           """,(
-                          (fun((Gait[limbav]["KneeAngle"][axis])[start:end])),
-                          (fun((Gait[limbav]["KneeMoment"][axis])[start:end])),
-                          (fun((Gait[limbav]["KneeForce"][axis])[start:end])),
-                          (fun((Gait[limbav]["KneePower"][axis])[start:end])),
-                          (fun((Gait[limbav]["HipAngle"][axis])[start:end])),
-                          (fun((Gait[limbav]["HipMoment"][axis])[start:end])),
-                          (fun((Gait[limbav]["HipForce"][axis])[start:end])),
-                          (fun((Gait[limbav]["HipPower"][axis])[start:end])),
-                          (fun((Gait[limbav]["AnkleAngle"][axis])[start:end])),
-                          (fun((Gait[limbav]["AnkleMoment"][axis])[start:end])),
-                          (fun((Gait[limbav]["AnkleForce"][axis])[start:end])),
-                          (fun((Gait[limbav]["AnklePower"][axis])[start:end])),
-                          (fun((Gait[limbav]["FootProgressAngle"][axis])[start:end])),
-                          (fun((Gait[limbav]["GRF"][axis])[start:end])),
-                          (fun((Gait[limbav]["NGRF"][axis])[start:end])),
-                          (fun((Gait[limbav]["pelvisAngle"][axis])[start:end])),
-                          (fun((Gait[limbav]["COM"][axis])[start:end])),
+                          (fun((Gait["Left Average"]["KneeAngle"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["KneeMoment"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["KneeForce"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["KneePower"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["HipAngle"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["HipMoment"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["HipForce"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["HipPower"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["AnkleAngle"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["AnkleMoment"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["AnkleForce"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["AnklePower"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["FootProgressAngle"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["GRF"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["NGRF"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["pelvisAngle"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["COM"][axis])[startl:endl])),
+                          (fun((Gait["Right Average"]["KneeAngle"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["KneeMoment"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["KneeForce"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["KneePower"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["HipAngle"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["HipMoment"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["HipForce"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["HipPower"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["AnkleAngle"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["AnkleMoment"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["AnkleForce"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["AnklePower"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["FootProgressAngle"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["GRF"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["NGRF"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["pelvisAngle"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["COM"][axis])[startr:endr])),
                           ID
                           ))
 
-create_Gait_Max_Min_Table()
-columns_Gait_Max_Min_Table()
-enter_Gait_extrema("Left Average", "Left")
-enter_Gait_extrema("Right Average", "Right")
+#create_Gait_Max_Min_Table()
+#columns_Gait_Max_Min_Table()
+enter_Gait_extrema()
 
 
 
 
-fig, axs = plt.subplots(4,3, sharex = True)
-x = np.array(range(100))
-#fig.subplots_adjust(wspace = 0.3, hspace = 0.4)
-fig.tight_layout()
-#axs.vlines(x=Gait["Left Average"]["FootOff"])
-
-axs[0,0].plot(x, Gait["Left Average"]["pelvisAngle"]["x"], "k", label = "mean")
-for Trials in cleanlefttrials:
-    axs[0,0].plot(x, Gait[Trials]["Left"]["pelvisAngle"]["x"], label = str(Trials))
-#plt.ylabel("Angle (degree)")
-axs[0,0].set_title("Pelvic Tilt (x)", fontsize = 9)
-
-axs[0,1].plot(x, Gait["Left Average"]["pelvisAngle"]["y"], "k")
-for Trials in cleanlefttrials:
-    axs[0,1].plot(x, Gait[Trials]["Left"]["pelvisAngle"]["y"])
-#plt.ylabel("Angle (degree)")
-axs[0,1].set_title("Pelvic Obliquity (y)", fontsize = 9)
-
-axs[0,2].plot(x, Gait["Left Average"]["pelvisAngle"]["z"], "k")
-for Trials in cleanlefttrials:
-    axs[0,2].plot(x, Gait[Trials]["Left"]["pelvisAngle"]["z"])
-
-axs[0,2].set_title("Pelvic Rotation (z)", fontsize = 9)
-
-
-axs[1,0].plot(x, Gait["Left Average"]["HipAngle"]["x"], "k")
-for Trials in cleanlefttrials:
-    axs[1,0].plot(x, Gait[Trials]["Left"]["HipAngle"]["x"])
-axs[1,0].set_title("Hip Flex/Extension (x)", fontsize = 9)
-
-
-axs[1,1].plot(x, Gait["Left Average"]["HipAngle"]["y"], "k")
-for Trials in cleanlefttrials:
-    axs[1,1].plot(x, Gait[Trials]["Left"]["HipAngle"]["y"])
-axs[1,1].set_title("Hip Ab/Adduction (y)", fontsize = 9)
-
-axs[1,2].plot(x, Gait["Left Average"]["HipAngle"]["z"], "k")
-for Trials in cleanlefttrials:
-    axs[1,2].plot(x, Gait[Trials]["Left"]["HipAngle"]["z"])
-axs[1,2].set_title("Hip Rotation (z)", fontsize = 9)
-
-
-
-axs[2,0].plot(x, Gait["Left Average"]["KneeAngle"]["x"], "k")
-for Trials in cleanlefttrials:
-    axs[2,0].plot(x, Gait[Trials]["Left"]["KneeAngle"]["x"])
-axs[2,0].set_title("Knee Flex/Extension (x)", fontsize = 9)
-
-axs[2,1].plot(x, Gait["Left Average"]["KneeAngle"]["y"], "k")
-for Trials in cleanlefttrials:
-    axs[2,1].plot(x, Gait[Trials]["Left"]["KneeAngle"]["y"])
-axs[2,1].set_title("Knee Valgus/Varus (y)", fontsize = 9)
-
-axs[2,2].plot(x, Gait["Left Average"]["KneeAngle"]["z"], "k")
-for Trials in cleanlefttrials:
-    axs[2,2].plot(x, Gait[Trials]["Left"]["KneeAngle"]["z"])
-axs[2,2].set_title("Knee Rotation (z)", fontsize = 9)
-
-
-
-axs[3,0].plot(x, Gait["Left Average"]["AnkleAngle"]["x"], "k")
-for Trials in cleanlefttrials:
-    axs[3,0].plot(x, Gait[Trials]["Left"]["AnkleAngle"]["x"])
-axs[3,0].set_title("Foot Dorsi/Plantar (x)", fontsize = 9)
-
-axs[3,1].plot(x, Gait["Left Average"]["AnkleAngle"]["y"], "k")
-for Trials in cleanlefttrials:
-    axs[3,1].plot(x, Gait[Trials]["Left"]["AnkleAngle"]["y"])
-axs[3,1].set_title("Foot Eversion/Inversion (y)", fontsize = 9)
-
-axs[3,2].plot(x, Gait["Left Average"]["AnkleAngle"]["z"], "k")
-for Trials in cleanlefttrials:
-    axs[3,2].plot(x, Gait[Trials]["Left"]["AnkleAngle"]["z"])
-axs[3,2].set_title("Foot Rotation (z)", fontsize = 9)
-
-
-plt.xlabel("Percent of Gait Cycle")
-
-plt.show() 
+def plot_tables():
+    fig, axs = plt.subplots(4,3, sharex = True)
+    x = np.array(range(100))
+    #fig.subplots_adjust(wspace = 0.3, hspace = 0.4)
+    fig.tight_layout()
+    #axs.vlines(x=Gait["Left Average"]["FootOff"])
+    
+    axs[0,0].plot(x, Gait["Left Average"]["pelvisAngle"]["x"], "k", label = "mean")
+    for Trials in cleanlefttrials:
+        axs[0,0].plot(x, Gait[Trials]["Left"]["pelvisAngle"]["x"], label = str(Trials))
+    #plt.ylabel("Angle (degree)")
+    axs[0,0].set_title("Pelvic Tilt (x)", fontsize = 9)
+    
+    axs[0,1].plot(x, Gait["Left Average"]["pelvisAngle"]["y"], "k")
+    for Trials in cleanlefttrials:
+        axs[0,1].plot(x, Gait[Trials]["Left"]["pelvisAngle"]["y"])
+    #plt.ylabel("Angle (degree)")
+    axs[0,1].set_title("Pelvic Obliquity (y)", fontsize = 9)
+    
+    axs[0,2].plot(x, Gait["Left Average"]["pelvisAngle"]["z"], "k")
+    for Trials in cleanlefttrials:
+        axs[0,2].plot(x, Gait[Trials]["Left"]["pelvisAngle"]["z"])
+    
+    axs[0,2].set_title("Pelvic Rotation (z)", fontsize = 9)
+    
+    
+    axs[1,0].plot(x, Gait["Left Average"]["HipAngle"]["x"], "k")
+    for Trials in cleanlefttrials:
+        axs[1,0].plot(x, Gait[Trials]["Left"]["HipAngle"]["x"])
+    axs[1,0].set_title("Hip Flex/Extension (x)", fontsize = 9)
+    
+    
+    axs[1,1].plot(x, Gait["Left Average"]["HipAngle"]["y"], "k")
+    for Trials in cleanlefttrials:
+        axs[1,1].plot(x, Gait[Trials]["Left"]["HipAngle"]["y"])
+    axs[1,1].set_title("Hip Ab/Adduction (y)", fontsize = 9)
+    
+    axs[1,2].plot(x, Gait["Left Average"]["HipAngle"]["z"], "k")
+    for Trials in cleanlefttrials:
+        axs[1,2].plot(x, Gait[Trials]["Left"]["HipAngle"]["z"])
+    axs[1,2].set_title("Hip Rotation (z)", fontsize = 9)
+    
+    
+    
+    axs[2,0].plot(x, Gait["Left Average"]["KneeAngle"]["x"], "k")
+    for Trials in cleanlefttrials:
+        axs[2,0].plot(x, Gait[Trials]["Left"]["KneeAngle"]["x"])
+    axs[2,0].set_title("Knee Flex/Extension (x)", fontsize = 9)
+    
+    axs[2,1].plot(x, Gait["Left Average"]["KneeAngle"]["y"], "k")
+    for Trials in cleanlefttrials:
+        axs[2,1].plot(x, Gait[Trials]["Left"]["KneeAngle"]["y"])
+    axs[2,1].set_title("Knee Valgus/Varus (y)", fontsize = 9)
+    
+    axs[2,2].plot(x, Gait["Left Average"]["KneeAngle"]["z"], "k")
+    for Trials in cleanlefttrials:
+        axs[2,2].plot(x, Gait[Trials]["Left"]["KneeAngle"]["z"])
+    axs[2,2].set_title("Knee Rotation (z)", fontsize = 9)
+    
+    
+    
+    axs[3,0].plot(x, Gait["Left Average"]["AnkleAngle"]["x"], "k")
+    for Trials in cleanlefttrials:
+        axs[3,0].plot(x, Gait[Trials]["Left"]["AnkleAngle"]["x"])
+    axs[3,0].set_title("Foot Dorsi/Plantar (x)", fontsize = 9)
+    
+    axs[3,1].plot(x, Gait["Left Average"]["AnkleAngle"]["y"], "k")
+    for Trials in cleanlefttrials:
+        axs[3,1].plot(x, Gait[Trials]["Left"]["AnkleAngle"]["y"])
+    axs[3,1].set_title("Foot Eversion/Inversion (y)", fontsize = 9)
+    
+    axs[3,2].plot(x, Gait["Left Average"]["AnkleAngle"]["z"], "k")
+    for Trials in cleanlefttrials:
+        axs[3,2].plot(x, Gait[Trials]["Left"]["AnkleAngle"]["z"])
+    axs[3,2].set_title("Foot Rotation (z)", fontsize = 9)
+    
+    
+    plt.xlabel("Percent of Gait Cycle")
+    
+    plt.show() 
+plot_tables()
 
 def select_columns():
     c.execute("SELECT sql FROM sqlite_master WHERE name='Gait_Max_Min_Table'")
     rows = c.fetchall()
     for row in rows:
         print(row)
-select_columns()
+##select_columns()
 
 def select_all():
     c.execute("SELECT * FROM 'Mean_Gait_Table'")
