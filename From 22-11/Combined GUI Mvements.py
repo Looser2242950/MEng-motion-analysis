@@ -4,7 +4,6 @@ Created on Tue Nov 24 15:07:27 2020
 
 @author: johan
 """
-
 import numpy as np
 import sys
 import btk
@@ -15,7 +14,16 @@ from tkinter import filedialog
 import os.path 
 from tkinter import ttk
 import tkinter.font as font
+import matplotlib.pyplot as plt
+import statistics
+plt.style.use('ggplot')
+plt.rcParams['figure.dpi'] = 300
+plt.rcParams['figure.constrained_layout.use'] = False
 
+"""Start SQLite Connection""" 
+#conn = sqlite3.connect(':memory:')
+conn = sqlite3.connect('MotionAnalysis109.db')
+c=conn.cursor()
 root = Tk()
 
 #SetUp Tabs
@@ -40,17 +48,13 @@ myFont = font.Font(family = "Helvetica", size=20)
 
 """TAB 1"""
 FrameTop = Frame(tab1, bg = "DodgerBlue3", bd = 6)
-FrameTop.pack(expand = 1, fill = BOTH, side = TOP)
+FrameTop.pack(expand = 1, fill = BOTH)
 FrameInfo = Frame(FrameTop, bg = "DodgerBlue3", bd = 6)
-FrameInfo.pack( side = LEFT,fill = BOTH, anchor = NW)
+FrameInfo.pack()
 FrameMovement = Frame(FrameTop, bg = "DodgerBlue2", bd = 6)
-FrameMovement.pack( side = RIGHT, anchor = NE)
+FrameMovement.pack(anchor = NE)
 FrameClose = Frame(tab1, bg = "DeepSkyBlue2")
-FrameClose.pack(expand = 1, fill = BOTH, side = BOTTOM, anchor = SE)
-
-def close_window():
-    root.destroy()
-
+FrameClose.pack(expand = 1, fill = BOTH, side = BOTTOM)
 
 #FRAME 1: INPuT PATIENT DATA
 labelID = Label(FrameInfo,  text = "Patient ID: ", bg = "ivory3") 
@@ -128,6 +132,11 @@ class Pattype:
         self.radioboth = Radiobutton(FrameInfo, text="Both",variable=vAffect, value="Both")
         self.radioboth.grid(column = 4, row = 6)             
 Pattype(FrameInfo)
+labelvisit = Label(FrameInfo,  text = "Patient Visit: ", bg = "ivory3") 
+labelvisit.grid(column = 1, row = 7, pady = 5)
+vVisit = StringVar()
+entryVisit = Entry(FrameInfo,  textvariable = vVisit,   fg = "purple4", width = 20) 
+entryVisit.grid(column = 2, row = 7, columnspan = 3)
 
 #FRAME 2: CHECKBOXES
 gc = IntVar()
@@ -155,25 +164,24 @@ SitStandSitcheck = Checkbutton(FrameMovement, variable = stsc)
 SitStandSitcheck.grid(column  = 11, row  = 5)
 
 
-#FRAME 3: CANCEL/ACCEPT
-buttoncancel = Button(FrameClose, text = "Cancel", command = lambda: close_window())
-buttoncancel.pack(side = RIGHT, anchor = CENTER, padx = 10)
-buttonaccept = Button(FrameClose, text = "Accept", command = lambda: [close_window()])
-buttonaccept.pack(side = RIGHT, anchor = CENTER, padx = 10, pady = 20)
+
+
+
+
+
+
+
 
 
 
 """Tab 2: Gait"""
+
 InfoFrameGait = Frame(tab2,bg = "DodgerBlue3", bd = 6)
 InfoFrameGait.pack(fill = BOTH)
 SelectFrameGait = Frame(tab2,bg = "DodgerBlue3", bd = 6)
 SelectFrameGait.pack(fill = BOTH)
 TrialFrameGait= Frame(tab2,bg = "DodgerBlue3")
 TrialFrameGait.pack(fill = BOTH)
-
-labelGait = Label(InfoFrameGait, text = "Gait")
-labelGait["font"] = myFont
-labelGait.pack()
 
 #Display filenames + whether clean or not    
 FrameTrial1Gait = Frame(TrialFrameGait, bg = "ivory3", bd = 6)
@@ -190,6 +198,12 @@ FrameTrial6Gait = Frame(TrialFrameGait, bg = "ghost white", bd = 6)
 FrameTrial6Gait.pack()
 Framebottom = Frame(TrialFrameGait, bg = "DodgerBlue3", bd = 6)
 Framebottom.pack()
+
+
+labelGait = Label(InfoFrameGait, text = "Gait")
+labelGait["font"] = myFont
+labelGait.pack()
+
 labelbottom = Label(Framebottom, height = 1,  bg = "DodgerBlue3")
 labelbottom.pack()
 
@@ -235,13 +249,10 @@ label_clean6Gait.grid(column = 2, row = 1)
 label_clean6rGait = Label(FrameTrial6Gait, text="",  width = 25, bg = "ghost white")
 label_clean6rGait.grid(column = 2, row = 2)
 
-#SELECT TRIALS GAIT
+
 
 Gait = {}
-# TriallistGait=[]
-# filelistGait=[]
 def browseFilesGait(): 
-    #TriallistGait.clear()
     gc.set(1)
     global filelistGait
     global TriallistGait
@@ -273,20 +284,21 @@ def browseFilesGait():
     print(filelistGait)
     print(length)
     print(TriallistGait)
-
+cleanlefttrials=[]
+cleanrighttrials=[]
 #EXCTRACT AND NORMALISE DATA
 def cutcycle(footstrike, data):
     footstrike1 = footstrike[0]
     footstrike2 = footstrike[1]
-    data1 = (data[footstrike1:footstrike2])
-    return data1
+    datacut = (data[footstrike1:footstrike2])
+    return datacut
     
 def extractintoDict(filename, TrialNum):     
     reader = btk.btkAcquisitionFileReader()
     reader.SetFilename(filename) # set a filename to the reader
     reader.Update()
     trialacq = reader.GetOutput() # is the btk aquisition object
-    def extractvalues(trial):
+    def extractvaluesl(trial):
         #extracts al the arrays
         #can be used for all trials, just needs to be instantiated with the correct trial
         x = dict();  
@@ -314,8 +326,36 @@ def extractintoDict(filename, TrialNum):
         except:
             pass
         return x
-    Gait[TrialNum].update({"Left": extractvalues(trialacq)})
-    Gait[TrialNum].update({"Right": extractvalues(trialacq)})
+    def extractvaluesr(trial):
+        #extracts al the arrays
+        #can be used for all trials, just needs to be instantiated with the correct trial
+        x = dict();  
+        x["KneeAngle"]= (trial.GetPoint("RKneeAngles")).GetValues()
+        x["KneeForce"]= (trial.GetPoint("RKneeForce")).GetValues()
+        x["KneeMoment"]= (trial.GetPoint("RKneeMoment")).GetValues()
+        x["KneePower"]= (trial.GetPoint("RKneePower")).GetValues() 
+        x["HipAngle"]= ((trial.GetPoint("RHipAngles")).GetValues())
+        x["HipForce"]= (trial.GetPoint("RHipForce")).GetValues()
+        x["HipMoment"]= (trial.GetPoint("RHipMoment")).GetValues()
+        x["HipPower"]= (trial.GetPoint("RHipPower")).GetValues() 
+        x["AnkleAngle"]= (trial.GetPoint("RAnkleAngles")).GetValues()
+        x["AnkleForce"]= (trial.GetPoint("RAnkleForce")).GetValues()
+        x["AnkleMoment"]= (trial.GetPoint("RAnkleMoment")).GetValues()
+        x["AnklePower"]= (trial.GetPoint("RAnklePower")).GetValues()    
+        x["FootProgressAngle"] = (trial.GetPoint("RFootProgressAngles")).GetValues()
+        x["pelvisAngle"] = (trial.GetPoint("RPelvisAngles")).GetValues() 
+        x["COM"] = (trial.GetPoint("CentreOfMass")).GetValues()
+        try:
+            x["GRF"] = (trial.GetPoint("RGroundReactionForce")).GetValues()
+        except:
+            pass
+        try:    
+            x["NGRF"] = (trial.GetPoint("RNormalisedGRF")).GetValues()
+        except:
+            pass
+        return x
+    Gait[TrialNum].update({"Left": extractvaluesl(trialacq)})
+    Gait[TrialNum].update({"Right": extractvaluesr(trialacq)})
     Gait[TrialNum].update({"lfootstrikeFrame":[]})
     Gait[TrialNum].update({"rfootstrikeFrame":[]})
     Gait[TrialNum].update({"lfootoffFrame":[]})
@@ -356,8 +396,10 @@ def extractintoDict(filename, TrialNum):
     if TrialNum=="Trial 6":
         labelleft = label_clean6Gait
         labelright = label_clean6rGait
+    
     if len(Gait[TrialNum]["lfootstrikeFrame"])>1:
         Gait[TrialNum].update({"Clean Left": "Yes"})
+        cleanlefttrials.append(TrialNum)
         labelleft.configure(text = "Clean Left Gait Cycle")
         Gait[TrialNum]["Left"]["KneeAngle"] = cutcycle(Gait[TrialNum]["lfootstrikeFrame"], Gait[TrialNum]["Left"]["KneeAngle"])
         Gait[TrialNum]["Left"]["KneeForce"] = cutcycle(Gait[TrialNum]["lfootstrikeFrame"], Gait[TrialNum]["Left"]["KneeForce"])
@@ -392,6 +434,7 @@ def extractintoDict(filename, TrialNum):
         if item <0:
             Gait[TrialNum]["lfootoffFrame"].remove(item)
     if len(Gait[TrialNum]["rfootstrikeFrame"])>1:
+        cleanrighttrials.append(TrialNum)
         Gait[TrialNum].update({"Clean Right": "Yes"})
         labelright.configure(text = "Clean Right Gait Cycle")
         Gait[TrialNum]["Right"]["KneeAngle"] = cutcycle(Gait[TrialNum]["rfootstrikeFrame"], Gait[TrialNum]["Right"]["KneeAngle"])
@@ -426,14 +469,118 @@ def extractintoDict(filename, TrialNum):
     for item in Gait[TrialNum]["rfootoffFrame"]:
         if item <0:
             Gait[TrialNum]["rfootoffFrame"].remove(item)
-    for LR in ['Right','Left']:
-        for key in Gait[TrialNum][LR].keys():
-            arr = Gait[TrialNum][LR][key]
-            Gait[TrialNum][LR][key] = {
+    def footoff(cleantrials, footoff, footstrike):
+        foot = []
+        if len(cleantrials)== 3:
+            foot = int((Gait[cleantrials[0]][footoff][0]/Gait[cleantrials[0]][footstrike][1]+
+                       Gait[cleantrials[1]][footoff][0]/Gait[cleantrials[1]][footstrike][1]+
+                       Gait[cleantrials[2]][footoff][0]/Gait[cleantrials[2]][footstrike][1])*100/3)
+        if len(cleantrials)== 4:   
+            foot = int((Gait[cleantrials[0]][footoff][0]/Gait[cleantrials[0]][footstrike][1]+
+                       Gait[cleantrials[1]][footoff][0]/Gait[cleantrials[1]][footstrike][1]+
+                       Gait[cleantrials[2]][footoff][0]/Gait[cleantrials[2]][footstrike][1]+
+                       Gait[cleantrials[3]][footoff][0]/Gait[cleantrials[3]][footstrike][1])*100/4)
+        if len(cleantrials)== 5:
+            foot = int((Gait[cleantrials[0]][footoff][0]/Gait[cleantrials[0]][footstrike][1]+
+                       Gait[cleantrials[1]][footoff][0]/Gait[cleantrials[1]][footstrike][1]+
+                       Gait[cleantrials[2]][footoff][0]/Gait[cleantrials[2]][footstrike][1]+
+                       Gait[cleantrials[3]][footoff][0]/Gait[cleantrials[3]][footstrike][1]+
+                       Gait[cleantrials[4]][footoff][0]/Gait[cleantrials[4]][footstrike][1])*100/5)
+        if len(cleantrials)== 6:
+            foot = int((Gait[cleantrials[0]][footoff][0]/Gait[cleantrials[0]][footstrike][1]+
+                       Gait[cleantrials[1]][footoff][0]/Gait[cleantrials[1]][footstrike][1]+
+                       Gait[cleantrials[2]][footoff][0]/Gait[cleantrials[2]][footstrike][1]+
+                       Gait[cleantrials[3]][footoff][0]/Gait[cleantrials[3]][footstrike][1]+
+                       Gait[cleantrials[4]][footoff][0]/Gait[cleantrials[4]][footstrike][1]+
+                       Gait[cleantrials[5]][footoff][0]/Gait[cleantrials[5]][footstrike][1])*100/6)
+        return foot
+    Gait["Left Average"] = {}
+    Gait["Right Average"] = {}
+    Gait["Left Average"].update({"FootOff": footoff(cleanlefttrials, "lfootoffFrame", "lfootstrikeFrame")})
+    Gait["Right Average"].update({"FootOff": footoff(cleanrighttrials, "rfootoffFrame", "rfootstrikeFrame")})
+    
+    def interpolate(cutdata):
+        increment = 100/len(cutdata)
+        Timepercent = np.arange(0, 100, increment).tolist() 
+        x = np.array(range(100))
+        datainterp = np.interp(x, Timepercent, cutdata)
+        return datainterp       
+
+#make array into list for SQ:
+    for key in Gait[TrialNum]["Left"].keys():
+        arr = Gait[TrialNum]["Left"][key]
+        if Gait[TrialNum]["Clean Left"]=="Yes":
+            Gait[TrialNum]["Left"][key] = {
+                    'x':(interpolate(arr[:,0])).tolist(),
+                    'y':(interpolate(arr[:,1])).tolist(),
+                    'z':(interpolate(arr[:,2])).tolist()
+                    }
+            
+        else:
+            Gait[TrialNum]["Left"][key] = {
                     'x':arr[:,0].tolist(),
                     'y':arr[:,1].tolist(),
                     'z':arr[:,2].tolist()
                     }
+    for key in Gait[TrialNum]["Right"].keys():
+        arr = Gait[TrialNum]["Right"][key]
+        if Gait[TrialNum]["Clean Right"]=="Yes":
+            Gait[TrialNum]["Right"][key] = {
+                    'x':(interpolate(arr[:,0])).tolist(),
+                    'y':(interpolate(arr[:,1])).tolist(),
+                    'z':(interpolate(arr[:,2])).tolist()
+                    }
+        else:
+            Gait[TrialNum]["Right"][key] = {
+                    'x':arr[:,0].tolist(),
+                    'y':arr[:,1].tolist(),
+                    'z':arr[:,2].tolist()
+                    }
+    def meanvals(limb, cleantrials):
+        o={}
+        
+        for move in ["KneeAngle", "KneeForce", "KneeMoment", "KneePower", 
+                     "HipAngle", "HipForce", "HipMoment", "HipPower",
+                     "AnkleAngle", "AnkleForce", "AnkleMoment", "AnklePower",
+                     "FootProgressAngle", "pelvisAngle", "COM", "GRF", "NGRF"]:
+            o[move]={}
+            for axis in ["x","y","z"]:
+
+                if len(cleantrials)== 3:
+                    o[move][axis] = (np.mean((np.array(Gait[cleantrials[0]][limb][move][axis]),
+                                                             np.array(Gait[cleantrials[1]][limb][move][axis]),
+                                                             np.array(Gait[cleantrials[2]][limb][move][axis])), 
+                                                             axis = 0)).tolist()
+                    
+                if len(cleantrials)== 4:
+                    o[move][axis] = (np.mean((np.array(Gait[cleantrials[0]][limb][move][axis]),
+                                                              np.array(Gait[cleantrials[1]][limb][move][axis]),
+                                                              np.array(Gait[cleantrials[2]][limb][move][axis]),
+                                                              np.array(Gait[cleantrials[3]][limb][move][axis])),
+                                                              axis = 0)).tolist()
+                    
+                if len(cleantrials)== 5:
+                    o[move][axis] = (np.mean((np.array(Gait[cleantrials[0]][limb][move][axis]),
+                                                              np.array(Gait[cleantrials[1]][limb][move][axis]),
+                                                              np.array(Gait[cleantrials[2]][limb][move][axis]),
+                                                              np.array(Gait[cleantrials[3]][limb][move][axis]),
+                                                              np.array(Gait[cleantrials[4]][limb][move][axis])), 
+                                                              axis = 0)).tolist()
+                if len(cleantrials)== 6:
+                    o[move][axis] = (np.mean((np.array(Gait[cleantrials[0]][limb][move][axis]),
+                                                              np.array(Gait[cleantrials[1]][limb][move][axis]),
+                                                              np.array(Gait[cleantrials[2]][limb][move][axis]),
+                                                              np.array(Gait[cleantrials[3]][limb][move][axis]),
+                                                              np.array(Gait[cleantrials[4]][limb][move][axis]),
+                                                              np.array(Gait[cleantrials[5]][limb][move][axis])),
+                                                              axis = 0)).tolist()
+
+        return o
+
+
+    Gait["Left Average"].update(meanvals("Left", cleanlefttrials))
+    Gait["Right Average"].update(meanvals("Right", cleanrighttrials))
+
 
 def extract_all_Gait_files():
     for i in range(len(TriallistGait)):
@@ -442,166 +589,118 @@ def extract_all_Gait_files():
 button_exploreGait = Button(SelectFrameGait, text = "Select up to 6 Trials",  width = 40, bg = "ghost white",
                           command = lambda : [browseFilesGait(), extract_all_Gait_files()])  
 button_exploreGait.pack(pady=10)
- 
+
+
+
+
+
 
 """Tab 3: Stepup"""
 
+#Display filenames + whether clean or not    
 InfoFrameStepUp = Frame(tab3,bg = "DodgerBlue3", bd = 6)
-InfoFrameStepUp.grid(column = 1, row = 2, columnspan = 2, sticky = NSEW)
-TrialFrameStepUp= Frame(tab3,bg = "DodgerBlue3")
-TrialFrameStepUp.grid(column = 1, row = 3, columnspan = 2, sticky = NSEW)
+InfoFrameStepUp.pack(fill = BOTH)
+SelectFrameStepUp = Frame(tab3,bg = "DodgerBlue3", bd = 6)
+SelectFrameStepUp.pack(fill = BOTH)
+TrialFrameStepUp1= Frame(tab3,bg = "DodgerBlue3")
+TrialFrameStepUp1.pack(fill = BOTH)   
+TrialFrameStepUp2= Frame(tab3,bg = "DodgerBlue3")
+TrialFrameStepUp2.pack(fill = BOTH)
 
-FrameStepUpLeft = Frame(TrialFrameStepUp, bg = "DeepSkyBlue2")
-FrameStepUpLeft.pack(side = LEFT, expand =True, fill = BOTH)
-FrameStepUpRight = Frame(TrialFrameStepUp, bg = "DeepSkyBlue2")
-FrameStepUpRight.pack(side = RIGHT, expand =True, fill = BOTH)
+FrameTrial1StepUp = Frame(TrialFrameStepUp1, bg = "ivory3", bd = 6)
+FrameTrial1StepUp.pack()
+FrameTrial2StepUp = Frame(TrialFrameStepUp1, bg = "ghost white", bd = 6)
+FrameTrial2StepUp.pack()
+FrameTrial3StepUp = Frame(TrialFrameStepUp1, bg = "ivory3", bd = 6)
+FrameTrial3StepUp.pack()
+FrameTrial4StepUp = Frame(TrialFrameStepUp1, bg = "ghost white", bd = 6)
+FrameTrial4StepUp.pack()
+FrameTrial5StepUp = Frame(TrialFrameStepUp1, bg = "ivory3", bd = 6)
+FrameTrial5StepUp.pack()
+FrameTrial6StepUp = Frame(TrialFrameStepUp1, bg = "ghost white", bd = 6)
+FrameTrial6StepUp.pack()
+Framebottom = Frame(TrialFrameStepUp2, bg = "DodgerBlue3", bd = 6)
+Framebottom.pack()
 
-InfoFrameSteppingUp = Frame(tab3,bg = "DodgerBlue3", bd = 6)
-InfoFrameSteppingUp.grid(column = 1, row = 4, columnspan = 2, sticky = NSEW)
-FrameMainSteppingUp= Frame(tab3,bg = "DodgerBlue3")
-FrameMainSteppingUp.grid(column = 1, row = 6, columnspan = 2)
-
-
-SelectFrameSteppingUp = Frame(FrameMainSteppingUp, bg = "DodgerBlue3", bd = 6)
-SelectFrameSteppingUp.grid(column =1, row = 1, columnspan = 2)
-FrameTrial1SteppingUp = Frame(FrameMainSteppingUp, bg = "ivory3", bd = 6)
-FrameTrial1SteppingUp.grid (column =  1, row  =2)
-FrameTrial2SteppingUp = Frame(FrameMainSteppingUp, bg = "ghost white", bd = 6)
-FrameTrial2SteppingUp.grid (column =  1, row  =3)
-FrameTrial3SteppingUp = Frame(FrameMainSteppingUp, bg = "ivory3", bd = 6)
-FrameTrial3SteppingUp.grid (column =  1, row  =4)
-FrameTrial4SteppingUp = Frame(FrameMainSteppingUp, bg = "ghost white", bd = 6)
-FrameTrial4SteppingUp.grid (column =  2, row  =2)
-FrameTrial5SteppingUp = Frame(FrameMainSteppingUp, bg = "ivory3", bd = 6)
-FrameTrial5SteppingUp.grid (column =  2, row  =3)
-FrameTrial6SteppingUp = Frame(FrameMainSteppingUp, bg = "ghost white", bd = 6)
-FrameTrial6SteppingUp.grid (column =  2, row  =4)
-Framebottom2 = Frame(FrameMainSteppingUp, bg = "DodgerBlue3", bd = 6)
-Framebottom2.grid(row  =5, column = 1, columnspan = 2)
-labelbottom2 = Label(Framebottom2, height = 1,  bg = "DodgerBlue3")
-labelbottom2.pack()
 
 labelStepUp = Label(InfoFrameStepUp, text = "StepUp")
 labelStepUp["font"] = myFont
 labelStepUp.pack()
 
-#Display filenames + whether clean or not    
-SelectFrameStepUpLeft = Frame(FrameStepUpLeft, bg = "DodgerBlue3", bd = 6)
-SelectFrameStepUpLeft.pack(expand =True, fill = BOTH)
-FrameTrial1StepUp = Frame(FrameStepUpLeft, bg = "ivory3", bd = 6)
-FrameTrial1StepUp.pack()
-FrameTrial2StepUp = Frame(FrameStepUpLeft, bg = "ghost white", bd = 6)
-FrameTrial2StepUp.pack()
-FrameTrial3StepUp = Frame(FrameStepUpLeft, bg = "ivory3", bd = 6)
-FrameTrial3StepUp.pack()
+labelbottom = Label(Framebottom, height = 1,  bg = "DodgerBlue3")
+labelbottom.pack()
 
-
-SelectFrameStepUpRight = Frame(FrameStepUpRight, bg = "DodgerBlue3", bd = 6)
-SelectFrameStepUpRight.pack(expand =True, fill = BOTH)
-FrameTrial4StepUp = Frame(FrameStepUpRight, bg = "ghost white", bd = 6)
-FrameTrial4StepUp.pack()
-FrameTrial5StepUp = Frame(FrameStepUpRight, bg = "ivory3", bd = 6)
-FrameTrial5StepUp.pack()
-FrameTrial6StepUp = Frame(FrameStepUpRight, bg = "ghost white", bd = 6)
-FrameTrial6StepUp.pack()
-
-label_file_explorer1StepUp = Label(FrameTrial1StepUp,  text = "", width = 60, height = 2 ,  fg = "blue" , bg = "ghost white") 
+label_file_explorer1StepUp = Label(FrameTrial1StepUp,  text = "", width = 50, height = 3 ,  fg = "blue" , bg = "ghost white") 
 label_file_explorer1StepUp.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
+vSU1=StringVar()
+vSU1.set(0)
+radio_left_1StepUp = Radiobutton(FrameTrial1StepUp, text = "Left", variable = vSU1, value="Left")
+radio_right_1StepUp = Radiobutton(FrameTrial1StepUp, text ="Right", variable = vSU1, value = "Right")
+radio_both_1StepUp = Radiobutton(FrameTrial1StepUp, text ="Both", variable = vSU1, value = "Both")
+radio_left_1StepUp.grid(column = 2,row = 1)
+radio_right_1StepUp.grid(column = 3,row = 1)
+radio_both_1StepUp.grid(column = 4,row = 1)
 
-label_file_explorer2StepUp = Label(FrameTrial2StepUp,  text = "", width = 60, height = 2 ,  fg = "blue" , bg = "ghost white") 
+label_file_explorer2StepUp = Label(FrameTrial2StepUp,  text = "", width = 50, height = 3,  fg = "blue", bg = "ivory2") 
 label_file_explorer2StepUp.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
+vSU2=StringVar()
+vSU2.set(0)
+radio_left_2StepUp = Radiobutton(FrameTrial2StepUp, text = "Left", variable = vSU2, value="Left")
+radio_right_2StepUp = Radiobutton(FrameTrial2StepUp, text ="Right", variable = vSU2, value = "Right")
+radio_both_2StepUp = Radiobutton(FrameTrial2StepUp, text ="Both", variable = vSU2, value = "Both")
+radio_left_2StepUp.grid(column = 2,row = 1)
+radio_right_2StepUp.grid(column = 3,row = 1)
+radio_both_2StepUp.grid(column = 4,row = 1)
 
-label_file_explorer3StepUp = Label(FrameTrial3StepUp,  text = "", width = 60, height = 2 ,  fg = "blue" , bg = "ghost white") 
+label_file_explorer3StepUp = Label(FrameTrial3StepUp,  text = "", width = 50, height = 3,  fg = "blue", bg = "ghost white") 
 label_file_explorer3StepUp.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
+vSU3=StringVar()
+vSU3.set(0)
+radio_left_3StepUp = Radiobutton(FrameTrial3StepUp, text = "Left", variable = vSU3, value="Left")
+radio_right_3StepUp = Radiobutton(FrameTrial3StepUp, text ="Right", variable = vSU3, value = "Right")
+radio_both_3StepUp = Radiobutton(FrameTrial3StepUp, text ="Both", variable = vSU3, value = "Both")
+radio_left_3StepUp.grid(column = 2,row = 1)
+radio_right_3StepUp.grid(column = 3,row = 1)
+radio_both_3StepUp.grid(column = 4,row = 1)
 
-label_file_explorer4StepUp = Label(FrameTrial4StepUp,  text = "", width = 60, height = 2 ,  fg = "blue" , bg = "ghost white") 
+label_file_explorer4StepUp = Label(FrameTrial4StepUp,  text = "", width = 50, height = 3,  fg = "blue", bg = "ivory2") 
 label_file_explorer4StepUp.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
+vSU4=StringVar()
+vSU4.set(0)
+radio_left_4StepUp = Radiobutton(FrameTrial4StepUp, text = "Left", variable = vSU4, value="Left")
+radio_right_4StepUp = Radiobutton(FrameTrial4StepUp, text ="Right", variable = vSU4, value = "Right")
+radio_both_4StepUp = Radiobutton(FrameTrial4StepUp, text ="Both", variable = vSU4, value = "Both")
+radio_left_4StepUp.grid(column = 2,row = 1)
+radio_right_4StepUp.grid(column = 3,row = 1)
+radio_both_4StepUp.grid(column = 4,row = 1)
 
-label_file_explorer5StepUp = Label(FrameTrial5StepUp,  text = "", width = 60, height = 2 ,  fg = "blue" , bg = "ghost white") 
+label_file_explorer5StepUp = Label(FrameTrial5StepUp,  text = "", width = 50, height = 3,  fg = "blue", bg = "ghost white") 
 label_file_explorer5StepUp.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
+vSU5=StringVar()
+vSU5.set(0)
+radio_left_5StepUp = Radiobutton(FrameTrial5StepUp, text = "Left", variable = vSU5, value="Left")
+radio_right_5StepUp = Radiobutton(FrameTrial5StepUp, text ="Right", variable = vSU5, value = "Right")
+radio_both_5StepUp = Radiobutton(FrameTrial5StepUp, text ="Both", variable = vSU5, value = "Both")
+radio_left_5StepUp.grid(column = 2,row = 1)
+radio_right_5StepUp.grid(column = 3,row = 1)
+radio_both_5StepUp.grid(column = 4,row = 1)
 
-label_file_explorer6StepUp = Label(FrameTrial6StepUp,  text = "", width = 60, height = 2 ,  fg = "blue" , bg = "ghost white") 
+label_file_explorer6StepUp = Label(FrameTrial6StepUp,  text = "", width = 50, height = 3,  fg = "blue", bg = "ivory2") 
 label_file_explorer6StepUp.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
-
-"""STRAHTCLYDE STYLE STEPPING"""
-
-labelSteppingUp = Label(InfoFrameSteppingUp, text = "OR Select Strathclyde Stepping Trials")
-labelSteppingUp.pack()
-
-label_file_explorer1SteppingUp = Label(FrameTrial1SteppingUp,  text = "", width = 40, height = 2 ,  fg = "blue" , bg = "ghost white") 
-label_file_explorer1SteppingUp.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
-VUp1 = StringVar()
-VUp1.set(0)
-radioleft1 = Radiobutton(FrameTrial1SteppingUp, text="Left",variable= VUp1, value="Left")
-radioleft1.grid(column = 2, row = 1)
-radioright1 = Radiobutton(FrameTrial1SteppingUp, text="Right",variable =VUp1, value="Right")
-radioright1.grid(column = 3, row = 1)
-radioboth1= Radiobutton(FrameTrial1SteppingUp, text="Both",variable =VUp1, value="Noth")
-radioboth1.grid(column = 4, row = 1)
-
-label_file_explorer2SteppingUp = Label(FrameTrial2SteppingUp,  text = "", width = 40, height = 2 ,  fg = "blue" , bg = "ghost white") 
-label_file_explorer2SteppingUp.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
-VUp2 = StringVar()
-VUp2.set(0)
-radioleft2 = Radiobutton(FrameTrial2SteppingUp, text="Left",variable= VUp2, value="Left")
-radioleft2.grid(column = 2, row = 1)
-radioright2 = Radiobutton(FrameTrial2SteppingUp, text="Right",variable =VUp2, value="Right")
-radioright2.grid(column = 3, row = 1)
-radioboth2= Radiobutton(FrameTrial2SteppingUp, text="Both",variable =VUp2, value="Noth")
-radioboth2.grid(column = 4, row = 1)
-
-label_file_explorer3SteppingUp = Label(FrameTrial3SteppingUp,  text = "", width = 40, height = 2 ,  fg = "blue" , bg = "ghost white") 
-label_file_explorer3SteppingUp.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
-VUp3 = StringVar()
-VUp3.set(0)
-radioleft3 = Radiobutton(FrameTrial3SteppingUp, text="Left",variable= VUp3, value="Left")
-radioleft3.grid(column = 2, row = 1)
-radioright3 = Radiobutton(FrameTrial3SteppingUp, text="Right",variable =VUp3, value="Right")
-radioright3.grid(column = 3, row = 1)
-radioboth3= Radiobutton(FrameTrial3SteppingUp, text="Both",variable =VUp3, value="Noth")
-radioboth3.grid(column = 4, row = 1)
-
-label_file_explorer4SteppingUp = Label(FrameTrial4SteppingUp,  text = "", width = 40, height = 2 ,  fg = "blue" , bg = "ghost white") 
-label_file_explorer4SteppingUp.grid(column = 5, row = 1, columnspan = 1, rowspan = 2) 
-VUp4 = StringVar()
-VUp4.set(0)
-radioleft4 = Radiobutton(FrameTrial4SteppingUp, text="Left",variable= VUp4, value="Left")
-radioleft4.grid(column = 6, row = 1)
-radioright4 = Radiobutton(FrameTrial4SteppingUp, text="Right",variable =VUp4, value="Right")
-radioright4.grid(column = 7, row = 1)
-radioboth4= Radiobutton(FrameTrial4SteppingUp, text="Both",variable =VUp4, value="Noth")
-radioboth4.grid(column = 8, row = 1)
-
-label_file_explorer5SteppingUp = Label(FrameTrial5SteppingUp,  text = "", width = 40, height = 2 ,  fg = "blue" , bg = "ghost white") 
-label_file_explorer5SteppingUp.grid(column = 5, row = 1, columnspan = 1, rowspan = 2) 
-VUp5 = StringVar()
-VUp5.set(0)
-radioleft5 = Radiobutton(FrameTrial5SteppingUp, text="Left",variable= VUp5, value="Left")
-radioleft5.grid(column = 6, row = 1)
-radioright5 = Radiobutton(FrameTrial5SteppingUp, text="Right",variable =VUp5, value="Right")
-radioright5.grid(column = 7, row = 1)
-radioboth5= Radiobutton(FrameTrial5SteppingUp, text="Both",variable =VUp5, value="Noth")
-radioboth5.grid(column = 8, row = 1)
-
-label_file_explorer6SteppingUp = Label(FrameTrial6SteppingUp,  text = "", width = 40, height = 2 ,  fg = "blue" , bg = "ghost white") 
-label_file_explorer6SteppingUp.grid(column = 5, row = 1, columnspan = 1, rowspan = 2) 
-VUp6 = StringVar()
-VUp6.set(0)
-radioleft6 = Radiobutton(FrameTrial6SteppingUp, text="Left",variable= VUp6, value="Left")
-radioleft6.grid(column = 6, row = 1)
-radioright6 = Radiobutton(FrameTrial6SteppingUp, text="Right",variable =VUp6, value="Right")
-radioright6.grid(column = 7, row = 1)
-radioboth6= Radiobutton(FrameTrial6SteppingUp, text="Both",variable =VUp6, value="Noth")
-radioboth6.grid(column = 8, row = 1)
+vSU6=StringVar()
+vSU6.set(0)
+radio_left_6StepUp = Radiobutton(FrameTrial6StepUp, text = "Left", variable = vSU6, value="Left")
+radio_right_6StepUp = Radiobutton(FrameTrial6StepUp, text ="Right", variable = vSU6, value = "Right")
+radio_both_6StepUp = Radiobutton(FrameTrial6StepUp, text ="Both", variable = vSU6, value = "Both")
+radio_left_6StepUp.grid(column = 2,row = 1)
+radio_right_6StepUp.grid(column = 3,row = 1)
+radio_both_6StepUp.grid(column = 4,row = 1)
 
 
-StepUp= {}
-StepUp["Left"] = {}
-StepUp["Right"] = {}
+StepUp = {}
 def browseFilesStepUp(Limb): 
-    #TriallistStepUp.clear()
     sdc.set(1)
-    global TriallistStepUp
+    global TriallistStepUp 
     global filelistStepUp
     TriallistStepUp = []
     filelistStepUp = []
@@ -610,271 +709,145 @@ def browseFilesStepUp(Limb):
         title = "Select a File", 
         filetypes = (("C3D files","*.c3d*"),
                       ("all files", "*.*"))))
-    #creates a tuple therefore must tur into a list
+    #creates a tuple therefore must turn into a list
     filelistStepUp = list(filenames)
     length = len(filelistStepUp)
-    print(filelistStepUp)
-    print (length)
+
     for i in range(length):
+        TriallistStepUp.append("Trial "+str(i+1))
+        StepUp[TriallistStepUp[i]]={}
         filelistStepUp[i]=os.path.basename(filelistStepUp[i])
-        if Limb == "Left":
-            TriallistStepUp.append("Trial "+str(i+1))
-            StepUp["Left"][TriallistStepUp[i]]={}
-            if i == 0:
-                label_file_explorer1StepUp.configure(text="File Opened: "+filelistStepUp[i])
-            if i == 1:
-                label_file_explorer2StepUp.configure(text="File Opened: "+filelistStepUp[i])
-            if i == 2:
-                label_file_explorer3StepUp.configure(text="File Opened: "+filelistStepUp[i])
+        StepUp[TriallistStepUp[i]].update({"Filename": filelistStepUp[i]})
+        if i == 0:
+            label_file_explorer1StepUp.configure(text="File Opened: "+filelistStepUp[i])
+        if i == 1:
+            label_file_explorer2StepUp.configure(text="File Opened: "+filelistStepUp[i])
+        if i == 2:
+            label_file_explorer3StepUp.configure(text="File Opened: "+filelistStepUp[i])
+        if i == 3:
+            label_file_explorer4StepUp.configure(text="File Opened: "+filelistStepUp[i])
+        if i == 4:
+            label_file_explorer5StepUp.configure(text="File Opened: "+filelistStepUp[i])
+        if i == 5:
+            label_file_explorer6StepUp.configure(text="File Opened: "+filelistStepUp[i])
 
-            global filelistStepUpLeft
-            filelistStepUpLeft = filelistStepUp
-        if Limb == "Right":
-            TriallistStepUp.append("Trial "+str(i+1))
-            StepUp["Right"][TriallistStepUp[i]]={}
-            if i == 0:
-                label_file_explorer4StepUp.configure(text="File Opened: "+filelistStepUp[i])
-            if i == 1:
-                label_file_explorer5StepUp.configure(text="File Opened: "+filelistStepUp[i])
-            if i == 2:
-                label_file_explorer6StepUp.configure(text="File Opened: "+filelistStepUp[i])
             
-            global filelistStepUpRight
-            filelistStepUpRight = filelistStepUp
-    print(filelistStepUp)
-    print(length)
-    print(TriallistStepUp)
+            
+button_exploreStepUp = Button(SelectFrameStepUp, text = "Select up to 3 LEFT Trials",  width = 40, bg = "ghost white",
+                          command = lambda : [browseFilesStepUp("Left")])  
+button_exploreStepUp.pack(pady=10)
+vStrath = IntVar()
+vStrath.set(0)
+check_strath = Checkbutton(SelectFrameStepUp, text ="Check if Strathclyde Stepping Trial", variable = vStrath)
+check_strath.pack()
 
-    
-def extractintoDictStepUp(filename, TrialNum, Limb):     
-    reader = btk.btkAcquisitionFileReader()
-    reader.SetFilename(filename) # set a filename to the reader
-    reader.Update()
-    trialacq = reader.GetOutput() # is the btk aquisition object
-    def extractvalues(trial):
-        #extracts al the arrays
-        #can be used for all trials, just needs to be instantiated with the correct trial
-        x = dict();  
-        x["KneeAngle"]= (trial.GetPoint("LKneeAngles")).GetValues()
-        x["KneeForce"]= (trial.GetPoint("LKneeForce")).GetValues()
-        x["KneeMoment"]= (trial.GetPoint("LKneeMoment")).GetValues()
-        x["KneePower"]= (trial.GetPoint("LKneePower")).GetValues() 
-        x["HipAngle"]= ((trial.GetPoint("LHipAngles")).GetValues())
-        x["HipForce"]= (trial.GetPoint("LHipForce")).GetValues()
-        x["HipMoment"]= (trial.GetPoint("LHipMoment")).GetValues()
-        x["HipPower"]= (trial.GetPoint("LHipPower")).GetValues() 
-        x["AnkleAngle"]= (trial.GetPoint("LAnkleAngles")).GetValues()
-        x["AnkleForce"]= (trial.GetPoint("LAnkleForce")).GetValues()
-        x["AnkleMoment"]= (trial.GetPoint("LAnkleMoment")).GetValues()
-        x["AnklePower"]= (trial.GetPoint("LAnklePower")).GetValues()    
-        x["FootProgressAngle"] = (trial.GetPoint("LFootProgressAngles")).GetValues()
-        x["pelvisAngle"] = (trial.GetPoint("LPelvisAngles")).GetValues() 
-        x["COM"] = (trial.GetPoint("CentreOfMass")).GetValues()
-        try:
-            x["GRF"] = (trial.GetPoint("LGroundReactionForce")).GetValues()
-        except:
-            pass
-        try:    
-            x["NGRF"] = (trial.GetPoint("LNormalisedGRF")).GetValues()
-        except:
-            pass
-        return x
-    if Limb == "Left":
-        StepUp["Left"].update({TrialNum:extractvalues(trialacq)})
-        for key in StepUp["Left"][TrialNum].keys():
-            arr = StepUp["Left"][TrialNum][key]
-            StepUp["Left"][TrialNum][key] = {
-                    'x':arr[:,0].tolist(),
-                    'y':arr[:,1].tolist(),
-                    'z':arr[:,2].tolist()
-                    }
-        StepUp["Left"][TrialNum].update({"Filename": filename})
-        
-    if Limb== "Right":
-        StepUp["Right"].update({TrialNum:extractvalues(trialacq)})
-        for key in StepUp["Right"][TrialNum].keys():
-            arr = StepUp["Right"][TrialNum][key]
-            StepUp["Right"][TrialNum][key] = {
-                    'x':arr[:,0].tolist(),
-                    'y':arr[:,1].tolist(),
-                    'z':arr[:,2].tolist()
-                    }
-        StepUp["Right"][TrialNum].update({"Filename": filename})
-
-def extract_all_StepUp_files(Limb):
-    for i in range(len(TriallistStepUp)):
-        extractintoDictStepUp(filelistStepUp[i], TriallistStepUp[i], Limb)
-
-button_exploreStepUpLeft = Button(SelectFrameStepUpLeft, text = "Select up to 3 LEFT Trials",  width = 40, bg = "ghost white",
-                          command = lambda : [browseFilesStepUp("Left"), extract_all_StepUp_files("Left")])  
-button_exploreStepUpLeft.pack(pady=10)
-button_exploreStepUpRight = Button(SelectFrameStepUpRight, text = "Select up to 3 RIGHT Trials",  width = 40, bg = "ghost white",
-                          command = lambda : [browseFilesStepUp("Right"),extract_all_StepUp_files("Right")])  
-button_exploreStepUpRight.pack(pady=10)
-
-button_exploreSteppingUp = Button(SelectFrameSteppingUp, text = "Select up to 6 Trials",  width = 40, bg = "ghost white",
-                          command = lambda : [])  
-button_exploreSteppingUp.pack(pady=10)
 
 """Tab 4: StepDown"""
 
+#Display filenames + whether clean or not    
 InfoFrameStepDown = Frame(tab4,bg = "DodgerBlue3", bd = 6)
-InfoFrameStepDown.grid(column = 1, row = 2, columnspan = 2, sticky = NSEW)
-TrialFrameStepDown= Frame(tab4,bg = "DodgerBlue3")
-TrialFrameStepDown.grid(column = 1, row = 3, columnspan = 2, sticky = NSEW)
+InfoFrameStepDown.pack(fill = BOTH)
+SelectFrameStepDown = Frame(tab4,bg = "DodgerBlue3", bd = 6)
+SelectFrameStepDown.pack(fill = BOTH)
+TrialFrameStepDown1= Frame(tab4,bg = "DodgerBlue3")
+TrialFrameStepDown1.pack(fill = BOTH)   
+TrialFrameStepDown2= Frame(tab4,bg = "DodgerBlue3")
+TrialFrameStepDown2.pack(fill = BOTH)
 
-FrameStepDownLeft = Frame(TrialFrameStepDown, bg = "DeepSkyBlue2")
-FrameStepDownLeft.pack(side = LEFT, expand =True, fill = BOTH)
-FrameStepDownRight = Frame(TrialFrameStepDown, bg = "DeepSkyBlue2")
-FrameStepDownRight.pack(side = RIGHT, expand =True, fill = BOTH)
-
-InfoFrameSteppingDown = Frame(tab4,bg = "DodgerBlue3", bd = 6)
-InfoFrameSteppingDown.grid(column = 1, row = 4, columnspan = 2, sticky = NSEW)
-FrameMainSteppingDown= Frame(tab4,bg = "DodgerBlue3")
-FrameMainSteppingDown.grid(column = 1, row = 6, columnspan = 2)
-
-
-SelectFrameSteppingDown = Frame(FrameMainSteppingDown, bg = "DodgerBlue3", bd = 6)
-SelectFrameSteppingDown.grid(column =1, row = 1, columnspan = 2)
-FrameTrial1SteppingDown = Frame(FrameMainSteppingDown, bg = "ivory3", bd = 6)
-FrameTrial1SteppingDown.grid (column =  1, row  =2)
-FrameTrial2SteppingDown = Frame(FrameMainSteppingDown, bg = "ghost white", bd = 6)
-FrameTrial2SteppingDown.grid (column =  1, row  =3)
-FrameTrial3SteppingDown = Frame(FrameMainSteppingDown, bg = "ivory3", bd = 6)
-FrameTrial3SteppingDown.grid (column =  1, row  =4)
-FrameTrial4SteppingDown = Frame(FrameMainSteppingDown, bg = "ghost white", bd = 6)
-FrameTrial4SteppingDown.grid (column =  2, row  =2)
-FrameTrial5SteppingDown = Frame(FrameMainSteppingDown, bg = "ivory3", bd = 6)
-FrameTrial5SteppingDown.grid (column =  2, row  =3)
-FrameTrial6SteppingDown = Frame(FrameMainSteppingDown, bg = "ghost white", bd = 6)
-FrameTrial6SteppingDown.grid (column =  2, row  =4)
-Framebottom3 = Frame(FrameMainSteppingDown, bg = "DodgerBlue3", bd = 6)
-Framebottom3.grid(row  =5, column = 1, columnspan = 2)
-labelbottom3 = Label(Framebottom3, height = 1,  bg = "DodgerBlue3")
-labelbottom3.pack()
+FrameTrial1StepDown = Frame(TrialFrameStepDown1, bg = "ivory3", bd = 6)
+FrameTrial1StepDown.pack()
+FrameTrial2StepDown = Frame(TrialFrameStepDown1, bg = "ghost white", bd = 6)
+FrameTrial2StepDown.pack()
+FrameTrial3StepDown = Frame(TrialFrameStepDown1, bg = "ivory3", bd = 6)
+FrameTrial3StepDown.pack()
+FrameTrial4StepDown = Frame(TrialFrameStepDown1, bg = "ghost white", bd = 6)
+FrameTrial4StepDown.pack()
+FrameTrial5StepDown = Frame(TrialFrameStepDown1, bg = "ivory3", bd = 6)
+FrameTrial5StepDown.pack()
+FrameTrial6StepDown = Frame(TrialFrameStepDown1, bg = "ghost white", bd = 6)
+FrameTrial6StepDown.pack()
+Framebottom = Frame(TrialFrameStepDown2  , bg = "DodgerBlue3", bd = 6)
+Framebottom.pack()
 
 
 labelStepDown = Label(InfoFrameStepDown, text = "StepDown")
 labelStepDown["font"] = myFont
 labelStepDown.pack()
 
-#Display filenames + whether clean or not    
-SelectFrameStepDownLeft = Frame(FrameStepDownLeft, bg = "DodgerBlue3", bd = 6)
-SelectFrameStepDownLeft.pack(expand =True, fill = BOTH)
-FrameTrial1StepDown = Frame(FrameStepDownLeft, bg = "ivory3", bd = 6)
-FrameTrial1StepDown.pack()
-FrameTrial2StepDown = Frame(FrameStepDownLeft, bg = "ghost white", bd = 6)
-FrameTrial2StepDown.pack()
-FrameTrial3StepDown = Frame(FrameStepDownLeft, bg = "ivory3", bd = 6)
-FrameTrial3StepDown.pack()
+labelbottom = Label(Framebottom, height = 1,  bg = "DodgerBlue3")
+labelbottom.pack()
 
-
-SelectFrameStepDownRight = Frame(FrameStepDownRight, bg = "DodgerBlue3", bd = 6)
-SelectFrameStepDownRight.pack(expand =True, fill = BOTH)
-FrameTrial4StepDown = Frame(FrameStepDownRight, bg = "ghost white", bd = 6)
-FrameTrial4StepDown.pack()
-FrameTrial5StepDown = Frame(FrameStepDownRight, bg = "ivory3", bd = 6)
-FrameTrial5StepDown.pack()
-FrameTrial6StepDown = Frame(FrameStepDownRight, bg = "ghost white", bd = 6)
-FrameTrial6StepDown.pack()
-
-label_file_explorer1StepDown = Label(FrameTrial1StepDown,  text = "", width = 60, height = 2 ,  fg = "blue" , bg = "ghost white") 
+label_file_explorer1StepDown = Label(FrameTrial1StepDown,  text = "", width = 50, height = 3 ,  fg = "blue" , bg = "ghost white") 
 label_file_explorer1StepDown.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
+vSD1=StringVar()
+vSD1.set(0)
+radio_left_1StepDown = Radiobutton(FrameTrial1StepDown, text = "Left", variable = vSD1, value="Left")
+radio_right_1StepDown = Radiobutton(FrameTrial1StepDown, text ="Right", variable = vSD1, value = "Right")
+radio_both_1StepDown = Radiobutton(FrameTrial1StepDown, text ="Both", variable = vSD1, value = "Both")
+radio_left_1StepDown.grid(column = 2,row = 1)
+radio_right_1StepDown.grid(column = 3,row = 1)
+radio_both_1StepDown.grid(column = 4,row = 1)
 
-label_file_explorer2StepDown = Label(FrameTrial2StepDown,  text = "", width = 60, height = 2 ,  fg = "blue" , bg = "ghost white") 
+label_file_explorer2StepDown = Label(FrameTrial2StepDown,  text = "", width = 50, height = 3,  fg = "blue", bg = "ivory2") 
 label_file_explorer2StepDown.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
+vSD2=StringVar()
+vSD2.set(0)
+radio_left_2StepDown = Radiobutton(FrameTrial2StepDown, text = "Left", variable = vSD2, value="Left")
+radio_right_2StepDown = Radiobutton(FrameTrial2StepDown, text ="Right", variable = vSD2, value = "Right")
+radio_both_2StepDown = Radiobutton(FrameTrial2StepDown, text ="Both", variable = vSD2, value = "Both")
+radio_left_2StepDown.grid(column = 2,row = 1)
+radio_right_2StepDown.grid(column = 3,row = 1)
+radio_both_2StepDown.grid(column = 4,row = 1)
 
-label_file_explorer3StepDown = Label(FrameTrial3StepDown,  text = "", width = 60, height = 2 ,  fg = "blue" , bg = "ghost white") 
+label_file_explorer3StepDown = Label(FrameTrial3StepDown,  text = "", width = 50, height = 3,  fg = "blue", bg = "ghost white") 
 label_file_explorer3StepDown.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
+vSD3=StringVar()
+vSD3.set(0)
+radio_left_3StepDown = Radiobutton(FrameTrial3StepDown, text = "Left", variable = vSD3, value="Left")
+radio_right_3StepDown = Radiobutton(FrameTrial3StepDown, text ="Right", variable = vSD3, value = "Right")
+radio_both_3StepDown = Radiobutton(FrameTrial3StepDown, text ="Both", variable = vSD3, value = "Both")
+radio_left_3StepDown.grid(column = 2,row = 1)
+radio_right_3StepDown.grid(column = 3,row = 1)
+radio_both_3StepDown.grid(column = 4,row = 1)
 
-label_file_explorer4StepDown = Label(FrameTrial4StepDown,  text = "", width = 60, height = 2 ,  fg = "blue" , bg = "ghost white") 
+label_file_explorer4StepDown = Label(FrameTrial4StepDown,  text = "", width = 50, height = 3,  fg = "blue", bg = "ivory2") 
 label_file_explorer4StepDown.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
+vSD4=StringVar()
+vSD4.set(0)
+radio_left_4StepDown = Radiobutton(FrameTrial4StepDown, text = "Left", variable = vSD4, value="Left")
+radio_right_4StepDown = Radiobutton(FrameTrial4StepDown, text ="Right", variable = vSD4, value = "Right")
+radio_both_4StepDown = Radiobutton(FrameTrial4StepDown, text ="Both", variable = vSD4, value = "Both")
+radio_left_4StepDown.grid(column = 2,row = 1)
+radio_right_4StepDown.grid(column = 3,row = 1)
+radio_both_4StepDown.grid(column = 4,row = 1)
 
-label_file_explorer5StepDown = Label(FrameTrial5StepDown,  text = "", width = 60, height = 2 ,  fg = "blue" , bg = "ghost white") 
+label_file_explorer5StepDown = Label(FrameTrial5StepDown,  text = "", width = 50, height = 3,  fg = "blue", bg = "ghost white") 
 label_file_explorer5StepDown.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
+vSD5=StringVar()
+vSD5.set(0)
+radio_left_5StepDown = Radiobutton(FrameTrial5StepDown, text = "Left", variable = vSD5, value="Left")
+radio_right_5StepDown = Radiobutton(FrameTrial5StepDown, text ="Right", variable = vSD5, value = "Right")
+radio_both_5StepDown = Radiobutton(FrameTrial5StepDown, text ="Both", variable = vSD5, value = "Both")
+radio_left_5StepDown.grid(column = 2,row = 1)
+radio_right_5StepDown.grid(column = 3,row = 1)
+radio_both_5StepDown.grid(column = 4,row = 1)
 
-label_file_explorer6StepDown = Label(FrameTrial6StepDown,  text = "", width = 60, height = 2 ,  fg = "blue" , bg = "ghost white") 
+label_file_explorer6StepDown = Label(FrameTrial6StepDown,  text = "", width = 50, height = 3,  fg = "blue", bg = "ivory2") 
 label_file_explorer6StepDown.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
-
-"""STRAHTCLYDE STYLE STEPPING"""
-
-labelSteppingDown = Label(InfoFrameSteppingDown, text = "OR Select Strathclyde Stepping Trials")
-labelSteppingDown.pack()
-
-label_file_explorer1SteppingDown = Label(FrameTrial1SteppingDown,  text = "", width = 40, height = 2 ,  fg = "blue" , bg = "ghost white") 
-label_file_explorer1SteppingDown.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
-vDown1 = StringVar()
-vDown1.set(0)
-radioleft1 = Radiobutton(FrameTrial1SteppingDown, text="Left",variable= vDown1, value="Left")
-radioleft1.grid(column = 2, row = 1)
-radioright1 = Radiobutton(FrameTrial1SteppingDown, text="Right",variable =vDown1, value="Right")
-radioright1.grid(column = 3, row = 1)
-radioboth1= Radiobutton(FrameTrial1SteppingDown, text="Both",variable =vDown1, value="Noth")
-radioboth1.grid(column = 4, row = 1)
-
-label_file_explorer2SteppingDown = Label(FrameTrial2SteppingDown,  text = "", width = 40, height = 2 ,  fg = "blue" , bg = "ghost white") 
-label_file_explorer2SteppingDown.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
-vDown2 = StringVar()
-vDown2.set(0)
-radioleft2 = Radiobutton(FrameTrial2SteppingDown, text="Left",variable= vDown2, value="Left")
-radioleft2.grid(column = 2, row = 1)
-radioright2 = Radiobutton(FrameTrial2SteppingDown, text="Right",variable =vDown2, value="Right")
-radioright2.grid(column = 3, row = 1)
-radioboth2= Radiobutton(FrameTrial2SteppingDown, text="Both",variable =vDown2, value="Noth")
-radioboth2.grid(column = 4, row = 1)
-
-label_file_explorer3SteppingDown = Label(FrameTrial3SteppingDown,  text = "", width = 40, height = 2 ,  fg = "blue" , bg = "ghost white") 
-label_file_explorer3SteppingDown.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
-vDown3 = StringVar()
-vDown3.set(0)
-radioleft3 = Radiobutton(FrameTrial3SteppingDown, text="Left",variable= vDown3, value="Left")
-radioleft3.grid(column = 2, row = 1)
-radioright3 = Radiobutton(FrameTrial3SteppingDown, text="Right",variable =vDown3, value="Right")
-radioright3.grid(column = 3, row = 1)
-radioboth3= Radiobutton(FrameTrial3SteppingDown, text="Both",variable =vDown3, value="Noth")
-radioboth3.grid(column = 4, row = 1)
-
-label_file_explorer4SteppingDown = Label(FrameTrial4SteppingDown,  text = "", width = 40, height = 2 ,  fg = "blue" , bg = "ghost white") 
-label_file_explorer4SteppingDown.grid(column = 5, row = 1, columnspan = 1, rowspan = 2) 
-vDown4 = StringVar()
-vDown4.set(0)
-radioleft4 = Radiobutton(FrameTrial4SteppingDown, text="Left",variable= vDown4, value="Left")
-radioleft4.grid(column = 6, row = 1)
-radioright4 = Radiobutton(FrameTrial4SteppingDown, text="Right",variable =vDown4, value="Right")
-radioright4.grid(column = 7, row = 1)
-radioboth4= Radiobutton(FrameTrial4SteppingDown, text="Both",variable =vDown4, value="Noth")
-radioboth4.grid(column = 8, row = 1)
-
-label_file_explorer5SteppingDown = Label(FrameTrial5SteppingDown,  text = "", width = 40, height = 2 ,  fg = "blue" , bg = "ghost white") 
-label_file_explorer5SteppingDown.grid(column = 5, row = 1, columnspan = 1, rowspan = 2) 
-vDown5 = StringVar()
-vDown5.set(0)
-radioleft5 = Radiobutton(FrameTrial5SteppingDown, text="Left",variable= vDown5, value="Left")
-radioleft5.grid(column = 6, row = 1)
-radioright5 = Radiobutton(FrameTrial5SteppingDown, text="Right",variable =vDown5, value="Right")
-radioright5.grid(column = 7, row = 1)
-radioboth5= Radiobutton(FrameTrial5SteppingDown, text="Both",variable =vDown5, value="Noth")
-radioboth5.grid(column = 8, row = 1)
-
-label_file_explorer6SteppingDown = Label(FrameTrial6SteppingDown,  text = "", width = 40, height = 2 ,  fg = "blue" , bg = "ghost white") 
-label_file_explorer6SteppingDown.grid(column = 5, row = 1, columnspan = 1, rowspan = 2) 
-vDown6 = StringVar()
-vDown6.set(0)
-radioleft6 = Radiobutton(FrameTrial6SteppingDown, text="Left",variable= vDown6, value="Left")
-radioleft6.grid(column = 6, row = 1)
-radioright6 = Radiobutton(FrameTrial6SteppingDown, text="Right",variable =vDown6, value="Right")
-radioright6.grid(column = 7, row = 1)
-radioboth6= Radiobutton(FrameTrial6SteppingDown, text="Both",variable =vDown6, value="Noth")
-radioboth6.grid(column = 8, row = 1)
+vSD6=StringVar()
+vSD6.set(0)
+radio_left_6StepDown = Radiobutton(FrameTrial6StepDown, text = "Left", variable = vSD6, value="Left")
+radio_right_6StepDown = Radiobutton(FrameTrial6StepDown, text ="Right", variable = vSD6, value = "Right")
+radio_both_6StepDown = Radiobutton(FrameTrial6StepDown, text ="Both", variable = vSD6, value = "Both")
+radio_left_6StepDown.grid(column = 2,row = 1)
+radio_right_6StepDown.grid(column = 3,row = 1)
+radio_both_6StepDown.grid(column = 4,row = 1)
 
 
-StepDown= {}
-StepDown["Left"] = {}
-StepDown["Right"] = {}
+StepDown = {}
 def browseFilesStepDown(Limb): 
-    #TriallistStepDown.clear()
     sdc.set(1)
-    global TriallistStepDown
+    global TriallistStepDown 
     global filelistStepDown
     TriallistStepDown = []
     filelistStepDown = []
@@ -883,48 +856,466 @@ def browseFilesStepDown(Limb):
         title = "Select a File", 
         filetypes = (("C3D files","*.c3d*"),
                       ("all files", "*.*"))))
-    #creates a tuple therefore must tur into a list
+    #creates a tuple therefore must turn into a list
     filelistStepDown = list(filenames)
     length = len(filelistStepDown)
-    print(filelistStepDown)
-    print (length)
+
     for i in range(length):
+        TriallistStepDown.append("Trial "+str(i+1))
+        StepDown[TriallistStepDown[i]]={}
         filelistStepDown[i]=os.path.basename(filelistStepDown[i])
-        if Limb == "Left":
-            TriallistStepDown.append("Trial "+str(i+1))
-            StepDown["Left"][TriallistStepDown[i]]={}
-            if i == 0:
-                label_file_explorer1StepDown.configure(text="File Opened: "+filelistStepDown[i])
-            if i == 1:
-                label_file_explorer2StepDown.configure(text="File Opened: "+filelistStepDown[i])
-            if i == 2:
-                label_file_explorer3StepDown.configure(text="File Opened: "+filelistStepDown[i])
+        StepDown[TriallistStepDown[i]].update({"Filename": filelistStepDown[i]})
+        if i == 0:
+            label_file_explorer1StepDown.configure(text="File Opened: "+filelistStepDown[i])
+        if i == 1:
+            label_file_explorer2StepDown.configure(text="File Opened: "+filelistStepDown[i])
+        if i == 2:
+            label_file_explorer3StepDown.configure(text="File Opened: "+filelistStepDown[i])
+        if i == 3:
+            label_file_explorer4StepDown.configure(text="File Opened: "+filelistStepDown[i])
+        if i == 4:
+            label_file_explorer5StepDown.configure(text="File Opened: "+filelistStepDown[i])
+        if i == 5:
+            label_file_explorer6StepDown.configure(text="File Opened: "+filelistStepDown[i])
 
-            global filelistStepDownLeft
-            filelistStepDownLeft = filelistStepDown
-        if Limb == "Right":
-            TriallistStepDown.append("Trial "+str(i+1))
-            StepDown["Right"][TriallistStepDown[i]]={}
-            if i == 0:
-                label_file_explorer4StepDown.configure(text="File Opened: "+filelistStepDown[i])
-            if i == 1:
-                label_file_explorer5StepDown.configure(text="File Opened: "+filelistStepDown[i])
-            if i == 2:
-                label_file_explorer6StepDown.configure(text="File Opened: "+filelistStepDown[i])
             
-            global filelistStepDownRight
-            filelistStepDownRight = filelistStepDown
-    print(filelistStepDown)
-    print(length)
-    print(TriallistStepDown)
+            
+button_exploreStepDown = Button(SelectFrameStepDown, text = "Select up to 3 LEFT Trials",  width = 40, bg = "ghost white",
+                          command = lambda : [browseFilesStepDown("Left")])  
+button_exploreStepDown.pack(pady=10)
+vStrath2 = IntVar()
+vStrath2.set(0)
+check_strath2 = Checkbutton(SelectFrameStepDown, text ="Check if Strathclyde Stepping Trial", variable = vStrath2)
+check_strath2.pack()
 
-    
-def extractintoDictStepDown(filename, TrialNum, Limb):     
+
+
+
+
+
+
+
+
+def close_window():
+    root.destroy()
+#FRAME 3: CANCEL/ACCEPT
+buttoncancel = Button(FrameClose, text = "Cancel", command = lambda: close_window())
+buttoncancel.pack(side = RIGHT, anchor = CENTER, padx = 10)
+buttonaccept = Button(FrameClose, text = "Accept", command = lambda: [close_window()])
+buttonaccept.pack(side = RIGHT, anchor = CENTER, padx = 10, pady = 20)
+root.mainloop()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""SQL GAIT"""
+
+
+
+ID = str(123545)
+dom_limb = "left"
+aff_limb = "left"
+tpe = "con"
+mon = "4"
+sex = "f"
+
+def create_Mean_Gait_Table():
+        c.execute("""CREATE TABLE IF NOT EXISTS Mean_Gait_Table
+              (ID TEXT, Dominant_Limb TEXT, Patient_Type TEXT, 
+               Sex TEXT, Month TEXT, Affected_Limb TEXT)""")            
+def columns_Mean_Gait_Table():
+     for LR in ["Left", "Right"]:
+         for axis in ["x", "y", "z"]:
+             c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_Knee_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_Knee_Moment_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_Knee_Force_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_Knee_Power_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_Hip_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_Hip_Moment_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_Hip_Force_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_Hip_Power_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_Ankle_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_Ankle_Moment_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_Ankle_Force_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_Ankle_Power_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_Foot_Progression_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_GRF_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_NGRF_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_pelvis_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_COM_{axis} TEXT""")   
+
+def enter_Mean_Gait_Table (limb_avl, limb_avr):
+    c.execute("""INSERT INTO Mean_Gait_Table 
+             (ID, Dominant_Limb, Patient_Type, 
+              Sex, Month, Affected_Limb)VALUES (?,?,?,?,?,?)""", 
+             (ID, dom_limb, tpe, sex, mon, aff_limb))
+    for axis in ["x", "y", "z"]:
+        c.execute(f"""UPDATE Mean_Gait_Table
+                  SET 
+                  Left_Knee_Angle_{axis} = ?,
+                  Left_Knee_Moment_{axis} = ?,
+                  Left_Knee_Force_{axis} = ?,
+                  Left_Knee_Power_{axis} = ?,
+                  Left_Hip_Angle_{axis} = ?,
+                  Left_Hip_Moment_{axis} = ?,
+                  Left_Hip_Force_{axis} = ?,
+                  Left_Hip_Power_{axis} = ?,
+                  Left_Ankle_Angle_{axis} = ?,
+                  Left_Ankle_Moment_{axis} = ?,
+                  Left_Ankle_Force_{axis} = ?,
+                  Left_Ankle_Power_{axis} =  ?,
+                  Left_Foot_Progression_Angle_{axis} = ?,
+                  Left_GRF_{axis} =  ?,
+                  Left_NGRF_{axis} =  ?,
+                  Left_pelvis_Angle_{axis} =  ?,
+                  Left_COM_{axis} =  ?,
+                  Right_Knee_Angle_{axis} = ?,
+                  Right_Knee_Moment_{axis} = ?,
+                  Right_Knee_Force_{axis} = ?,
+                  Right_Knee_Power_{axis} = ?,
+                  Right_Hip_Angle_{axis} = ?,
+                  Right_Hip_Moment_{axis} = ?,
+                  Right_Hip_Force_{axis} = ?,
+                  Right_Hip_Power_{axis} = ?,
+                  Right_Ankle_Angle_{axis} = ?,
+                  Right_Ankle_Moment_{axis} = ?,
+                  Right_Ankle_Force_{axis} = ?,
+                  Right_Ankle_Power_{axis} =  ?,
+                  Right_Foot_Progression_Angle_{axis} = ?,
+                  Right_GRF_{axis} =  ?,
+                  Right_NGRF_{axis} =  ?,
+                  Right_pelvis_Angle_{axis} =  ?,
+                  Right_COM_{axis} =  ? 
+                  WHERE ID = ?
+                  """,(
+                  (str(limb_avl["KneeAngle"][axis])[1:-1]),
+                  (str(limb_avl["KneeMoment"][axis])[1:-1]),
+                  (str(limb_avl["KneeForce"][axis])[1:-1]),
+                  (str(limb_avl["KneePower"][axis])[1:-1]),
+                  (str(limb_avl["HipAngle"][axis])[1:-1]),
+                  (str(limb_avl["HipMoment"][axis])[1:-1]),
+                  (str(limb_avl["HipForce"][axis])[1:-1]),
+                  (str(limb_avl["HipPower"][axis])[1:-1]),
+                  (str(limb_avl["AnkleAngle"][axis])[1:-1]),
+                  (str(limb_avl["AnkleMoment"][axis])[1:-1]),
+                  (str(limb_avl["AnkleForce"][axis])[1:-1]),
+                  (str(limb_avl["AnklePower"][axis])[1:-1]),
+                  (str(limb_avl["FootProgressAngle"][axis])[1:-1]),
+                  (str(limb_avl["GRF"][axis])[1:-1]),
+                  (str(limb_avl["NGRF"][axis])[1:-1]),
+                  (str(limb_avl["pelvisAngle"][axis])[1:-1]),
+                  (str(limb_avl["COM"][axis])[1:-1]),
+                  (str(limb_avr["KneeAngle"][axis])[1:-1]),
+                  (str(limb_avr["KneeMoment"][axis])[1:-1]),
+                  (str(limb_avr["KneeForce"][axis])[1:-1]),
+                  (str(limb_avr["KneePower"][axis])[1:-1]),
+                  (str(limb_avr["HipAngle"][axis])[1:-1]),
+                  (str(limb_avr["HipMoment"][axis])[1:-1]),
+                  (str(limb_avr["HipForce"][axis])[1:-1]),
+                  (str(limb_avr["HipPower"][axis])[1:-1]),
+                  (str(limb_avr["AnkleAngle"][axis])[1:-1]),
+                  (str(limb_avr["AnkleMoment"][axis])[1:-1]),
+                  (str(limb_avr["AnkleForce"][axis])[1:-1]),
+                  (str(limb_avr["AnklePower"][axis])[1:-1]),
+                  (str(limb_avr["FootProgressAngle"][axis])[1:-1]),
+                  (str(limb_avr["GRF"][axis])[1:-1]),
+                  (str(limb_avr["NGRF"][axis])[1:-1]),
+                  (str(limb_avr["pelvisAngle"][axis])[1:-1]),
+                  (str(limb_avr["COM"][axis])[1:-1]),
+                  ID
+                  ))
+
+
+create_Mean_Gait_Table()
+columns_Mean_Gait_Table()
+enter_Mean_Gait_Table(Gait["Left Average"],Gait["Right Average"])
+
+
+def create_Gait_Max_Min_Table():
+        c.execute("""CREATE TABLE IF NOT EXISTS Gait_Max_Min_Table
+              (ID TEXT, Dominant_Limb TEXT, Patient_Type TEXT, 
+               Sex TEXT, Month TEXT, Affected_Limb TEXT)""")            
+def columns_Gait_Max_Min_Table():
+    for phase in ["stance", "swing"]:
+        for limb in ["Left", "Right"]:
+            for axis in ["x", "y", "z"]:
+                for function in ["max", "min"]:
+                   c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_Knee_Angle_{axis}_{phase} REAL""")
+                   c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_Knee_Moment_{axis}_{phase} REAL""")
+                   c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_Knee_Force_{axis}_{phase} REAL""")
+                   c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_Knee_Power_{axis}_{phase} REAL""")
+                   c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_Hip_Angle_{axis}_{phase} REAL""")
+                   c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_Hip_Moment_{axis}_{phase} REAL""")
+                   c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_Hip_Force_{axis}_{phase} REAL""")
+                   c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_Hip_Power_{axis}_{phase} REAL""")
+                   c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Angle_{axis}_{phase} REAL""")
+                   c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Moment_{axis}_{phase} REAL""")
+                   c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Force_{axis}_{phase} REAL""")
+                   c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Power_{axis}_{phase} REAL""")
+                   c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_Foot_Progression_Angle_{axis}_{phase} REAL""")
+                   c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_GRF_{axis}_{phase} REAL""")
+                   c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_NGRF_{axis}_{phase} REAL""")
+                   c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_pelvis_Angle_{axis}_{phase} REAL""")
+                   c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_COM_{axis}_{phase} REAL""")   
+
+def enter_Gait_extrema ():  
+    c.execute("""INSERT INTO Gait_Max_Min_Table 
+              (ID, Dominant_Limb, Patient_Type, 
+              Sex, Month, Affected_Limb)VALUES (?,?,?,?,?,?)""", 
+             (ID, dom_limb, tpe, sex, mon, aff_limb))
+    for phase in ["stance", "swing"]:
+#does not include a row for inclmplete cycles                      
+        if phase == "stance":
+            startl = 0
+            endl = Gait["Left Average"]["FootOff"]
+            startr = 0
+            endr = Gait["Right Average"]["FootOff"]
+        if phase == "swing":
+            startl = Gait["Left Average"]["FootOff"]
+            endl = -1
+            startr = Gait["Right Average"]["FootOff"]
+            endr = -1
+        for axis in ["x", "y", "z"]:
+            for function in ["max", "min"]:
+                if function=="max":
+                    fun = max
+                else:
+                    fun = min
+                c.execute(f"""UPDATE Gait_Max_Min_Table
+                          SET 
+                          {function}_Left_Knee_Angle_{axis}_{phase} = ?,
+                          {function}_Left_Knee_Moment_{axis}_{phase} = ?,
+                          {function}_Left_Knee_Force_{axis}_{phase} = ?,
+                          {function}_Left_Knee_Power_{axis}_{phase} = ?,
+                          {function}_Left_Hip_Angle_{axis}_{phase} = ?,
+                          {function}_Left_Hip_Moment_{axis}_{phase} = ?,
+                          {function}_Left_Hip_Force_{axis}_{phase} = ?,
+                          {function}_Left_Hip_Power_{axis}_{phase} = ?,
+                          {function}_Left_Ankle_Angle_{axis}_{phase} = ?,
+                          {function}_Left_Ankle_Moment_{axis}_{phase} = ?,
+                          {function}_Left_Ankle_Force_{axis}_{phase} = ?,
+                          {function}_Left_Ankle_Power_{axis}_{phase} =  ?,
+                          {function}_Left_Foot_Progression_Angle_{axis}_{phase} = ?,
+                          {function}_Left_GRF_{axis}_{phase} =  ?,
+                          {function}_Left_NGRF_{axis}_{phase} =  ?,
+                          {function}_Left_pelvis_Angle_{axis}_{phase} =  ?,
+                          {function}_Left_COM_{axis}_{phase} =  ?,
+                          {function}_Right_Knee_Angle_{axis}_{phase} = ?,
+                          {function}_Right_Knee_Moment_{axis}_{phase} = ?,
+                          {function}_Right_Knee_Force_{axis}_{phase} = ?,
+                          {function}_Right_Knee_Power_{axis}_{phase} = ?,
+                          {function}_Right_Hip_Angle_{axis}_{phase} = ?,
+                          {function}_Right_Hip_Moment_{axis}_{phase} = ?,
+                          {function}_Right_Hip_Force_{axis}_{phase} = ?,
+                          {function}_Right_Hip_Power_{axis}_{phase} = ?,
+                          {function}_Right_Ankle_Angle_{axis}_{phase} = ?,
+                          {function}_Right_Ankle_Moment_{axis}_{phase} = ?,
+                          {function}_Right_Ankle_Force_{axis}_{phase} = ?,
+                          {function}_Right_Ankle_Power_{axis}_{phase} =  ?,
+                          {function}_Right_Foot_Progression_Angle_{axis}_{phase} = ?,
+                          {function}_Right_GRF_{axis}_{phase} =  ?,
+                          {function}_Right_NGRF_{axis}_{phase} =  ?,
+                          {function}_Right_pelvis_Angle_{axis}_{phase} =  ?,
+                          {function}_Right_COM_{axis}_{phase} =  ?
+                          WHERE ID = ?
+                          """,(
+                          (fun((Gait["Left Average"]["KneeAngle"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["KneeMoment"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["KneeForce"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["KneePower"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["HipAngle"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["HipMoment"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["HipForce"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["HipPower"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["AnkleAngle"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["AnkleMoment"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["AnkleForce"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["AnklePower"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["FootProgressAngle"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["GRF"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["NGRF"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["pelvisAngle"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["COM"][axis])[startl:endl])),
+                          (fun((Gait["Right Average"]["KneeAngle"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["KneeMoment"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["KneeForce"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["KneePower"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["HipAngle"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["HipMoment"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["HipForce"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["HipPower"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["AnkleAngle"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["AnkleMoment"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["AnkleForce"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["AnklePower"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["FootProgressAngle"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["GRF"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["NGRF"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["pelvisAngle"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["COM"][axis])[startr:endr])),
+                          ID
+                          ))
+
+create_Gait_Max_Min_Table()
+columns_Gait_Max_Min_Table()
+enter_Gait_extrema()
+
+              
+def create_Gait_Table():
+        c.execute("""CREATE TABLE IF NOT EXISTS Gait_Table
+              (ID TEXT, Dominant_Limb TEXT, Patient_Type TEXT, 
+              Sex TEXT, Month TEXT, Affected_Limb TEXT,
+              Filename TEXT, Complete_Left_Cycle TEXT, Complete_Right_Cycle TEXT,
+              Left_Footstrike_Index TEXT, Left_FootOff_Index TEXT,
+              Right_Footstrike_Index TEXT, Right_FootOff_Index TEXT)""")            
+def columns_Gait_Table():
+     for LR in ["Left", "Right"]:
+         for axis in ["x", "y", "z"]:
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Knee_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Knee_Moment_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Knee_Force_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Knee_Power_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Hip_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Hip_Moment_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Hip_Force_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Hip_Power_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Ankle_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Ankle_Moment_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Ankle_Force_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Ankle_Power_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Foot_Progression_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_GRF_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_NGRF_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_pelvis_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_COM_{axis} TEXT""")             
+
+
+def enter_Gait_Table (numTrials):
+    for TrialNum in numTrials:
+        filename = Gait[TrialNum]["Filename"] 
+        if len(Gait[TrialNum]["lfootstrikeFrame"])>1:
+            cleanleft = "Yes"
+        else:
+            cleanleft = "No"
+        if len(Gait[TrialNum]["rfootstrikeFrame"])>1:
+            cleanright = "Yes"
+        else:
+            cleanright = "No"
+
+        c.execute("""INSERT INTO Gait_Table 
+                  (ID, Dominant_Limb, Patient_Type, 
+                  Sex, Month, Affected_Limb, Filename, 
+                  Complete_left_Cycle, Complete_Right_Cycle, 
+                  Left_Footstrike_Index, Left_FootOff_Index, 
+                  Right_Footstrike_Index, Right_FootOff_Index) 
+                  VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""", 
+                  (ID, dom_limb, tpe, sex, mon, aff_limb, 
+                   filename, cleanleft, cleanright,
+                  (str(Gait[TrialNum]["lfootstrikeFrame"])),
+                  (str(Gait[TrialNum]["lfootoffFrame"])),
+                  (str(Gait[TrialNum]["rfootstrikeFrame"])),
+                  (str(Gait[TrialNum]["rfootoffFrame"]))))
+        for LR in ["Left", "Right"]:
+            for axis in ["x", "y", "z"]:
+                c.execute(f"""UPDATE Gait_Table
+                          SET 
+                          {LR}_Knee_Angle_{axis} = ?,
+                          {LR}_Hip_Angle_{axis} = ?,
+                          {LR}_Ankle_Angle_{axis} = ?,
+                          {LR}_Foot_Progression_Angle_{axis} = ?,
+                          {LR}_pelvis_Angle_{axis} =  ?,
+                          {LR}_COM_{axis} =  ?
+                          WHERE Filename = ?
+                          """,(
+                          (str(Gait[TrialNum][LR]["KneeAngle"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["HipAngle"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["AnkleAngle"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["FootProgressAngle"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["pelvisAngle"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["COM"][axis])[1:-1]),
+                          filename
+                          ))
+                try:
+                    c.execute(f"""UPDATE Gait_Table
+                          SET 
+                          {LR}_Knee_Moment_{axis} = ?,
+                          {LR}_Knee_Force_{axis} = ?,
+                          {LR}_Knee_Power_{axis} = ?,
+                          {LR}_Hip_Moment_{axis} = ?,
+                          {LR}_Hip_Force_{axis} = ?,
+                          {LR}_Hip_Power_{axis} = ?,
+                          {LR}_Ankle_Moment_{axis} = ?,
+                          {LR}_Ankle_Force_{axis} = ?,
+                          {LR}_Ankle_Power_{axis} =  ?,
+                          {LR}_GRF_{axis} =  ?,
+                          {LR}_NGRF_{axis} =  ?,
+                          WHERE Filename = ?
+                          """,(
+                          (str(Gait[TrialNum][LR]["KneeMoment"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["KneeForce"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["KneePower"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["HipMoment"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["HipForce"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["HipPower"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["AnkleMoment"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["AnkleForce"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["AnklePower"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["GRF"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["NGRF"][axis])[1:-1]),
+                          filename
+                          ))
+                except:
+                    pass
+
+create_Gait_Table()
+columns_Gait_Table()
+enter_Gait_Table(TriallistGait)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""STEP UP SQL"""
+def extractintoDictStepUp(filename, TrialNum, Limb):     
     reader = btk.btkAcquisitionFileReader()
     reader.SetFilename(filename) # set a filename to the reader
     reader.Update()
     trialacq = reader.GetOutput() # is the btk aquisition object
-    def extractvalues(trial):
+    def extractvaluesl(trial):
         #extracts al the arrays
         #can be used for all trials, just needs to be instantiated with the correct trial
         x = dict();  
@@ -943,54 +1334,623 @@ def extractintoDictStepDown(filename, TrialNum, Limb):
         x["FootProgressAngle"] = (trial.GetPoint("LFootProgressAngles")).GetValues()
         x["pelvisAngle"] = (trial.GetPoint("LPelvisAngles")).GetValues() 
         x["COM"] = (trial.GetPoint("CentreOfMass")).GetValues()
-        try:
-            x["GRF"] = (trial.GetPoint("LGroundReactionForce")).GetValues()
-        except:
-            pass
-        try:    
-            x["NGRF"] = (trial.GetPoint("LNormalisedGRF")).GetValues()
-        except:
-            pass
         return x
+    def extractvaluesr(trial):
+        #extracts al the arrays
+        #can be used for all trials, just needs to be instantiated with the correct trial
+        x = dict();  
+        x["KneeAngle"]= (trial.GetPoint("RKneeAngles")).GetValues()
+        x["KneeForce"]= (trial.GetPoint("RKneeForce")).GetValues()
+        x["KneeMoment"]= (trial.GetPoint("RKneeMoment")).GetValues()
+        x["KneePower"]= (trial.GetPoint("RKneePower")).GetValues() 
+        x["HipAngle"]= ((trial.GetPoint("RHipAngles")).GetValues())
+        x["HipForce"]= (trial.GetPoint("RHipForce")).GetValues()
+        x["HipMoment"]= (trial.GetPoint("RHipMoment")).GetValues()
+        x["HipPower"]= (trial.GetPoint("RHipPower")).GetValues() 
+        x["AnkleAngle"]= (trial.GetPoint("RAnkleAngles")).GetValues()
+        x["AnkleForce"]= (trial.GetPoint("RAnkleForce")).GetValues()
+        x["AnkleMoment"]= (trial.GetPoint("RAnkleMoment")).GetValues()
+        x["AnklePower"]= (trial.GetPoint("RAnklePower")).GetValues()    
+        x["FootProgressAngle"] = (trial.GetPoint("RFootProgressAngles")).GetValues()
+        x["pelvisAngle"] = (trial.GetPoint("RPelvisAngles")).GetValues() 
+        x["COM"] = (trial.GetPoint("CentreOfMass")).GetValues()
+        return x
+    y = {}
+    
+    
     if Limb == "Left":
-        StepDown["Left"].update({TrialNum:extractvalues(trialacq)})
-        for key in StepDown["Left"][TrialNum].keys():
-            arr = StepDown["Left"][TrialNum][key]
-            StepDown["Left"][TrialNum][key] = {
+        y["Left"] = {}
+        y["Left"].update(extractvaluesl(trialacq))
+        for key in y["Left"].keys():
+            arr = y["Left"][key]
+            y["Left"][key] = {
                     'x':arr[:,0].tolist(),
                     'y':arr[:,1].tolist(),
                     'z':arr[:,2].tolist()
                     }
-        StepDown["Left"][TrialNum].update({"Filename": filename})
         
     if Limb== "Right":
-        StepDown["Right"].update({TrialNum:extractvalues(trialacq)})
-        for key in StepDown["Right"][TrialNum].keys():
-            arr = StepDown["Right"][TrialNum][key]
-            StepDown["Right"][TrialNum][key] = {
+        y["Right"] = {}
+        y["Right"].update(extractvaluesr(trialacq))
+        for key in y["Right"].keys():
+            arr = y["Right"][key]
+            y["Right"][key] = {
                     'x':arr[:,0].tolist(),
                     'y':arr[:,1].tolist(),
                     'z':arr[:,2].tolist()
                     }
-        StepDown["Right"][TrialNum].update({"Filename": filename})
-
-def extract_all_StepDown_files(Limb):
-    for i in range(len(TriallistStepDown)):
-        extractintoDictStepDown(filelistStepDown[i], TriallistStepDown[i], Limb)
-
-button_exploreStepDownLeft = Button(SelectFrameStepDownLeft, text = "Select up to 3 LEFT Trials",  width = 40, bg = "ghost white",
-                          command = lambda : [browseFilesStepDown("Left"), extract_all_StepDown_files("Left")])  
-button_exploreStepDownLeft.pack(pady=10)
-button_exploreStepDownRight = Button(SelectFrameStepDownRight, text = "Select up to 3 RIGHT Trials",  width = 40, bg = "ghost white",
-                          command = lambda : [browseFilesStepDown("Right"),extract_all_StepDown_files("Right")])  
-button_exploreStepDownRight.pack(pady=10)
-
-button_exploreSteppingDown = Button(SelectFrameSteppingDown, text = "Select up to 6 Trials",  width = 40, bg = "ghost white",
-                          command = lambda : [])  
-button_exploreSteppingDown.pack(pady=10)
-#, extract_all_StepUp_files()
+    return y
 
 
+def extract_all_StepUp_files():
+    def cleanextract(v, trialnum, filename):
+        z={}
+        if v.get() == "Left":
+            z.update(extractintoDictStepUp(filename, trialnum, "Left"))
+        if v.get() =="Right":
+            z.update(extractintoDictStepUp(filename, trialnum, "Right"))
+        if v.get() =="Both":
+            z.update(extractintoDictStepUp(filename, trialnum, "Left"))
+            z.update(extractintoDictStepUp(filename, trialnum, "Right"))
+        return z
+    for i in range(len(TriallistStepUp)):           
+        if vStrath.get()==0:
+            StepUp[TriallistStepUp[i]].update(cleanextract(va[i], TriallistStepUp[i], filelistStepUp[i]))
+            StepUp[TriallistStepUp[i]].update({"Testing Type": "Single Step"})
+        if vStrath.get()==1:
+            StepUp[TriallistStepUp[i]].update(cleanextract(va[i], TriallistStepUp[i], filelistStepUp[i]))
+            StepUp[TriallistStepUp[i]].update({"Testing Type": "Strathclyde Steps"})
+va= [vSU1, vSU2, vSU3, vSU4, vSU5, vSU6]
+extract_all_StepUp_files() 
+
+
+StepUp["max"]= {}
+StepUp["min"] = {}
+
+TriallistStepUpl = []
+TriallistStepUpr = []
+for i in range(len(TriallistStepUp)):
+    if (va[i]).get()=="Left":
+        TriallistStepUpl.append(TriallistStepUp[i])
+    if (va[i]).get()=="Right":
+        TriallistStepUpr.append(TriallistStepUp[i])
+    if (va[i]).get()=="Both":
+        TriallistStepUpr.append(TriallistStepUp[i])
+        TriallistStepUpl.append(TriallistStepUp[i])
+        
+def meanmaxminvals(limb, cleantrials, function):
+        o={}
+        if function == "max":
+            fun = max
+        if function == "min":
+            fun = min
+        for move in ["KneeAngle", "KneeForce", "KneeMoment", "KneePower", 
+                     "HipAngle", "HipForce", "HipMoment", "HipPower",
+                     "AnkleAngle", "AnkleForce", "AnkleMoment", "AnklePower",
+                     "FootProgressAngle", "pelvisAngle", "COM"]:
+            o[move]={}
+            for axis in ["x","y","z"]:
+                if len(cleantrials)== 3:
+                    o[move][axis] = (((fun(StepUp[cleantrials[0]][limb][move][axis]))+
+                                                             (fun(StepUp[cleantrials[1]][limb][move][axis]))+
+                                                             (fun(StepUp[cleantrials[2]][limb][move][axis])))/3)                    
+                if len(cleantrials)== 4:
+                    o[move][axis] = (((fun(StepUp[cleantrials[0]][limb][move][axis]))+
+                                                             (fun(StepUp[cleantrials[1]][limb][move][axis]))+
+                                                             (fun(StepUp[cleantrials[2]][limb][move][axis]))+
+                                                             (fun(StepUp[cleantrials[3]][limb][move][axis])))/4)
+                    
+                if len(cleantrials)== 5:
+                    o[move][axis] = (((fun(StepUp[cleantrials[0]][limb][move][axis]))+
+                                                             (fun(StepUp[cleantrials[1]][limb][move][axis]))+
+                                                             (fun(StepUp[cleantrials[2]][limb][move][axis]))+
+                                                             (fun(StepUp[cleantrials[3]][limb][move][axis]))+
+                                                             (fun(StepUp[cleantrials[4]][limb][move][axis])))/5)
+                if len(cleantrials)== 6:
+                    o[move][axis] = (((fun(StepUp[cleantrials[0]][limb][move][axis]))+
+                                                             (fun(StepUp[cleantrials[1]][limb][move][axis]))+
+                                                             (fun(StepUp[cleantrials[2]][limb][move][axis]))+
+                                                             (fun(StepUp[cleantrials[3]][limb][move][axis]))+
+                                                             (fun(StepUp[cleantrials[4]][limb][move][axis]))+
+                                                             (fun(StepUp[cleantrials[5]][limb][move][axis])))/6)
+
+        return o
+
+
+StepUp["max"].update({"Left":  meanmaxminvals("Left", TriallistStepUpl, "max")})
+StepUp["max"].update({"Right":  meanmaxminvals("Right", TriallistStepUpr, "max")})
+StepUp["min"].update({"Left":  meanmaxminvals("Left", TriallistStepUpl, "min")})
+StepUp["min"].update({"Right":  meanmaxminvals("Right", TriallistStepUpr, "min")})
+ 
+
+
+
+
+
+
+
+
+
+def create_StepUp_Max_Min_Table():
+        c.execute("""CREATE TABLE IF NOT EXISTS StepUp_Max_Min_Table
+              (ID TEXT, Dominant_Limb TEXT, Patient_Type TEXT, 
+               Sex TEXT, Month TEXT, Affected_Limb TEXT, Trial_Type TEXT)""")            
+def columns_StepUp_Max_Min_Table():
+    for limb in ["Left", "Right"]:
+        for axis in ["x", "y", "z"]:
+            for function in ["max", "min"]:
+               c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_Knee_Angle_{axis} REAL""")
+               c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_Knee_Moment_{axis} REAL""")
+               c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_Knee_Force_{axis} REAL""")
+               c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_Knee_Power_{axis} REAL""")
+               c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_Hip_Angle_{axis} REAL""")
+               c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_Hip_Moment_{axis} REAL""")
+               c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_Hip_Force_{axis} REAL""")
+               c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_Hip_Power_{axis} REAL""")
+               c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Angle_{axis} REAL""")
+               c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Moment_{axis} REAL""")
+               c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Force_{axis} REAL""")
+               c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Power_{axis} REAL""")
+               c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_Foot_Progression_Angle_{axis} REAL""")
+               c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_pelvis_Angle_{axis} REAL""")
+               c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_COM_{axis} REAL""")   
+
+def enter_StepUp_extrema ():  
+    c.execute("""INSERT INTO StepUp_Max_Min_Table 
+              (ID, Dominant_Limb, Patient_Type, 
+              Sex, Month, Affected_Limb, Trial_Type)VALUES (?,?,?,?,?,?,?)""", 
+             (ID, dom_limb, tpe, sex, mon, aff_limb, str(StepUp["Trial 1"]["Testing Type"])))
+    for limb in ["Left", "Right"]:
+        for axis in ["x", "y", "z"]:
+            for function in ["max", "min"]:
+                c.execute(f"""UPDATE StepUp_Max_Min_Table
+                          SET 
+                          {function}_{limb}_Knee_Angle_{axis} = ?,
+                          {function}_{limb}_Knee_Moment_{axis} = ?,
+                          {function}_{limb}_Knee_Force_{axis} = ?,
+                          {function}_{limb}_Knee_Power_{axis} = ?,
+                          {function}_{limb}_Hip_Angle_{axis} = ?,
+                          {function}_{limb}_Hip_Moment_{axis} = ?,
+                          {function}_{limb}_Hip_Force_{axis} = ?,
+                          {function}_{limb}_Hip_Power_{axis} = ?,
+                          {function}_{limb}_Ankle_Angle_{axis} = ?,
+                          {function}_{limb}_Ankle_Moment_{axis} = ?,
+                          {function}_{limb}_Ankle_Force_{axis} = ?,
+                          {function}_{limb}_Ankle_Power_{axis} =  ?,
+                          {function}_{limb}_Foot_Progression_Angle_{axis} = ?,
+                          {function}_{limb}_pelvis_Angle_{axis} =  ?,
+                          {function}_{limb}_COM_{axis} =  ?
+                          WHERE ID = ?
+                          """,(
+                          (StepUp[function][limb]["KneeAngle"][axis]),
+                          (StepUp[function][limb]["KneeMoment"][axis]),
+                          (StepUp[function][limb]["KneeForce"][axis]),
+                          (StepUp[function][limb]["KneePower"][axis]),
+                          (StepUp[function][limb]["HipAngle"][axis]),
+                          (StepUp[function][limb]["HipMoment"][axis]),
+                          (StepUp[function][limb]["HipForce"][axis]),
+                          (StepUp[function][limb]["HipPower"][axis]),
+                          (StepUp[function][limb]["AnkleAngle"][axis]),
+                          (StepUp[function][limb]["AnkleMoment"][axis]),
+                          (StepUp[function][limb]["AnkleForce"][axis]),
+                          (StepUp[function][limb]["AnklePower"][axis]),
+                          (StepUp[function][limb]["FootProgressAngle"][axis]),
+                          (StepUp[function][limb]["pelvisAngle"][axis]),
+                          (StepUp[function][limb]["COM"][axis]),
+                          ID
+                          ))
+
+create_StepUp_Max_Min_Table()
+columns_StepUp_Max_Min_Table()
+enter_StepUp_extrema()
+
+              
+def create_StepUp_Table():
+        c.execute("""CREATE TABLE IF NOT EXISTS StepUp_Table
+              (ID TEXT, Dominant_Limb TEXT, Patient_Type TEXT, 
+              Sex TEXT, Month TEXT, Affected_Limb TEXT, Trial_Type TEXT,
+              Filename TEXT, Complete_Left_Cycle TEXT, Complete_Right_Cycle TEXT,
+              Left_Footstrike_Index TEXT, Left_FootOff_Index TEXT,
+              Right_Footstrike_Index TEXT, Right_FootOff_Index TEXT)""")            
+def columns_StepUp_Table():
+     for LR in ["Left", "Right"]:
+         for axis in ["x", "y", "z"]:
+             c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Knee_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Knee_Moment_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Knee_Force_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Knee_Power_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Hip_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Hip_Moment_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Hip_Force_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Hip_Power_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Ankle_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Ankle_Moment_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Ankle_Force_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Ankle_Power_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Foot_Progression_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_pelvis_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_COM_{axis} TEXT""")             
+
+
+def enter_StepUp_Table (numTrials):
+    for TrialNum in numTrials:
+        filename = StepUp[TrialNum]["Filename"] 
+        c.execute("""INSERT INTO StepUp_Table 
+                  (ID, Dominant_Limb, Patient_Type, 
+                  Sex, Month, Affected_Limb, Filename, Trial_Type) 
+                  VALUES (?,?,?,?,?,?,?,?)""", 
+                  (ID, dom_limb, tpe, sex, mon, aff_limb, 
+                   filename, str(StepUp["Trial 1"]["Testing Type"])))
+        for LR in ["Left", "Right"]:
+            try:
+                for axis in ["x", "y", "z"]:
+                    c.execute(f"""UPDATE StepUp_Table
+                              SET 
+                              {LR}_Knee_Angle_{axis} = ?,
+                              {LR}_Hip_Angle_{axis} = ?,
+                              {LR}_Ankle_Angle_{axis} = ?,
+                              {LR}_Foot_Progression_Angle_{axis} = ?,
+                              {LR}_pelvis_Angle_{axis} =  ?,
+                              {LR}_COM_{axis} =  ?,
+                              {LR}_Knee_Moment_{axis} = ?,
+                              {LR}_Knee_Force_{axis} = ?,
+                              {LR}_Knee_Power_{axis} = ?,
+                              {LR}_Hip_Moment_{axis} = ?,
+                              {LR}_Hip_Force_{axis} = ?,
+                              {LR}_Hip_Power_{axis} = ?,
+                              {LR}_Ankle_Moment_{axis} = ?,
+                              {LR}_Ankle_Force_{axis} = ?,
+                              {LR}_Ankle_Power_{axis} =  ?
+                              WHERE Filename = ?
+                              """,(
+                              (str(StepUp[TrialNum][LR]["KneeAngle"][axis])[1:-1]),
+                              (str(StepUp[TrialNum][LR]["HipAngle"][axis])[1:-1]),
+                              (str(StepUp[TrialNum][LR]["AnkleAngle"][axis])[1:-1]),
+                              (str(StepUp[TrialNum][LR]["FootProgressAngle"][axis])[1:-1]),
+                              (str(StepUp[TrialNum][LR]["pelvisAngle"][axis])[1:-1]),
+                              (str(StepUp[TrialNum][LR]["COM"][axis])[1:-1]),
+                              (str(StepUp[TrialNum][LR]["KneeMoment"][axis])[1:-1]),
+                              (str(StepUp[TrialNum][LR]["KneeForce"][axis])[1:-1]),
+                              (str(StepUp[TrialNum][LR]["KneePower"][axis])[1:-1]),
+                              (str(StepUp[TrialNum][LR]["HipMoment"][axis])[1:-1]),
+                              (str(StepUp[TrialNum][LR]["HipForce"][axis])[1:-1]),
+                              (str(StepUp[TrialNum][LR]["HipPower"][axis])[1:-1]),
+                              (str(StepUp[TrialNum][LR]["AnkleMoment"][axis])[1:-1]),
+                              (str(StepUp[TrialNum][LR]["AnkleForce"][axis])[1:-1]),
+                              (str(StepUp[TrialNum][LR]["AnklePower"][axis])[1:-1]),
+                              filename
+                              ))
+            except:
+                pass
+
+
+create_StepUp_Table()
+columns_StepUp_Table()
+enter_StepUp_Table(TriallistStepUp)
+
+
+
+
+"""STEPDOWN SQL"""
+
+def extractintoDictStepDown(filename, TrialNum, Limb):     
+    reader = btk.btkAcquisitionFileReader()
+    reader.SetFilename(filename) # set a filename to the reader
+    reader.Update()
+    trialacq = reader.GetOutput() # is the btk aquisition object
+    def extractvaluesl(trial):
+        #extracts al the arrays
+        #can be used for all trials, just needs to be instantiated with the correct trial
+        x = dict();  
+        x["KneeAngle"]= (trial.GetPoint("LKneeAngles")).GetValues()
+        x["KneeForce"]= (trial.GetPoint("LKneeForce")).GetValues()
+        x["KneeMoment"]= (trial.GetPoint("LKneeMoment")).GetValues()
+        x["KneePower"]= (trial.GetPoint("LKneePower")).GetValues() 
+        x["HipAngle"]= ((trial.GetPoint("LHipAngles")).GetValues())
+        x["HipForce"]= (trial.GetPoint("LHipForce")).GetValues()
+        x["HipMoment"]= (trial.GetPoint("LHipMoment")).GetValues()
+        x["HipPower"]= (trial.GetPoint("LHipPower")).GetValues() 
+        x["AnkleAngle"]= (trial.GetPoint("LAnkleAngles")).GetValues()
+        x["AnkleForce"]= (trial.GetPoint("LAnkleForce")).GetValues()
+        x["AnkleMoment"]= (trial.GetPoint("LAnkleMoment")).GetValues()
+        x["AnklePower"]= (trial.GetPoint("LAnklePower")).GetValues()    
+        x["FootProgressAngle"] = (trial.GetPoint("LFootProgressAngles")).GetValues()
+        x["pelvisAngle"] = (trial.GetPoint("LPelvisAngles")).GetValues() 
+        x["COM"] = (trial.GetPoint("CentreOfMass")).GetValues()
+        return x
+    def extractvaluesr(trial):
+        #extracts al the arrays
+        #can be used for all trials, just needs to be instantiated with the correct trial
+        x = dict();  
+        x["KneeAngle"]= (trial.GetPoint("RKneeAngles")).GetValues()
+        x["KneeForce"]= (trial.GetPoint("RKneeForce")).GetValues()
+        x["KneeMoment"]= (trial.GetPoint("RKneeMoment")).GetValues()
+        x["KneePower"]= (trial.GetPoint("RKneePower")).GetValues() 
+        x["HipAngle"]= ((trial.GetPoint("RHipAngles")).GetValues())
+        x["HipForce"]= (trial.GetPoint("RHipForce")).GetValues()
+        x["HipMoment"]= (trial.GetPoint("RHipMoment")).GetValues()
+        x["HipPower"]= (trial.GetPoint("RHipPower")).GetValues() 
+        x["AnkleAngle"]= (trial.GetPoint("RAnkleAngles")).GetValues()
+        x["AnkleForce"]= (trial.GetPoint("RAnkleForce")).GetValues()
+        x["AnkleMoment"]= (trial.GetPoint("RAnkleMoment")).GetValues()
+        x["AnklePower"]= (trial.GetPoint("RAnklePower")).GetValues()    
+        x["FootProgressAngle"] = (trial.GetPoint("RFootProgressAngles")).GetValues()
+        x["pelvisAngle"] = (trial.GetPoint("RPelvisAngles")).GetValues() 
+        x["COM"] = (trial.GetPoint("CentreOfMass")).GetValues()
+        return x
+    y = {}
+    
+    
+    if Limb == "Left":
+        y["Left"] = {}
+        y["Left"].update(extractvaluesl(trialacq))
+        for key in y["Left"].keys():
+            arr = y["Left"][key]
+            y["Left"][key] = {
+                    'x':arr[:,0].tolist(),
+                    'y':arr[:,1].tolist(),
+                    'z':arr[:,2].tolist()
+                    }
+        
+    if Limb== "Right":
+        y["Right"] = {}
+        y["Right"].update(extractvaluesr(trialacq))
+        for key in y["Right"].keys():
+            arr = y["Right"][key]
+            y["Right"][key] = {
+                    'x':arr[:,0].tolist(),
+                    'y':arr[:,1].tolist(),
+                    'z':arr[:,2].tolist()
+                    }
+    return y
+
+
+def extract_all_StepDown_files():
+    def cleanextract(v, trialnum, filename):
+        z={}
+        if v.get() == "Left":
+            z.update(extractintoDictStepDown(filename, trialnum, "Left"))
+        if v.get() =="Right":
+            z.update(extractintoDictStepDown(filename, trialnum, "Right"))
+        if v.get() =="Both":
+            z.update(extractintoDictStepDown(filename, trialnum, "Left"))
+            z.update(extractintoDictStepDown(filename, trialnum, "Right"))
+        return z
+    for i in range(len(TriallistStepDown)):           
+        if vStrath2.get()==0:
+            StepDown[TriallistStepDown[i]].update(cleanextract(va[i], TriallistStepDown[i], filelistStepDown[i]))
+            StepDown[TriallistStepDown[i]].update({"Testing Type": "Single Step"})
+        if vStrath2.get()==1:
+            StepDown[TriallistStepDown[i]].update(cleanextract(va[i], TriallistStepDown[i], filelistStepDown[i]))
+            StepDown[TriallistStepDown[i]].update({"Testing Type": "Strathclyde Steps"})
+va2= [vSD1, vSD2, vSD3, vSD4, vSD5, vSD6]
+extract_all_StepDown_files() 
+
+
+StepDown["max"]= {}
+StepDown["min"] = {}
+
+TriallistStepDownl = []
+TriallistStepDownr = []
+for i in range(len(TriallistStepDown)):
+    if (va[i]).get()=="Left":
+        TriallistStepDownl.append(TriallistStepDown[i])
+    if (va[i]).get()=="Right":
+        TriallistStepDownr.append(TriallistStepDown[i])
+    if (va[i]).get()=="Both":
+        TriallistStepDownr.append(TriallistStepDown[i])
+        TriallistStepDownl.append(TriallistStepDown[i])
+        
+def meanmaxminvals(limb, cleantrials, function):
+        o={}
+        if function == "max":
+            fun = max
+        if function == "min":
+            fun = min
+        for move in ["KneeAngle", "KneeForce", "KneeMoment", "KneePower", 
+                     "HipAngle", "HipForce", "HipMoment", "HipPower",
+                     "AnkleAngle", "AnkleForce", "AnkleMoment", "AnklePower",
+                     "FootProgressAngle", "pelvisAngle", "COM"]:
+            o[move]={}
+            for axis in ["x","y","z"]:
+                if len(cleantrials)== 3:
+                    o[move][axis] = (((fun(StepDown[cleantrials[0]][limb][move][axis]))+
+                                                             (fun(StepDown[cleantrials[1]][limb][move][axis]))+
+                                                             (fun(StepDown[cleantrials[2]][limb][move][axis])))/3)                    
+                if len(cleantrials)== 4:
+                    o[move][axis] = (((fun(StepDown[cleantrials[0]][limb][move][axis]))+
+                                                             (fun(StepDown[cleantrials[1]][limb][move][axis]))+
+                                                             (fun(StepDown[cleantrials[2]][limb][move][axis]))+
+                                                             (fun(StepDown[cleantrials[3]][limb][move][axis])))/4)
+                    
+                if len(cleantrials)== 5:
+                    o[move][axis] = (((fun(StepDown[cleantrials[0]][limb][move][axis]))+
+                                                             (fun(StepDown[cleantrials[1]][limb][move][axis]))+
+                                                             (fun(StepDown[cleantrials[2]][limb][move][axis]))+
+                                                             (fun(StepDown[cleantrials[3]][limb][move][axis]))+
+                                                             (fun(StepDown[cleantrials[4]][limb][move][axis])))/5)
+                if len(cleantrials)== 6:
+                    o[move][axis] = (((fun(StepDown[cleantrials[0]][limb][move][axis]))+
+                                                             (fun(StepDown[cleantrials[1]][limb][move][axis]))+
+                                                             (fun(StepDown[cleantrials[2]][limb][move][axis]))+
+                                                             (fun(StepDown[cleantrials[3]][limb][move][axis]))+
+                                                             (fun(StepDown[cleantrials[4]][limb][move][axis]))+
+                                                             (fun(StepDown[cleantrials[5]][limb][move][axis])))/6)
+
+        return o
+
+
+StepDown["max"].update({"Left":  meanmaxminvals("Left", TriallistStepDownl, "max")})
+StepDown["max"].update({"Right":  meanmaxminvals("Right", TriallistStepDownr, "max")})
+StepDown["min"].update({"Left":  meanmaxminvals("Left", TriallistStepDownl, "min")})
+StepDown["min"].update({"Right":  meanmaxminvals("Right", TriallistStepDownr, "min")})
+ 
+
+
+
+
+
+
+
+
+
+def create_StepDown_Max_Min_Table():
+        c.execute("""CREATE TABLE IF NOT EXISTS StepDown_Max_Min_Table
+              (ID TEXT, Dominant_Limb TEXT, Patient_Type TEXT, 
+               Sex TEXT, Month TEXT, Affected_Limb TEXT, Trial_Type TEXT)""")            
+def columns_StepDown_Max_Min_Table():
+    for limb in ["Left", "Right"]:
+        for axis in ["x", "y", "z"]:
+            for function in ["max", "min"]:
+               c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_Knee_Angle_{axis} REAL""")
+               c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_Knee_Moment_{axis} REAL""")
+               c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_Knee_Force_{axis} REAL""")
+               c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_Knee_Power_{axis} REAL""")
+               c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_Hip_Angle_{axis} REAL""")
+               c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_Hip_Moment_{axis} REAL""")
+               c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_Hip_Force_{axis} REAL""")
+               c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_Hip_Power_{axis} REAL""")
+               c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Angle_{axis} REAL""")
+               c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Moment_{axis} REAL""")
+               c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Force_{axis} REAL""")
+               c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Power_{axis} REAL""")
+               c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_Foot_Progression_Angle_{axis} REAL""")
+               c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_pelvis_Angle_{axis} REAL""")
+               c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_COM_{axis} REAL""")   
+
+def enter_StepDown_extrema ():  
+    c.execute("""INSERT INTO StepDown_Max_Min_Table 
+              (ID, Dominant_Limb, Patient_Type, 
+              Sex, Month, Affected_Limb, Trial_Type)VALUES (?,?,?,?,?,?,?)""", 
+             (ID, dom_limb, tpe, sex, mon, aff_limb,
+              str(StepUp["Trial 1"]["Testing Type"])))
+    for limb in ["Left", "Right"]:
+        for axis in ["x", "y", "z"]:
+            for function in ["max", "min"]:
+                c.execute(f"""UPDATE StepDown_Max_Min_Table
+                          SET 
+                          {function}_{limb}_Knee_Angle_{axis} = ?,
+                          {function}_{limb}_Knee_Moment_{axis} = ?,
+                          {function}_{limb}_Knee_Force_{axis} = ?,
+                          {function}_{limb}_Knee_Power_{axis} = ?,
+                          {function}_{limb}_Hip_Angle_{axis} = ?,
+                          {function}_{limb}_Hip_Moment_{axis} = ?,
+                          {function}_{limb}_Hip_Force_{axis} = ?,
+                          {function}_{limb}_Hip_Power_{axis} = ?,
+                          {function}_{limb}_Ankle_Angle_{axis} = ?,
+                          {function}_{limb}_Ankle_Moment_{axis} = ?,
+                          {function}_{limb}_Ankle_Force_{axis} = ?,
+                          {function}_{limb}_Ankle_Power_{axis} =  ?,
+                          {function}_{limb}_Foot_Progression_Angle_{axis} = ?,
+                          {function}_{limb}_pelvis_Angle_{axis} =  ?,
+                          {function}_{limb}_COM_{axis} =  ?
+                          WHERE ID = ?
+                          """,(
+                          (StepDown[function][limb]["KneeAngle"][axis]),
+                          (StepDown[function][limb]["KneeMoment"][axis]),
+                          (StepDown[function][limb]["KneeForce"][axis]),
+                          (StepDown[function][limb]["KneePower"][axis]),
+                          (StepDown[function][limb]["HipAngle"][axis]),
+                          (StepDown[function][limb]["HipMoment"][axis]),
+                          (StepDown[function][limb]["HipForce"][axis]),
+                          (StepDown[function][limb]["HipPower"][axis]),
+                          (StepDown[function][limb]["AnkleAngle"][axis]),
+                          (StepDown[function][limb]["AnkleMoment"][axis]),
+                          (StepDown[function][limb]["AnkleForce"][axis]),
+                          (StepDown[function][limb]["AnklePower"][axis]),
+                          (StepDown[function][limb]["FootProgressAngle"][axis]),
+                          (StepDown[function][limb]["pelvisAngle"][axis]),
+                          (StepDown[function][limb]["COM"][axis]),
+                          ID
+                          ))
+
+create_StepDown_Max_Min_Table()
+columns_StepDown_Max_Min_Table()
+enter_StepDown_extrema()
+
+              
+def create_StepDown_Table():
+        c.execute("""CREATE TABLE IF NOT EXISTS StepDown_Table
+              (ID TEXT, Dominant_Limb TEXT, Patient_Type TEXT, 
+              Sex TEXT, Month TEXT, Affected_Limb TEXT,
+              Filename TEXT, Trial_Type TEXT, Complete_Left_Cycle TEXT, Complete_Right_Cycle TEXT,
+              Left_Footstrike_Index TEXT, Left_FootOff_Index TEXT,
+              Right_Footstrike_Index TEXT, Right_FootOff_Index TEXT)""")            
+def columns_StepDown_Table():
+     for LR in ["Left", "Right"]:
+         for axis in ["x", "y", "z"]:
+             c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Knee_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Knee_Moment_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Knee_Force_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Knee_Power_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Hip_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Hip_Moment_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Hip_Force_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Hip_Power_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Ankle_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Ankle_Moment_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Ankle_Force_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Ankle_Power_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Foot_Progression_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_pelvis_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_COM_{axis} TEXT""")             
+
+
+def enter_StepDown_Table (numTrials):
+    for TrialNum in numTrials:
+        filename = StepDown[TrialNum]["Filename"] 
+        c.execute("""INSERT INTO StepDown_Table 
+                  (ID, Dominant_Limb, Patient_Type, 
+                  Sex, Month, Affected_Limb, Filename, Trial_Type) 
+                  VALUES (?,?,?,?,?,?,?,?)""", 
+                  (ID, dom_limb, tpe, sex, mon, aff_limb, 
+                   filename, str(StepUp["Trial 1"]["Testing Type"])))
+        for LR in ["Left", "Right"]:
+            try:
+                for axis in ["x", "y", "z"]:
+                    c.execute(f"""UPDATE StepDown_Table
+                              SET 
+                              {LR}_Knee_Angle_{axis} = ?,
+                              {LR}_Hip_Angle_{axis} = ?,
+                              {LR}_Ankle_Angle_{axis} = ?,
+                              {LR}_Foot_Progression_Angle_{axis} = ?,
+                              {LR}_pelvis_Angle_{axis} =  ?,
+                              {LR}_COM_{axis} =  ?,
+                              {LR}_Knee_Moment_{axis} = ?,
+                              {LR}_Knee_Force_{axis} = ?,
+                              {LR}_Knee_Power_{axis} = ?,
+                              {LR}_Hip_Moment_{axis} = ?,
+                              {LR}_Hip_Force_{axis} = ?,
+                              {LR}_Hip_Power_{axis} = ?,
+                              {LR}_Ankle_Moment_{axis} = ?,
+                              {LR}_Ankle_Force_{axis} = ?,
+                              {LR}_Ankle_Power_{axis} =  ?
+                              WHERE Filename = ?
+                              """,(
+                              (str(StepDown[TrialNum][LR]["KneeAngle"][axis])[1:-1]),
+                              (str(StepDown[TrialNum][LR]["HipAngle"][axis])[1:-1]),
+                              (str(StepDown[TrialNum][LR]["AnkleAngle"][axis])[1:-1]),
+                              (str(StepDown[TrialNum][LR]["FootProgressAngle"][axis])[1:-1]),
+                              (str(StepDown[TrialNum][LR]["pelvisAngle"][axis])[1:-1]),
+                              (str(StepDown[TrialNum][LR]["COM"][axis])[1:-1]),
+                              (str(StepDown[TrialNum][LR]["KneeMoment"][axis])[1:-1]),
+                              (str(StepDown[TrialNum][LR]["KneeForce"][axis])[1:-1]),
+                              (str(StepDown[TrialNum][LR]["KneePower"][axis])[1:-1]),
+                              (str(StepDown[TrialNum][LR]["HipMoment"][axis])[1:-1]),
+                              (str(StepDown[TrialNum][LR]["HipForce"][axis])[1:-1]),
+                              (str(StepDown[TrialNum][LR]["HipPower"][axis])[1:-1]),
+                              (str(StepDown[TrialNum][LR]["AnkleMoment"][axis])[1:-1]),
+                              (str(StepDown[TrialNum][LR]["AnkleForce"][axis])[1:-1]),
+                              (str(StepDown[TrialNum][LR]["AnklePower"][axis])[1:-1]),
+                              filename
+                              ))
+            except:
+                pass
+
+
+create_StepDown_Table()
+columns_StepDown_Table()
+enter_StepDown_Table(TriallistStepDown)
 
 
 
@@ -1010,37 +1970,77 @@ button_exploreSteppingDown.pack(pady=10)
 
 
 
-root.mainloop()
-
-ID = vID.get()
-Type = vType.get()
-Month = str(vMonth.get()) + " Month(s)"
-
-patient = {}
-patient["ID"] = vID.get()
-patient["Sex"]= vSex.get()
-patient["Dominant Limb"] = vDom.get()
-patient["Affected Limb"] = vAffect.get()
-patient["Type"] = Type
-patient[Type]= {}
-
-# patient["Type"] = vType.get()
-if Type == "Post-op":
-    patient[Type][Month]={}
-    patient[Type][Month].update({"Month Post-op": vMonth.get()})
-    patient[Type][Month].update({"Gait":Gait})
-    patient[Type][Month].update({"StepUp":StepUp})
-    patient[Type][Month].update({"StepDown":StepDown})
-else:
-    patient[Type].update({"Gait":Gait})
-    patient[Type].update({"StepUp":StepUp})
-    patient[Type].update({"StepDown":StepDown})
 
 
-def writetodict():
-    name = ID + Type + str(vMonth.get()) + ".json"
-    with open(name, 'w') as f:
-        json.dump(patient, f, indent = 5)    
-writetodict()
+"""Close SQLite Connection"""
+conn.commit()
+conn.close()     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ID = vID.get()
+# Type = vType.get()
+# Month = str(vMonth.get()) + " Month(s)"
+
+# patient = {}
+# patient["ID"] = vID.get()
+# patient["Sex"]= vSex.get()
+# patient["Dominant Limb"] = vDom.get()
+# patient["Affected Limb"] = vAffect.get()
+# patient["Type"] = Type
+
+
+# patient["Gait"]= Gait
+# patient["StepUp"]= StepUp
+# patient["StepDown"]= StepDown
+# # patient["StandUp"]= StandUp
+# # patient["SitDown"]= SitDown
+# # patient["RampGait"]= RampGait
+
+# if Type == "Post-op":
+#     patient["Month"] = vMonth.get()
+
+    
+
+
+
+# def writetodict():
+#     name = ID + Type + str(vMonth.get()) + ".json"
+#     with open(name, 'w') as f:
+#         json.dump(patient, f, indent = 5)    
+# writetodict()
 
 

@@ -22,8 +22,8 @@ plt.rcParams['figure.dpi'] = 300
 plt.rcParams['figure.constrained_layout.use'] = False
 
 """Start SQLite Connection""" 
-conn = sqlite3.connect(':memory:')
-#conn = sqlite3.connect('MotionAnalysis106.db')
+#conn = sqlite3.connect(':memory:')
+conn = sqlite3.connect('MotionAnalysis107.db')
 c=conn.cursor()
 root = Tk()
 
@@ -172,7 +172,7 @@ def extractintoDict(filename, TrialNum):
     reader.SetFilename(filename) # set a filename to the reader
     reader.Update()
     trialacq = reader.GetOutput() # is the btk aquisition object
-    def extractvalues(trial):
+    def extractvaluesl(trial):
         #extracts al the arrays
         #can be used for all trials, just needs to be instantiated with the correct trial
         x = dict();  
@@ -200,8 +200,36 @@ def extractintoDict(filename, TrialNum):
         except:
             pass
         return x
-    Gait[TrialNum].update({"Left": extractvalues(trialacq)})
-    Gait[TrialNum].update({"Right": extractvalues(trialacq)})
+    def extractvaluesr(trial):
+        #extracts al the arrays
+        #can be used for all trials, just needs to be instantiated with the correct trial
+        x = dict();  
+        x["KneeAngle"]= (trial.GetPoint("RKneeAngles")).GetValues()
+        x["KneeForce"]= (trial.GetPoint("RKneeForce")).GetValues()
+        x["KneeMoment"]= (trial.GetPoint("RKneeMoment")).GetValues()
+        x["KneePower"]= (trial.GetPoint("RKneePower")).GetValues() 
+        x["HipAngle"]= ((trial.GetPoint("RHipAngles")).GetValues())
+        x["HipForce"]= (trial.GetPoint("RHipForce")).GetValues()
+        x["HipMoment"]= (trial.GetPoint("RHipMoment")).GetValues()
+        x["HipPower"]= (trial.GetPoint("RHipPower")).GetValues() 
+        x["AnkleAngle"]= (trial.GetPoint("RAnkleAngles")).GetValues()
+        x["AnkleForce"]= (trial.GetPoint("RAnkleForce")).GetValues()
+        x["AnkleMoment"]= (trial.GetPoint("RAnkleMoment")).GetValues()
+        x["AnklePower"]= (trial.GetPoint("RAnklePower")).GetValues()    
+        x["FootProgressAngle"] = (trial.GetPoint("RFootProgressAngles")).GetValues()
+        x["pelvisAngle"] = (trial.GetPoint("RPelvisAngles")).GetValues() 
+        x["COM"] = (trial.GetPoint("CentreOfMass")).GetValues()
+        try:
+            x["GRF"] = (trial.GetPoint("RGroundReactionForce")).GetValues()
+        except:
+            pass
+        try:    
+            x["NGRF"] = (trial.GetPoint("RNormalisedGRF")).GetValues()
+        except:
+            pass
+        return x
+    Gait[TrialNum].update({"Left": extractvaluesl(trialacq)})
+    Gait[TrialNum].update({"Right": extractvaluesr(trialacq)})
     Gait[TrialNum].update({"lfootstrikeFrame":[]})
     Gait[TrialNum].update({"rfootstrikeFrame":[]})
     Gait[TrialNum].update({"lfootoffFrame":[]})
@@ -449,7 +477,11 @@ root.mainloop()
 
 
 ID = str(123545)
-
+dom_limb = "left"
+aff_limb = "left"
+tpe = "con"
+mon = "4"
+sex = "f"
 
 def create_Mean_Gait_Table():
         c.execute("""CREATE TABLE IF NOT EXISTS Mean_Gait_Table
@@ -478,7 +510,9 @@ def columns_Mean_Gait_Table():
 
 def enter_Mean_Gait_Table (limb_avl, limb_avr):
     c.execute("""INSERT INTO Mean_Gait_Table 
-             (ID)VALUES (?)""", (ID,))
+             (ID, Dominant_Limb, Patient_Type, 
+              Sex, Month, Affected_Limb)VALUES (?,?,?,?,?,?)""", 
+             (ID, dom_limb, tpe, sex, mon, aff_limb))
     for axis in ["x", "y", "z"]:
         c.execute(f"""UPDATE Mean_Gait_Table
                   SET 
@@ -556,10 +590,9 @@ def enter_Mean_Gait_Table (limb_avl, limb_avr):
                   ))
 
 
-#create_Mean_Gait_Table()
-#columns_Mean_Gait_Table()
+create_Mean_Gait_Table()
+columns_Mean_Gait_Table()
 enter_Mean_Gait_Table(Gait["Left Average"],Gait["Right Average"])
-# enter_Mean_Gait_Table(Gait["Right Average"])
 
 
 def create_Gait_Max_Min_Table():
@@ -591,8 +624,9 @@ def columns_Gait_Max_Min_Table():
 
 def enter_Gait_extrema ():  
     c.execute("""INSERT INTO Gait_Max_Min_Table 
-              (ID) 
-              VALUES (?)""", (ID,))
+              (ID, Dominant_Limb, Patient_Type, 
+              Sex, Month, Affected_Limb)VALUES (?,?,?,?,?,?)""", 
+             (ID, dom_limb, tpe, sex, mon, aff_limb))
     for phase in ["stance", "swing"]:
 #does not include a row for inclmplete cycles                      
         if phase == "stance":
@@ -686,12 +720,120 @@ def enter_Gait_extrema ():
                           ID
                           ))
 
-#create_Gait_Max_Min_Table()
-#columns_Gait_Max_Min_Table()
+create_Gait_Max_Min_Table()
+columns_Gait_Max_Min_Table()
 enter_Gait_extrema()
 
+              
+def create_Gait_Table():
+        c.execute("""CREATE TABLE IF NOT EXISTS Gait_Table
+              (ID TEXT, Dominant_Limb TEXT, Patient_Type TEXT, 
+              Sex TEXT, Month TEXT, Affected_Limb TEXT,
+              Filename TEXT, Complete_Left_Cycle TEXT, Complete_Right_Cycle TEXT,
+              Left_Footstrike_Index TEXT, Left_FootOff_Index TEXT,
+              Right_Footstrike_Index TEXT, Right_FootOff_Index TEXT)""")            
+def columns_Gait_Table():
+     for LR in ["Left", "Right"]:
+         for axis in ["x", "y", "z"]:
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Knee_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Knee_Moment_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Knee_Force_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Knee_Power_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Hip_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Hip_Moment_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Hip_Force_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Hip_Power_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Ankle_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Ankle_Moment_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Ankle_Force_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Ankle_Power_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Foot_Progression_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_GRF_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_NGRF_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_pelvis_Angle_{axis} TEXT""")
+             c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_COM_{axis} TEXT""")             
 
 
+def enter_Gait_Table (numTrials):
+    for TrialNum in numTrials:
+        filename = Gait[TrialNum]["Filename"] 
+        if len(Gait[TrialNum]["lfootstrikeFrame"])>1:
+            cleanleft = "Yes"
+        else:
+            cleanleft = "No"
+        if len(Gait[TrialNum]["rfootstrikeFrame"])>1:
+            cleanright = "Yes"
+        else:
+            cleanright = "No"
+
+        c.execute("""INSERT INTO Gait_Table 
+                  (ID, Dominant_Limb, Patient_Type, 
+                  Sex, Month, Affected_Limb, Filename, 
+                  Complete_left_Cycle, Complete_Right_Cycle, 
+                  Left_Footstrike_Index, Left_FootOff_Index, 
+                  Right_Footstrike_Index, Right_FootOff_Index) 
+                  VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""", 
+                  (ID, dom_limb, tpe, sex, mon, aff_limb, 
+                   filename, cleanleft, cleanright,
+                  (str(Gait[TrialNum]["lfootstrikeFrame"])),
+                  (str(Gait[TrialNum]["lfootoffFrame"])),
+                  (str(Gait[TrialNum]["rfootstrikeFrame"])),
+                  (str(Gait[TrialNum]["rfootoffFrame"]))))
+        for LR in ["Left", "Right"]:
+            for axis in ["x", "y", "z"]:
+                c.execute(f"""UPDATE Gait_Table
+                          SET 
+                          {LR}_Knee_Angle_{axis} = ?,
+                          {LR}_Hip_Angle_{axis} = ?,
+                          {LR}_Ankle_Angle_{axis} = ?,
+                          {LR}_Foot_Progression_Angle_{axis} = ?,
+                          {LR}_pelvis_Angle_{axis} =  ?,
+                          {LR}_COM_{axis} =  ?
+                          WHERE Filename = ?
+                          """,(
+                          (str(Gait[TrialNum][LR]["KneeAngle"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["HipAngle"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["AnkleAngle"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["FootProgressAngle"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["pelvisAngle"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["COM"][axis])[1:-1]),
+                          filename
+                          ))
+                try:
+                    c.execute(f"""UPDATE Gait_Table
+                          SET 
+                          {LR}_Knee_Moment_{axis} = ?,
+                          {LR}_Knee_Force_{axis} = ?,
+                          {LR}_Knee_Power_{axis} = ?,
+                          {LR}_Hip_Moment_{axis} = ?,
+                          {LR}_Hip_Force_{axis} = ?,
+                          {LR}_Hip_Power_{axis} = ?,
+                          {LR}_Ankle_Moment_{axis} = ?,
+                          {LR}_Ankle_Force_{axis} = ?,
+                          {LR}_Ankle_Power_{axis} =  ?,
+                          {LR}_GRF_{axis} =  ?,
+                          {LR}_NGRF_{axis} =  ?,
+                          WHERE Filename = ?
+                          """,(
+                          (str(Gait[TrialNum][LR]["KneeMoment"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["KneeForce"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["KneePower"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["HipMoment"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["HipForce"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["HipPower"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["AnkleMoment"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["AnkleForce"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["AnklePower"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["GRF"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["NGRF"][axis])[1:-1]),
+                          filename
+                          ))
+                except:
+                    pass
+
+create_Gait_Table()
+columns_Gait_Table()
+enter_Gait_Table(TriallistGait)
 
 def plot_tables():
     fig, axs = plt.subplots(4,3, sharex = True)
