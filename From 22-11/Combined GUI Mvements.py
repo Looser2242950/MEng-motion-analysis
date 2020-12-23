@@ -16,15 +16,17 @@ from tkinter import ttk
 import tkinter.font as font
 import matplotlib.pyplot as plt
 import statistics
+from PIL import Image, ImageTk
 plt.style.use('ggplot')
 plt.rcParams['figure.dpi'] = 300
 plt.rcParams['figure.constrained_layout.use'] = False
 
 """Start SQLite Connection""" 
 #conn = sqlite3.connect(':memory:')
-conn = sqlite3.connect('MotionAnalysis109.db')
+conn = sqlite3.connect('MotionAnalysis.db')
 c=conn.cursor()
 root = Tk()
+root.geometry("600x700")
 
 #SetUp Tabs
 tab_parent = ttk.Notebook(root)
@@ -47,14 +49,24 @@ myFont = font.Font(family = "Helvetica", size=20)
 """TAB 1"""
 FrameTop = Frame(tab1, bg = "DodgerBlue3", bd = 6)
 FrameTop.pack(expand = 1, fill = BOTH)
+FrameTitle = Frame(FrameTop, bg = "DodgerBlue3", bd = 6)
+FrameTitle.grid(row = 0, column  =0, columnspan = 2)
 FrameInfo = Frame(FrameTop, bg = "DodgerBlue3", bd = 6)
-FrameInfo.pack()
+FrameInfo.grid(row =1, column = 0, padx = 20, pady = 20)
 FrameMovement = Frame(FrameTop, bg = "DodgerBlue2", bd = 6)
-FrameMovement.pack(anchor = NE)
-FrameClose = Frame(tab1, bg = "DeepSkyBlue2")
-FrameClose.pack(expand = 1, fill = BOTH, side = BOTTOM)
+FrameMovement.grid(row = 1, column = 1, padx = 20)
+FrameNext = Frame(tab1, bg = "DeepSkyBlue2")
+FrameNext.pack(expand = 2, fill = BOTH)
+FrameClose = Frame(tab1, bg = "DodgerBlue3")
+FrameClose.pack(expand = 2, fill = BOTH, side = BOTTOM)
 
-#FRAME 1: INPuT PATIENT DATA
+label_title = Label(FrameTitle, text = "Input Motion Analysis Data")
+label_title.pack()
+label_title["font"] = myFont
+
+ 
+
+#INPuT PATIENT DATA
 labelID = Label(FrameInfo,  text = "Patient ID: ", bg = "ivory3") 
 labelID.grid(column = 1, row = 1, pady = 5)
 vID = StringVar()
@@ -132,7 +144,7 @@ class Pattype:
 Pattype(FrameInfo)
 labelvisit = Label(FrameInfo,  text = "Patient Visit: ", bg = "ivory3") 
 labelvisit.grid(column = 1, row = 7, pady = 5)
-vVisit = StringVar()
+vVisit = IntVar()
 entryVisit = Entry(FrameInfo,  textvariable = vVisit,   fg = "purple4", width = 20) 
 entryVisit.grid(column = 2, row = 7, columnspan = 3)
 
@@ -164,15 +176,17 @@ SitStandSitcheck.grid(column  = 11, row  = 5)
 def totab2():
     tab_parent.select(tab2)
     
-button_next1 = Button(FrameClose, text = "Next", command  = lambda:[totab2()] )
+label_Next = Label(FrameNext, text = """"Select 'Next' to Save and Continue to File Selection.""")
+label_Next.pack(pady = 10)   
+    
+button_next1 = Button(FrameNext, text = "Next", command  = lambda:[totab2()] )
 button_next1.pack()
 
-ID = vID.get()
-sex = vSex.get()
-dom_limb = vDom.get()
-pattype = vType.get()
-aff_limb = vAffect.get()
-mon = vMonth.get()
+label_save= Label(FrameClose, text = """Once finished selecting all files 
+                  and inputting patient data, click "Accept" to update database. 
+                  If you've made an error, click "Cancel" and start again """)
+label_save.pack(pady = 10)   
+
 
 
 
@@ -183,7 +197,7 @@ InfoFrameGait.pack(fill = BOTH)
 SelectFrameGait = Frame(tab2,bg = "DodgerBlue3", bd = 6)
 SelectFrameGait.pack(fill = BOTH)
 TrialFrameGait= Frame(tab2,bg = "DodgerBlue3")
-TrialFrameGait.pack(fill = BOTH)
+TrialFrameGait.pack(expand =1, fill = BOTH)
 
 #Display filenames + whether clean or not    
 FrameTrial1Gait = Frame(TrialFrameGait, bg = "ivory3", bd = 6)
@@ -204,7 +218,7 @@ FramebottomGait.pack()
 
 labelGait = Label(InfoFrameGait, text = "Gait")
 labelGait["font"] = myFont
-labelGait.pack()
+labelGait.pack(pady = 10)
 
 labelbottomGait = Label(FramebottomGait, height = 1,  bg = "DodgerBlue3")
 labelbottomGait.pack()
@@ -590,16 +604,21 @@ def extract_all_Gait_files():
         extractintoDict(filelistGait[i], TriallistGait[i])
         
 button_exploreGait = Button(SelectFrameGait, text = "Select up to 6 Trials",  width = 40, bg = "ghost white",
-                          command = lambda : [browseFilesGait()])  
+                          command = lambda : [browseFilesGait(), extract_all_Gait_files()])  
 button_exploreGait.pack(pady=10)
 
 
 def totab3():
     tab_parent.select(tab3)
 
-label_Next_Gait = Label(FramebottomGait, text = "Select 'Next' to Save and Continue")
-label_Next_Gait.pack()                      
-button_nextGait = Button(FramebottomGait, text = "Next", command  = lambda:[extract_all_Gait_files(), totab3()])
+label_Next_Gait = Label(FramebottomGait, text = """Select 'Next' to Save and Continue. 
+    Do not navigate using the tabs. 
+    If this movement was not included, select 'Skip' """, justify = CENTER)
+label_Next_Gait.pack()    
+button_skip2 = Button(FramebottomGait, text = "Skip", 
+                      command  = lambda:[totab3()])
+button_skip2.pack(pady = 10)                    
+button_nextGait = Button(FramebottomGait, text = "Next", command  = lambda:[ totab3()])
 button_nextGait.pack(pady = 10)
 
 
@@ -634,7 +653,7 @@ FramebottomStepUp.pack()
 
 labelStepUp = Label(InfoFrameStepUp, text = "StepUp")
 labelStepUp["font"] = myFont
-labelStepUp.pack()
+labelStepUp.pack(pady = 10)
 
 labelbottomStepUp = Label(FramebottomStepUp, height = 1,  bg = "DodgerBlue3")
 labelbottomStepUp.pack()
@@ -903,8 +922,13 @@ check_strath.pack()
 def totab4():
     tab_parent.select(tab4)
     
-label_Next_StepUp = Label(FramebottomStepUp, text = "Select 'Next' to Save and Continue")
-label_Next_StepUp.pack()         
+label_Next_StepUp = Label(FramebottomStepUp, text = """Select 'Next' to Save and Continue. 
+    Do not navigate using the tabs. 
+    If this movement was not included, select 'Skip' """, justify = CENTER)
+label_Next_StepUp.pack() 
+button_skip3 = Button(FramebottomStepUp, text = "Skip", 
+                      command  = lambda:[totab4()])
+button_skip3.pack(pady = 10)  
 button_next3 = Button(FramebottomStepUp, text = "Next", 
                       command  = lambda:[extract_all_StepUp_files(), 
                                           add_max_min_to_dict(), totab4()] )
@@ -945,7 +969,7 @@ FramebottomStepDown.pack()
 
 labelStepDown = Label(InfoFrameStepDown, text = "StepDown")
 labelStepDown["font"] = myFont
-labelStepDown.pack()
+labelStepDown.pack(pady = 10)
 
 labelbottomStepDown = Label(FramebottomStepDown, height = 1,  bg = "DodgerBlue3")
 labelbottomStepDown.pack()
@@ -1213,8 +1237,13 @@ check_strath2.pack()
 
 def totab5():
     tab_parent.select(tab5)
-label_Next_StepDown = Label(FramebottomStepDown, text = "Select 'Next' to Save and Continue")
+label_Next_StepDown = Label(FramebottomStepDown, text = """Select 'Next' to Save and Continue. 
+    Do not navigate using the tabs. 
+    If this movement was not included, select 'Skip' """, justify = CENTER)
 label_Next_StepDown.pack()  
+button_skip4 = Button(FramebottomStepDown, text = "Skip", 
+                      command  = lambda:[totab5()])
+button_skip4.pack(pady = 10)   
 button_next4 = Button(FramebottomStepDown, text = "Next", 
                       command  = lambda:[totab5(),extract_all_StepDown_files(), 
                                           add_max_min_to_dictStepDown()] )
@@ -1232,7 +1261,7 @@ SelectFrameSTS.pack(fill = BOTH)
 TrialFrameSTS1= Frame(tab5,bg = "DodgerBlue3")
 TrialFrameSTS1.pack(fill = BOTH)   
 TrialFrameSTS2= Frame(tab5,bg = "DodgerBlue3")
-TrialFrameSTS2.pack(fill = BOTH)
+TrialFrameSTS2.pack(fill = BOTH, expand  = 1)
 
 FrameTrial1STS = Frame(TrialFrameSTS1, bg = "ivory3", bd = 6)
 FrameTrial1STS.pack()
@@ -1252,7 +1281,7 @@ FramebottomSTS.pack()
 
 labelSTS = Label(InfoFrameSTS, text = "Sit/Stand (STS)")
 labelSTS["font"] = myFont
-labelSTS.pack()
+labelSTS.pack(pady = 10)
 
 labelbottomSTS = Label(FramebottomSTS, height = 1,  bg = "DodgerBlue3")
 labelbottomSTS.pack()
@@ -1473,995 +1502,709 @@ button_exploreSTS.pack(pady=10)
 
 def totab1():
     tab_parent.select(tab1)
-label_Next_STS = Label(FramebottomSTS, text = "Select 'Next' to Save and Continue")
-label_Next_STS.pack()      
+label_Next_STS = Label(FramebottomSTS, text = """Select 'Next' to Save and Continue. 
+    Do not navigate using the tabs. 
+    If this movement was not included, select 'Skip' """, justify = CENTER)
+label_Next_STS.pack()   
+button_skip5 = Button(FramebottomSTS, text = "Skip", 
+                      command  = lambda:[totab1()])
+button_skip5.pack(pady = 10)   
 button_next5 = Button(FramebottomSTS, text = "Next", 
                       command  = lambda:[extract_all_STS_files(),
                                           split_STS(), add_moves_to_dict(), 
                                           add_max_min_to_dict_STS(), totab1()])
 button_next5.pack(pady = 10)
+
 SitStandSit = STS 
 
 
 
-# """TABLES"""
-# #Gait
+"""TABLES"""
+def variable():
+    global ID, sex, dom_limb, aff_limb, pattype, mon, visit
+    ID = vID.get()
+    sex = vSex.get()
+    dom_limb = vDom.get()
+    pattype = vType.get()
+    aff_limb = vAffect.get()
+    mon = vMonth.get()
+    visit = vVisit.get()
+def enter_Mean_Gait_Table (limb_avl, limb_avr):
+    c.execute("""INSERT INTO Mean_Gait_Table 
+              (ID, Dominant_Limb, Patient_Type, 
+              Sex, Month, Affected_Limb, Visit_Number)VALUES (?,?,?,?,?,?,?)""", 
+              (ID, dom_limb, pattype, sex, mon, aff_limb, visit))
+    for axis in ["x", "y", "z"]:
+        c.execute(f"""UPDATE Mean_Gait_Table
+                  SET 
+                  Left_Knee_Angle_{axis} = ?,
+                  Left_Knee_Moment_{axis} = ?,
+                  Left_Knee_Force_{axis} = ?,
+                  Left_Knee_Power_{axis} = ?,
+                  Left_Hip_Angle_{axis} = ?,
+                  Left_Hip_Moment_{axis} = ?,
+                  Left_Hip_Force_{axis} = ?,
+                  Left_Hip_Power_{axis} = ?,
+                  Left_Ankle_Angle_{axis} = ?,
+                  Left_Ankle_Moment_{axis} = ?,
+                  Left_Ankle_Force_{axis} = ?,
+                  Left_Ankle_Power_{axis} =  ?,
+                  Left_Foot_Progression_Angle_{axis} = ?,
+                  Left_GRF_{axis} =  ?,
+                  Left_NGRF_{axis} =  ?,
+                  Left_pelvis_Angle_{axis} =  ?,
+                  Left_COM_{axis} =  ?,
+                  Right_Knee_Angle_{axis} = ?,
+                  Right_Knee_Moment_{axis} = ?,
+                  Right_Knee_Force_{axis} = ?,
+                  Right_Knee_Power_{axis} = ?,
+                  Right_Hip_Angle_{axis} = ?,
+                  Right_Hip_Moment_{axis} = ?,
+                  Right_Hip_Force_{axis} = ?,
+                  Right_Hip_Power_{axis} = ?,
+                  Right_Ankle_Angle_{axis} = ?,
+                  Right_Ankle_Moment_{axis} = ?,
+                  Right_Ankle_Force_{axis} = ?,
+                  Right_Ankle_Power_{axis} =  ?,
+                  Right_Foot_Progression_Angle_{axis} = ?,
+                  Right_GRF_{axis} =  ?,
+                  Right_NGRF_{axis} =  ?,
+                  Right_pelvis_Angle_{axis} =  ?,
+                  Right_COM_{axis} =  ? 
+                  WHERE ID = ? and Visit_Number = ?
+                  """,(
+                  (str(limb_avl["KneeAngle"][axis])[1:-1]),
+                  (str(limb_avl["KneeMoment"][axis])[1:-1]),
+                  (str(limb_avl["KneeForce"][axis])[1:-1]),
+                  (str(limb_avl["KneePower"][axis])[1:-1]),
+                  (str(limb_avl["HipAngle"][axis])[1:-1]),
+                  (str(limb_avl["HipMoment"][axis])[1:-1]),
+                  (str(limb_avl["HipForce"][axis])[1:-1]),
+                  (str(limb_avl["HipPower"][axis])[1:-1]),
+                  (str(limb_avl["AnkleAngle"][axis])[1:-1]),
+                  (str(limb_avl["AnkleMoment"][axis])[1:-1]),
+                  (str(limb_avl["AnkleForce"][axis])[1:-1]),
+                  (str(limb_avl["AnklePower"][axis])[1:-1]),
+                  (str(limb_avl["FootProgressAngle"][axis])[1:-1]),
+                  (str(limb_avl["GRF"][axis])[1:-1]),
+                  (str(limb_avl["NGRF"][axis])[1:-1]),
+                  (str(limb_avl["pelvisAngle"][axis])[1:-1]),
+                  (str(limb_avl["COM"][axis])[1:-1]),
+                  (str(limb_avr["KneeAngle"][axis])[1:-1]),
+                  (str(limb_avr["KneeMoment"][axis])[1:-1]),
+                  (str(limb_avr["KneeForce"][axis])[1:-1]),
+                  (str(limb_avr["KneePower"][axis])[1:-1]),
+                  (str(limb_avr["HipAngle"][axis])[1:-1]),
+                  (str(limb_avr["HipMoment"][axis])[1:-1]),
+                  (str(limb_avr["HipForce"][axis])[1:-1]),
+                  (str(limb_avr["HipPower"][axis])[1:-1]),
+                  (str(limb_avr["AnkleAngle"][axis])[1:-1]),
+                  (str(limb_avr["AnkleMoment"][axis])[1:-1]),
+                  (str(limb_avr["AnkleForce"][axis])[1:-1]),
+                  (str(limb_avr["AnklePower"][axis])[1:-1]),
+                  (str(limb_avr["FootProgressAngle"][axis])[1:-1]),
+                  (str(limb_avr["GRF"][axis])[1:-1]),
+                  (str(limb_avr["NGRF"][axis])[1:-1]),
+                  (str(limb_avr["pelvisAngle"][axis])[1:-1]),
+                  (str(limb_avr["COM"][axis])[1:-1]),
+                  ID, visit
+                  ))
+def enter_Gait_extrema ():  
+    c.execute("""INSERT INTO Gait_Max_Min_Table 
+              (ID, Dominant_Limb, Patient_Type, 
+              Sex, Month, Affected_Limb, Visit_Number)VALUES (?,?,?,?,?,?,?)""", 
+              (ID, dom_limb, pattype, sex, mon, aff_limb, visit))
+    for phase in ["stance", "swing"]:
+#does not include a row for inclmplete cycles                      
+        if phase == "stance":
+            startl = 0
+            endl = Gait["Left Average"]["FootOff"]
+            startr = 0
+            endr = Gait["Right Average"]["FootOff"]
+        if phase == "swing":
+            startl = Gait["Left Average"]["FootOff"]
+            endl = -1
+            startr = Gait["Right Average"]["FootOff"]
+            endr = -1
+        for axis in ["x", "y", "z"]:
+            for function in ["max", "min"]:
+                if function=="max":
+                    fun = max
+                else:
+                    fun = min
+                c.execute(f"""UPDATE Gait_Max_Min_Table
+                          SET 
+                          {function}_Left_Knee_Angle_{axis}_{phase} = ?,
+                          {function}_Left_Knee_Moment_{axis}_{phase} = ?,
+                          {function}_Left_Knee_Force_{axis}_{phase} = ?,
+                          {function}_Left_Knee_Power_{axis}_{phase} = ?,
+                          {function}_Left_Hip_Angle_{axis}_{phase} = ?,
+                          {function}_Left_Hip_Moment_{axis}_{phase} = ?,
+                          {function}_Left_Hip_Force_{axis}_{phase} = ?,
+                          {function}_Left_Hip_Power_{axis}_{phase} = ?,
+                          {function}_Left_Ankle_Angle_{axis}_{phase} = ?,
+                          {function}_Left_Ankle_Moment_{axis}_{phase} = ?,
+                          {function}_Left_Ankle_Force_{axis}_{phase} = ?,
+                          {function}_Left_Ankle_Power_{axis}_{phase} =  ?,
+                          {function}_Left_Foot_Progression_Angle_{axis}_{phase} = ?,
+                          {function}_Left_GRF_{axis}_{phase} =  ?,
+                          {function}_Left_NGRF_{axis}_{phase} =  ?,
+                          {function}_Left_pelvis_Angle_{axis}_{phase} =  ?,
+                          {function}_Left_COM_{axis}_{phase} =  ?,
+                          {function}_Right_Knee_Angle_{axis}_{phase} = ?,
+                          {function}_Right_Knee_Moment_{axis}_{phase} = ?,
+                          {function}_Right_Knee_Force_{axis}_{phase} = ?,
+                          {function}_Right_Knee_Power_{axis}_{phase} = ?,
+                          {function}_Right_Hip_Angle_{axis}_{phase} = ?,
+                          {function}_Right_Hip_Moment_{axis}_{phase} = ?,
+                          {function}_Right_Hip_Force_{axis}_{phase} = ?,
+                          {function}_Right_Hip_Power_{axis}_{phase} = ?,
+                          {function}_Right_Ankle_Angle_{axis}_{phase} = ?,
+                          {function}_Right_Ankle_Moment_{axis}_{phase} = ?,
+                          {function}_Right_Ankle_Force_{axis}_{phase} = ?,
+                          {function}_Right_Ankle_Power_{axis}_{phase} =  ?,
+                          {function}_Right_Foot_Progression_Angle_{axis}_{phase} = ?,
+                          {function}_Right_GRF_{axis}_{phase} =  ?,
+                          {function}_Right_NGRF_{axis}_{phase} =  ?,
+                          {function}_Right_pelvis_Angle_{axis}_{phase} =  ?,
+                          {function}_Right_COM_{axis}_{phase} =  ?
+                          WHERE ID = ? and Visit_Number = ?
+                          """,(
+                          (fun((Gait["Left Average"]["KneeAngle"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["KneeMoment"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["KneeForce"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["KneePower"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["HipAngle"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["HipMoment"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["HipForce"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["HipPower"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["AnkleAngle"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["AnkleMoment"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["AnkleForce"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["AnklePower"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["FootProgressAngle"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["GRF"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["NGRF"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["pelvisAngle"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["COM"][axis])[startl:endl])),
+                          (fun((Gait["Right Average"]["KneeAngle"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["KneeMoment"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["KneeForce"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["KneePower"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["HipAngle"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["HipMoment"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["HipForce"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["HipPower"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["AnkleAngle"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["AnkleMoment"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["AnkleForce"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["AnklePower"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["FootProgressAngle"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["GRF"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["NGRF"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["pelvisAngle"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["COM"][axis])[startr:endr])),
+                          ID, visit
+                          ))
+def enter_Gait_Table (numTrials):
+    for TrialNum in numTrials:
+        filename = Gait[TrialNum]["Filename"] 
+        if len(Gait[TrialNum]["lfootstrikeFrame"])>1:
+            cleanleft = "Yes"
+        else:
+            cleanleft = "No"
+        if len(Gait[TrialNum]["rfootstrikeFrame"])>1:
+            cleanright = "Yes"
+        else:
+            cleanright = "No"
 
-# def create_Mean_Gait_Table():
-#         c.execute("""CREATE TABLE IF NOT EXISTS Mean_Gait_Table
-#               (ID TEXT, Dominant_Limb TEXT, Patient_Type TEXT, 
-#                Sex TEXT, Month TEXT, Affected_Limb TEXT)""")            
-# def columns_Mean_Gait_Table():
-#      for LR in ["Left", "Right"]:
-#          for axis in ["x", "y", "z"]:
-#              c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_Knee_Angle_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_Knee_Moment_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_Knee_Force_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_Knee_Power_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_Hip_Angle_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_Hip_Moment_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_Hip_Force_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_Hip_Power_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_Ankle_Angle_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_Ankle_Moment_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_Ankle_Force_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_Ankle_Power_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_Foot_Progression_Angle_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_GRF_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_NGRF_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_pelvis_Angle_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_COM_{axis} TEXT""")   
-# def enter_Mean_Gait_Table (limb_avl, limb_avr):
-#     c.execute("""INSERT INTO Mean_Gait_Table 
-#              (ID, Dominant_Limb, Patient_Type, 
-#               Sex, Month, Affected_Limb)VALUES (?,?,?,?,?,?)""", 
-#              (ID, dom_limb, pattype, sex, mon, aff_limb))
-#     for axis in ["x", "y", "z"]:
-#         c.execute(f"""UPDATE Mean_Gait_Table
-#                   SET 
-#                   Left_Knee_Angle_{axis} = ?,
-#                   Left_Knee_Moment_{axis} = ?,
-#                   Left_Knee_Force_{axis} = ?,
-#                   Left_Knee_Power_{axis} = ?,
-#                   Left_Hip_Angle_{axis} = ?,
-#                   Left_Hip_Moment_{axis} = ?,
-#                   Left_Hip_Force_{axis} = ?,
-#                   Left_Hip_Power_{axis} = ?,
-#                   Left_Ankle_Angle_{axis} = ?,
-#                   Left_Ankle_Moment_{axis} = ?,
-#                   Left_Ankle_Force_{axis} = ?,
-#                   Left_Ankle_Power_{axis} =  ?,
-#                   Left_Foot_Progression_Angle_{axis} = ?,
-#                   Left_GRF_{axis} =  ?,
-#                   Left_NGRF_{axis} =  ?,
-#                   Left_pelvis_Angle_{axis} =  ?,
-#                   Left_COM_{axis} =  ?,
-#                   Right_Knee_Angle_{axis} = ?,
-#                   Right_Knee_Moment_{axis} = ?,
-#                   Right_Knee_Force_{axis} = ?,
-#                   Right_Knee_Power_{axis} = ?,
-#                   Right_Hip_Angle_{axis} = ?,
-#                   Right_Hip_Moment_{axis} = ?,
-#                   Right_Hip_Force_{axis} = ?,
-#                   Right_Hip_Power_{axis} = ?,
-#                   Right_Ankle_Angle_{axis} = ?,
-#                   Right_Ankle_Moment_{axis} = ?,
-#                   Right_Ankle_Force_{axis} = ?,
-#                   Right_Ankle_Power_{axis} =  ?,
-#                   Right_Foot_Progression_Angle_{axis} = ?,
-#                   Right_GRF_{axis} =  ?,
-#                   Right_NGRF_{axis} =  ?,
-#                   Right_pelvis_Angle_{axis} =  ?,
-#                   Right_COM_{axis} =  ? 
-#                   WHERE ID = ?
-#                   """,(
-#                   (str(limb_avl["KneeAngle"][axis])[1:-1]),
-#                   (str(limb_avl["KneeMoment"][axis])[1:-1]),
-#                   (str(limb_avl["KneeForce"][axis])[1:-1]),
-#                   (str(limb_avl["KneePower"][axis])[1:-1]),
-#                   (str(limb_avl["HipAngle"][axis])[1:-1]),
-#                   (str(limb_avl["HipMoment"][axis])[1:-1]),
-#                   (str(limb_avl["HipForce"][axis])[1:-1]),
-#                   (str(limb_avl["HipPower"][axis])[1:-1]),
-#                   (str(limb_avl["AnkleAngle"][axis])[1:-1]),
-#                   (str(limb_avl["AnkleMoment"][axis])[1:-1]),
-#                   (str(limb_avl["AnkleForce"][axis])[1:-1]),
-#                   (str(limb_avl["AnklePower"][axis])[1:-1]),
-#                   (str(limb_avl["FootProgressAngle"][axis])[1:-1]),
-#                   (str(limb_avl["GRF"][axis])[1:-1]),
-#                   (str(limb_avl["NGRF"][axis])[1:-1]),
-#                   (str(limb_avl["pelvisAngle"][axis])[1:-1]),
-#                   (str(limb_avl["COM"][axis])[1:-1]),
-#                   (str(limb_avr["KneeAngle"][axis])[1:-1]),
-#                   (str(limb_avr["KneeMoment"][axis])[1:-1]),
-#                   (str(limb_avr["KneeForce"][axis])[1:-1]),
-#                   (str(limb_avr["KneePower"][axis])[1:-1]),
-#                   (str(limb_avr["HipAngle"][axis])[1:-1]),
-#                   (str(limb_avr["HipMoment"][axis])[1:-1]),
-#                   (str(limb_avr["HipForce"][axis])[1:-1]),
-#                   (str(limb_avr["HipPower"][axis])[1:-1]),
-#                   (str(limb_avr["AnkleAngle"][axis])[1:-1]),
-#                   (str(limb_avr["AnkleMoment"][axis])[1:-1]),
-#                   (str(limb_avr["AnkleForce"][axis])[1:-1]),
-#                   (str(limb_avr["AnklePower"][axis])[1:-1]),
-#                   (str(limb_avr["FootProgressAngle"][axis])[1:-1]),
-#                   (str(limb_avr["GRF"][axis])[1:-1]),
-#                   (str(limb_avr["NGRF"][axis])[1:-1]),
-#                   (str(limb_avr["pelvisAngle"][axis])[1:-1]),
-#                   (str(limb_avr["COM"][axis])[1:-1]),
-#                   ID
-#                   ))
-
-# def create_Gait_Max_Min_Table():
-#         c.execute("""CREATE TABLE IF NOT EXISTS Gait_Max_Min_Table
-#               (ID TEXT, Dominant_Limb TEXT, Patient_Type TEXT, 
-#                Sex TEXT, Month TEXT, Affected_Limb TEXT)""")            
-# def columns_Gait_Max_Min_Table():
-#     for phase in ["stance", "swing"]:
-#         for limb in ["Left", "Right"]:
-#             for axis in ["x", "y", "z"]:
-#                 for function in ["max", "min"]:
-#                    c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_Knee_Angle_{axis}_{phase} REAL""")
-#                    c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_Knee_Moment_{axis}_{phase} REAL""")
-#                    c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_Knee_Force_{axis}_{phase} REAL""")
-#                    c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_Knee_Power_{axis}_{phase} REAL""")
-#                    c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_Hip_Angle_{axis}_{phase} REAL""")
-#                    c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_Hip_Moment_{axis}_{phase} REAL""")
-#                    c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_Hip_Force_{axis}_{phase} REAL""")
-#                    c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_Hip_Power_{axis}_{phase} REAL""")
-#                    c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Angle_{axis}_{phase} REAL""")
-#                    c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Moment_{axis}_{phase} REAL""")
-#                    c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Force_{axis}_{phase} REAL""")
-#                    c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Power_{axis}_{phase} REAL""")
-#                    c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_Foot_Progression_Angle_{axis}_{phase} REAL""")
-#                    c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_GRF_{axis}_{phase} REAL""")
-#                    c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_NGRF_{axis}_{phase} REAL""")
-#                    c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_pelvis_Angle_{axis}_{phase} REAL""")
-#                    c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_COM_{axis}_{phase} REAL""")   
-# def enter_Gait_extrema ():  
-#     c.execute("""INSERT INTO Gait_Max_Min_Table 
-#               (ID, Dominant_Limb, Patient_Type, 
-#               Sex, Month, Affected_Limb)VALUES (?,?,?,?,?,?)""", 
-#              (ID, dom_limb, pattype, sex, mon, aff_limb))
-#     for phase in ["stance", "swing"]:
-# #does not include a row for inclmplete cycles                      
-#         if phase == "stance":
-#             startl = 0
-#             endl = Gait["Left Average"]["FootOff"]
-#             startr = 0
-#             endr = Gait["Right Average"]["FootOff"]
-#         if phase == "swing":
-#             startl = Gait["Left Average"]["FootOff"]
-#             endl = -1
-#             startr = Gait["Right Average"]["FootOff"]
-#             endr = -1
-#         for axis in ["x", "y", "z"]:
-#             for function in ["max", "min"]:
-#                 if function=="max":
-#                     fun = max
-#                 else:
-#                     fun = min
-#                 c.execute(f"""UPDATE Gait_Max_Min_Table
-#                           SET 
-#                           {function}_Left_Knee_Angle_{axis}_{phase} = ?,
-#                           {function}_Left_Knee_Moment_{axis}_{phase} = ?,
-#                           {function}_Left_Knee_Force_{axis}_{phase} = ?,
-#                           {function}_Left_Knee_Power_{axis}_{phase} = ?,
-#                           {function}_Left_Hip_Angle_{axis}_{phase} = ?,
-#                           {function}_Left_Hip_Moment_{axis}_{phase} = ?,
-#                           {function}_Left_Hip_Force_{axis}_{phase} = ?,
-#                           {function}_Left_Hip_Power_{axis}_{phase} = ?,
-#                           {function}_Left_Ankle_Angle_{axis}_{phase} = ?,
-#                           {function}_Left_Ankle_Moment_{axis}_{phase} = ?,
-#                           {function}_Left_Ankle_Force_{axis}_{phase} = ?,
-#                           {function}_Left_Ankle_Power_{axis}_{phase} =  ?,
-#                           {function}_Left_Foot_Progression_Angle_{axis}_{phase} = ?,
-#                           {function}_Left_GRF_{axis}_{phase} =  ?,
-#                           {function}_Left_NGRF_{axis}_{phase} =  ?,
-#                           {function}_Left_pelvis_Angle_{axis}_{phase} =  ?,
-#                           {function}_Left_COM_{axis}_{phase} =  ?,
-#                           {function}_Right_Knee_Angle_{axis}_{phase} = ?,
-#                           {function}_Right_Knee_Moment_{axis}_{phase} = ?,
-#                           {function}_Right_Knee_Force_{axis}_{phase} = ?,
-#                           {function}_Right_Knee_Power_{axis}_{phase} = ?,
-#                           {function}_Right_Hip_Angle_{axis}_{phase} = ?,
-#                           {function}_Right_Hip_Moment_{axis}_{phase} = ?,
-#                           {function}_Right_Hip_Force_{axis}_{phase} = ?,
-#                           {function}_Right_Hip_Power_{axis}_{phase} = ?,
-#                           {function}_Right_Ankle_Angle_{axis}_{phase} = ?,
-#                           {function}_Right_Ankle_Moment_{axis}_{phase} = ?,
-#                           {function}_Right_Ankle_Force_{axis}_{phase} = ?,
-#                           {function}_Right_Ankle_Power_{axis}_{phase} =  ?,
-#                           {function}_Right_Foot_Progression_Angle_{axis}_{phase} = ?,
-#                           {function}_Right_GRF_{axis}_{phase} =  ?,
-#                           {function}_Right_NGRF_{axis}_{phase} =  ?,
-#                           {function}_Right_pelvis_Angle_{axis}_{phase} =  ?,
-#                           {function}_Right_COM_{axis}_{phase} =  ?
-#                           WHERE ID = ?
-#                           """,(
-#                           (fun((Gait["Left Average"]["KneeAngle"][axis])[startl:endl])),
-#                           (fun((Gait["Left Average"]["KneeMoment"][axis])[startl:endl])),
-#                           (fun((Gait["Left Average"]["KneeForce"][axis])[startl:endl])),
-#                           (fun((Gait["Left Average"]["KneePower"][axis])[startl:endl])),
-#                           (fun((Gait["Left Average"]["HipAngle"][axis])[startl:endl])),
-#                           (fun((Gait["Left Average"]["HipMoment"][axis])[startl:endl])),
-#                           (fun((Gait["Left Average"]["HipForce"][axis])[startl:endl])),
-#                           (fun((Gait["Left Average"]["HipPower"][axis])[startl:endl])),
-#                           (fun((Gait["Left Average"]["AnkleAngle"][axis])[startl:endl])),
-#                           (fun((Gait["Left Average"]["AnkleMoment"][axis])[startl:endl])),
-#                           (fun((Gait["Left Average"]["AnkleForce"][axis])[startl:endl])),
-#                           (fun((Gait["Left Average"]["AnklePower"][axis])[startl:endl])),
-#                           (fun((Gait["Left Average"]["FootProgressAngle"][axis])[startl:endl])),
-#                           (fun((Gait["Left Average"]["GRF"][axis])[startl:endl])),
-#                           (fun((Gait["Left Average"]["NGRF"][axis])[startl:endl])),
-#                           (fun((Gait["Left Average"]["pelvisAngle"][axis])[startl:endl])),
-#                           (fun((Gait["Left Average"]["COM"][axis])[startl:endl])),
-#                           (fun((Gait["Right Average"]["KneeAngle"][axis])[startr:endr])),
-#                           (fun((Gait["Right Average"]["KneeMoment"][axis])[startr:endr])),
-#                           (fun((Gait["Right Average"]["KneeForce"][axis])[startr:endr])),
-#                           (fun((Gait["Right Average"]["KneePower"][axis])[startr:endr])),
-#                           (fun((Gait["Right Average"]["HipAngle"][axis])[startr:endr])),
-#                           (fun((Gait["Right Average"]["HipMoment"][axis])[startr:endr])),
-#                           (fun((Gait["Right Average"]["HipForce"][axis])[startr:endr])),
-#                           (fun((Gait["Right Average"]["HipPower"][axis])[startr:endr])),
-#                           (fun((Gait["Right Average"]["AnkleAngle"][axis])[startr:endr])),
-#                           (fun((Gait["Right Average"]["AnkleMoment"][axis])[startr:endr])),
-#                           (fun((Gait["Right Average"]["AnkleForce"][axis])[startr:endr])),
-#                           (fun((Gait["Right Average"]["AnklePower"][axis])[startr:endr])),
-#                           (fun((Gait["Right Average"]["FootProgressAngle"][axis])[startr:endr])),
-#                           (fun((Gait["Right Average"]["GRF"][axis])[startr:endr])),
-#                           (fun((Gait["Right Average"]["NGRF"][axis])[startr:endr])),
-#                           (fun((Gait["Right Average"]["pelvisAngle"][axis])[startr:endr])),
-#                           (fun((Gait["Right Average"]["COM"][axis])[startr:endr])),
-#                           ID
-#                           ))
-          
-# def create_Gait_Table():
-#         c.execute("""CREATE TABLE IF NOT EXISTS Gait_Table
-#               (ID TEXT, Dominant_Limb TEXT, Patient_Type TEXT, 
-#               Sex TEXT, Month TEXT, Affected_Limb TEXT,
-#               Filename TEXT, Complete_Left_Cycle TEXT, Complete_Right_Cycle TEXT,
-#               Left_Footstrike_Index TEXT, Left_FootOff_Index TEXT,
-#               Right_Footstrike_Index TEXT, Right_FootOff_Index TEXT)""")            
-# def columns_Gait_Table():
-#      for LR in ["Left", "Right"]:
-#          for axis in ["x", "y", "z"]:
-#              c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Knee_Angle_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Knee_Moment_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Knee_Force_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Knee_Power_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Hip_Angle_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Hip_Moment_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Hip_Force_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Hip_Power_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Ankle_Angle_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Ankle_Moment_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Ankle_Force_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Ankle_Power_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Foot_Progression_Angle_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_GRF_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_NGRF_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_pelvis_Angle_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_COM_{axis} TEXT""")             
-# def enter_Gait_Table (numTrials):
-#     for TrialNum in numTrials:
-#         filename = Gait[TrialNum]["Filename"] 
-#         if len(Gait[TrialNum]["lfootstrikeFrame"])>1:
-#             cleanleft = "Yes"
-#         else:
-#             cleanleft = "No"
-#         if len(Gait[TrialNum]["rfootstrikeFrame"])>1:
-#             cleanright = "Yes"
-#         else:
-#             cleanright = "No"
-
-#         c.execute("""INSERT INTO Gait_Table 
-#                   (ID, Dominant_Limb, Patient_Type, 
-#                   Sex, Month, Affected_Limb, Filename, 
-#                   Complete_left_Cycle, Complete_Right_Cycle, 
-#                   Left_Footstrike_Index, Left_FootOff_Index, 
-#                   Right_Footstrike_Index, Right_FootOff_Index) 
-#                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""", 
-#                   (ID, dom_limb, pattype, sex, mon, aff_limb, 
-#                    filename, cleanleft, cleanright,
-#                   (str(Gait[TrialNum]["lfootstrikeFrame"])),
-#                   (str(Gait[TrialNum]["lfootoffFrame"])),
-#                   (str(Gait[TrialNum]["rfootstrikeFrame"])),
-#                   (str(Gait[TrialNum]["rfootoffFrame"]))))
-#         for LR in ["Left", "Right"]:
-#             for axis in ["x", "y", "z"]:
-#                 c.execute(f"""UPDATE Gait_Table
-#                           SET 
-#                           {LR}_Knee_Angle_{axis} = ?,
-#                           {LR}_Hip_Angle_{axis} = ?,
-#                           {LR}_Ankle_Angle_{axis} = ?,
-#                           {LR}_Foot_Progression_Angle_{axis} = ?,
-#                           {LR}_pelvis_Angle_{axis} =  ?,
-#                           {LR}_COM_{axis} =  ?
-#                           WHERE Filename = ?
-#                           """,(
-#                           (str(Gait[TrialNum][LR]["KneeAngle"][axis])[1:-1]),
-#                           (str(Gait[TrialNum][LR]["HipAngle"][axis])[1:-1]),
-#                           (str(Gait[TrialNum][LR]["AnkleAngle"][axis])[1:-1]),
-#                           (str(Gait[TrialNum][LR]["FootProgressAngle"][axis])[1:-1]),
-#                           (str(Gait[TrialNum][LR]["pelvisAngle"][axis])[1:-1]),
-#                           (str(Gait[TrialNum][LR]["COM"][axis])[1:-1]),
-#                           filename
-#                           ))
-#                 try:
-#                     c.execute(f"""UPDATE Gait_Table
-#                           SET 
-#                           {LR}_Knee_Moment_{axis} = ?,
-#                           {LR}_Knee_Force_{axis} = ?,
-#                           {LR}_Knee_Power_{axis} = ?,
-#                           {LR}_Hip_Moment_{axis} = ?,
-#                           {LR}_Hip_Force_{axis} = ?,
-#                           {LR}_Hip_Power_{axis} = ?,
-#                           {LR}_Ankle_Moment_{axis} = ?,
-#                           {LR}_Ankle_Force_{axis} = ?,
-#                           {LR}_Ankle_Power_{axis} =  ?,
-#                           {LR}_GRF_{axis} =  ?,
-#                           {LR}_NGRF_{axis} =  ?,
-#                           WHERE Filename = ?
-#                           """,(
-#                           (str(Gait[TrialNum][LR]["KneeMoment"][axis])[1:-1]),
-#                           (str(Gait[TrialNum][LR]["KneeForce"][axis])[1:-1]),
-#                           (str(Gait[TrialNum][LR]["KneePower"][axis])[1:-1]),
-#                           (str(Gait[TrialNum][LR]["HipMoment"][axis])[1:-1]),
-#                           (str(Gait[TrialNum][LR]["HipForce"][axis])[1:-1]),
-#                           (str(Gait[TrialNum][LR]["HipPower"][axis])[1:-1]),
-#                           (str(Gait[TrialNum][LR]["AnkleMoment"][axis])[1:-1]),
-#                           (str(Gait[TrialNum][LR]["AnkleForce"][axis])[1:-1]),
-#                           (str(Gait[TrialNum][LR]["AnklePower"][axis])[1:-1]),
-#                           (str(Gait[TrialNum][LR]["GRF"][axis])[1:-1]),
-#                           (str(Gait[TrialNum][LR]["NGRF"][axis])[1:-1]),
-#                           filename
-#                           ))
-#                 except:
-#                     pass
+        c.execute("""INSERT INTO Gait_Table 
+                  (ID, Dominant_Limb, Patient_Type, 
+                  Sex, Month, Affected_Limb, Visit_Number,Filename, 
+                  Complete_left_Cycle, Complete_Right_Cycle, 
+                  Left_Footstrike_Index, Left_FootOff_Index, 
+                  Right_Footstrike_Index, Right_FootOff_Index) 
+                  VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""", 
+                  (ID, dom_limb, pattype, sex, mon, aff_limb, visit,
+                    filename, cleanleft, cleanright,
+                  (str(Gait[TrialNum]["lfootstrikeFrame"])),
+                  (str(Gait[TrialNum]["lfootoffFrame"])),
+                  (str(Gait[TrialNum]["rfootstrikeFrame"])),
+                  (str(Gait[TrialNum]["rfootoffFrame"]))))
+        for LR in ["Left", "Right"]:
+            for axis in ["x", "y", "z"]:
+                c.execute(f"""UPDATE Gait_Table
+                          SET 
+                          {LR}_Knee_Angle_{axis} = ?,
+                          {LR}_Hip_Angle_{axis} = ?,
+                          {LR}_Ankle_Angle_{axis} = ?,
+                          {LR}_Foot_Progression_Angle_{axis} = ?,
+                          {LR}_pelvis_Angle_{axis} =  ?,
+                          {LR}_COM_{axis} =  ?
+                          WHERE Filename = ?
+                          """,(
+                          (str(Gait[TrialNum][LR]["KneeAngle"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["HipAngle"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["AnkleAngle"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["FootProgressAngle"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["pelvisAngle"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["COM"][axis])[1:-1]),
+                          filename
+                          ))
+                try:
+                    c.execute(f"""UPDATE Gait_Table
+                          SET 
+                          {LR}_Knee_Moment_{axis} = ?,
+                          {LR}_Knee_Force_{axis} = ?,
+                          {LR}_Knee_Power_{axis} = ?,
+                          {LR}_Hip_Moment_{axis} = ?,
+                          {LR}_Hip_Force_{axis} = ?,
+                          {LR}_Hip_Power_{axis} = ?,
+                          {LR}_Ankle_Moment_{axis} = ?,
+                          {LR}_Ankle_Force_{axis} = ?,
+                          {LR}_Ankle_Power_{axis} =  ?,
+                          {LR}_GRF_{axis} =  ?,
+                          {LR}_NGRF_{axis} =  ?,
+                          WHERE Filename = ?
+                          """,(
+                          (str(Gait[TrialNum][LR]["KneeMoment"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["KneeForce"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["KneePower"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["HipMoment"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["HipForce"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["HipPower"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["AnkleMoment"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["AnkleForce"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["AnklePower"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["GRF"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["NGRF"][axis])[1:-1]),
+                          filename
+                          ))
+                except:
+                    pass
 
 
-# #Step Up
-# def create_StepUp_Max_Min_Table():
-#         c.execute("""CREATE TABLE IF NOT EXISTS StepUp_Max_Min_Table
-#               (ID TEXT, Dominant_Limb TEXT, Patient_Type TEXT, 
-#                Sex TEXT, Month TEXT, Affected_Limb TEXT, Trial_Type TEXT)""")            
-# def columns_StepUp_Max_Min_Table():
-#     for limb in ["Left", "Right"]:
-#         for axis in ["x", "y", "z"]:
-#             for function in ["max", "min"]:
-#                c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_Knee_Angle_{axis} REAL""")
-#                c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_Knee_Moment_{axis} REAL""")
-#                c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_Knee_Force_{axis} REAL""")
-#                c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_Knee_Power_{axis} REAL""")
-#                c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_Hip_Angle_{axis} REAL""")
-#                c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_Hip_Moment_{axis} REAL""")
-#                c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_Hip_Force_{axis} REAL""")
-#                c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_Hip_Power_{axis} REAL""")
-#                c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Angle_{axis} REAL""")
-#                c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Moment_{axis} REAL""")
-#                c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Force_{axis} REAL""")
-#                c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Power_{axis} REAL""")
-#                c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_Foot_Progression_Angle_{axis} REAL""")
-#                c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_pelvis_Angle_{axis} REAL""")
-#                c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_COM_{axis} REAL""")   
-# def enter_StepUp_extrema ():  
-#     c.execute("""INSERT INTO StepUp_Max_Min_Table 
-#               (ID, Dominant_Limb, Patient_Type, 
-#               Sex, Month, Affected_Limb, Trial_Type)VALUES (?,?,?,?,?,?,?)""", 
-#              (ID, dom_limb, pattype, sex, mon, aff_limb, str(StepUp["Trial 1"]["Testing Type"])))
-#     for limb in ["Left", "Right"]:
-#         for axis in ["x", "y", "z"]:
-#             for function in ["max", "min"]:
-#                 c.execute(f"""UPDATE StepUp_Max_Min_Table
-#                           SET 
-#                           {function}_{limb}_Knee_Angle_{axis} = ?,
-#                           {function}_{limb}_Knee_Moment_{axis} = ?,
-#                           {function}_{limb}_Knee_Force_{axis} = ?,
-#                           {function}_{limb}_Knee_Power_{axis} = ?,
-#                           {function}_{limb}_Hip_Angle_{axis} = ?,
-#                           {function}_{limb}_Hip_Moment_{axis} = ?,
-#                           {function}_{limb}_Hip_Force_{axis} = ?,
-#                           {function}_{limb}_Hip_Power_{axis} = ?,
-#                           {function}_{limb}_Ankle_Angle_{axis} = ?,
-#                           {function}_{limb}_Ankle_Moment_{axis} = ?,
-#                           {function}_{limb}_Ankle_Force_{axis} = ?,
-#                           {function}_{limb}_Ankle_Power_{axis} =  ?,
-#                           {function}_{limb}_Foot_Progression_Angle_{axis} = ?,
-#                           {function}_{limb}_pelvis_Angle_{axis} =  ?,
-#                           {function}_{limb}_COM_{axis} =  ?
-#                           WHERE ID = ?
-#                           """,(
-#                           (StepUp[function][limb]["KneeAngle"][axis]),
-#                           (StepUp[function][limb]["KneeMoment"][axis]),
-#                           (StepUp[function][limb]["KneeForce"][axis]),
-#                           (StepUp[function][limb]["KneePower"][axis]),
-#                           (StepUp[function][limb]["HipAngle"][axis]),
-#                           (StepUp[function][limb]["HipMoment"][axis]),
-#                           (StepUp[function][limb]["HipForce"][axis]),
-#                           (StepUp[function][limb]["HipPower"][axis]),
-#                           (StepUp[function][limb]["AnkleAngle"][axis]),
-#                           (StepUp[function][limb]["AnkleMoment"][axis]),
-#                           (StepUp[function][limb]["AnkleForce"][axis]),
-#                           (StepUp[function][limb]["AnklePower"][axis]),
-#                           (StepUp[function][limb]["FootProgressAngle"][axis]),
-#                           (StepUp[function][limb]["pelvisAngle"][axis]),
-#                           (StepUp[function][limb]["COM"][axis]),
-#                           ID
-#                           ))
-          
-# def create_StepUp_Table():
-#         c.execute("""CREATE TABLE IF NOT EXISTS StepUp_Table
-#               (ID TEXT, Dominant_Limb TEXT, Patient_Type TEXT, 
-#               Sex TEXT, Month TEXT, Affected_Limb TEXT, Trial_Type TEXT,
-#               Filename TEXT, Complete_Left_Cycle TEXT, Complete_Right_Cycle TEXT,
-#               Left_Footstrike_Index TEXT, Left_FootOff_Index TEXT,
-#               Right_Footstrike_Index TEXT, Right_FootOff_Index TEXT)""")            
-# def columns_StepUp_Table():
-#      for LR in ["Left", "Right"]:
-#          for axis in ["x", "y", "z"]:
-#              c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Knee_Angle_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Knee_Moment_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Knee_Force_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Knee_Power_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Hip_Angle_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Hip_Moment_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Hip_Force_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Hip_Power_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Ankle_Angle_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Ankle_Moment_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Ankle_Force_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Ankle_Power_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Foot_Progression_Angle_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_pelvis_Angle_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_COM_{axis} TEXT""")             
-# def enter_StepUp_Table (numTrials):
-#     for TrialNum in numTrials:
-#         filename = StepUp[TrialNum]["Filename"] 
-#         c.execute("""INSERT INTO StepUp_Table 
-#                   (ID, Dominant_Limb, Patient_Type, 
-#                   Sex, Month, Affected_Limb, Filename, Trial_Type) 
-#                   VALUES (?,?,?,?,?,?,?,?)""", 
-#                   (ID, dom_limb, pattype, sex, mon, aff_limb, 
-#                    filename, str(StepUp["Trial 1"]["Testing Type"])))
-#         for LR in ["Left", "Right"]:
-#             try:
-#                 for axis in ["x", "y", "z"]:
-#                     c.execute(f"""UPDATE StepUp_Table
-#                               SET 
-#                               {LR}_Knee_Angle_{axis} = ?,
-#                               {LR}_Hip_Angle_{axis} = ?,
-#                               {LR}_Ankle_Angle_{axis} = ?,
-#                               {LR}_Foot_Progression_Angle_{axis} = ?,
-#                               {LR}_pelvis_Angle_{axis} =  ?,
-#                               {LR}_COM_{axis} =  ?,
-#                               {LR}_Knee_Moment_{axis} = ?,
-#                               {LR}_Knee_Force_{axis} = ?,
-#                               {LR}_Knee_Power_{axis} = ?,
-#                               {LR}_Hip_Moment_{axis} = ?,
-#                               {LR}_Hip_Force_{axis} = ?,
-#                               {LR}_Hip_Power_{axis} = ?,
-#                               {LR}_Ankle_Moment_{axis} = ?,
-#                               {LR}_Ankle_Force_{axis} = ?,
-#                               {LR}_Ankle_Power_{axis} =  ?
-#                               WHERE Filename = ?
-#                               """,(
-#                               (str(StepUp[TrialNum][LR]["KneeAngle"][axis])[1:-1]),
-#                               (str(StepUp[TrialNum][LR]["HipAngle"][axis])[1:-1]),
-#                               (str(StepUp[TrialNum][LR]["AnkleAngle"][axis])[1:-1]),
-#                               (str(StepUp[TrialNum][LR]["FootProgressAngle"][axis])[1:-1]),
-#                               (str(StepUp[TrialNum][LR]["pelvisAngle"][axis])[1:-1]),
-#                               (str(StepUp[TrialNum][LR]["COM"][axis])[1:-1]),
-#                               (str(StepUp[TrialNum][LR]["KneeMoment"][axis])[1:-1]),
-#                               (str(StepUp[TrialNum][LR]["KneeForce"][axis])[1:-1]),
-#                               (str(StepUp[TrialNum][LR]["KneePower"][axis])[1:-1]),
-#                               (str(StepUp[TrialNum][LR]["HipMoment"][axis])[1:-1]),
-#                               (str(StepUp[TrialNum][LR]["HipForce"][axis])[1:-1]),
-#                               (str(StepUp[TrialNum][LR]["HipPower"][axis])[1:-1]),
-#                               (str(StepUp[TrialNum][LR]["AnkleMoment"][axis])[1:-1]),
-#                               (str(StepUp[TrialNum][LR]["AnkleForce"][axis])[1:-1]),
-#                               (str(StepUp[TrialNum][LR]["AnklePower"][axis])[1:-1]),
-#                               filename
-#                               ))
-#             except:
-#                 pass
+#Step Up
+def enter_StepUp_extrema ():  
+    c.execute("""INSERT INTO StepUp_Max_Min_Table 
+              (ID, Dominant_Limb, Patient_Type, 
+              Sex, Month, Affected_Limb, Trial_Type, Visit_Number )VALUES (?,?,?,?,?,?,?,?)""", 
+              (ID, dom_limb, pattype, sex, mon, aff_limb, 
+               str(StepUp["Trial 1"]["Testing Type"]), visit))
+    for limb in ["Left", "Right"]:
+        for axis in ["x", "y", "z"]:
+            for function in ["max", "min"]:
+                c.execute(f"""UPDATE StepUp_Max_Min_Table
+                          SET 
+                          {function}_{limb}_Knee_Angle_{axis} = ?,
+                          {function}_{limb}_Knee_Moment_{axis} = ?,
+                          {function}_{limb}_Knee_Force_{axis} = ?,
+                          {function}_{limb}_Knee_Power_{axis} = ?,
+                          {function}_{limb}_Hip_Angle_{axis} = ?,
+                          {function}_{limb}_Hip_Moment_{axis} = ?,
+                          {function}_{limb}_Hip_Force_{axis} = ?,
+                          {function}_{limb}_Hip_Power_{axis} = ?,
+                          {function}_{limb}_Ankle_Angle_{axis} = ?,
+                          {function}_{limb}_Ankle_Moment_{axis} = ?,
+                          {function}_{limb}_Ankle_Force_{axis} = ?,
+                          {function}_{limb}_Ankle_Power_{axis} =  ?,
+                          {function}_{limb}_Foot_Progression_Angle_{axis} = ?,
+                          {function}_{limb}_pelvis_Angle_{axis} =  ?,
+                          {function}_{limb}_COM_{axis} =  ?
+                          WHERE ID = ? and Visit_Number =?
+                          """,(
+                          (StepUp[function][limb]["KneeAngle"][axis]),
+                          (StepUp[function][limb]["KneeMoment"][axis]),
+                          (StepUp[function][limb]["KneeForce"][axis]),
+                          (StepUp[function][limb]["KneePower"][axis]),
+                          (StepUp[function][limb]["HipAngle"][axis]),
+                          (StepUp[function][limb]["HipMoment"][axis]),
+                          (StepUp[function][limb]["HipForce"][axis]),
+                          (StepUp[function][limb]["HipPower"][axis]),
+                          (StepUp[function][limb]["AnkleAngle"][axis]),
+                          (StepUp[function][limb]["AnkleMoment"][axis]),
+                          (StepUp[function][limb]["AnkleForce"][axis]),
+                          (StepUp[function][limb]["AnklePower"][axis]),
+                          (StepUp[function][limb]["FootProgressAngle"][axis]),
+                          (StepUp[function][limb]["pelvisAngle"][axis]),
+                          (StepUp[function][limb]["COM"][axis]),
+                          ID, visit
+                          ))
+def enter_StepUp_Table (numTrials):
+    for TrialNum in numTrials:
+        filename = StepUp[TrialNum]["Filename"] 
+        c.execute("""INSERT INTO StepUp_Table 
+                  (ID, Dominant_Limb, Patient_Type, 
+                  Sex, Month, Affected_Limb, Filename, Trial_Type, Visit_Number) 
+                  VALUES (?,?,?,?,?,?,?,?,?)""", 
+                  (ID, dom_limb, pattype, sex, mon, aff_limb, 
+                    filename, str(StepUp["Trial 1"]["Testing Type"]), visit))
+        for LR in ["Left", "Right"]:
+            try:
+                for axis in ["x", "y", "z"]:
+                    c.execute(f"""UPDATE StepUp_Table
+                              SET 
+                              {LR}_Knee_Angle_{axis} = ?,
+                              {LR}_Hip_Angle_{axis} = ?,
+                              {LR}_Ankle_Angle_{axis} = ?,
+                              {LR}_Foot_Progression_Angle_{axis} = ?,
+                              {LR}_pelvis_Angle_{axis} =  ?,
+                              {LR}_COM_{axis} =  ?,
+                              {LR}_Knee_Moment_{axis} = ?,
+                              {LR}_Knee_Force_{axis} = ?,
+                              {LR}_Knee_Power_{axis} = ?,
+                              {LR}_Hip_Moment_{axis} = ?,
+                              {LR}_Hip_Force_{axis} = ?,
+                              {LR}_Hip_Power_{axis} = ?,
+                              {LR}_Ankle_Moment_{axis} = ?,
+                              {LR}_Ankle_Force_{axis} = ?,
+                              {LR}_Ankle_Power_{axis} =  ?
+                              WHERE Filename = ?
+                              """,(
+                              (str(StepUp[TrialNum][LR]["KneeAngle"][axis])[1:-1]),
+                              (str(StepUp[TrialNum][LR]["HipAngle"][axis])[1:-1]),
+                              (str(StepUp[TrialNum][LR]["AnkleAngle"][axis])[1:-1]),
+                              (str(StepUp[TrialNum][LR]["FootProgressAngle"][axis])[1:-1]),
+                              (str(StepUp[TrialNum][LR]["pelvisAngle"][axis])[1:-1]),
+                              (str(StepUp[TrialNum][LR]["COM"][axis])[1:-1]),
+                              (str(StepUp[TrialNum][LR]["KneeMoment"][axis])[1:-1]),
+                              (str(StepUp[TrialNum][LR]["KneeForce"][axis])[1:-1]),
+                              (str(StepUp[TrialNum][LR]["KneePower"][axis])[1:-1]),
+                              (str(StepUp[TrialNum][LR]["HipMoment"][axis])[1:-1]),
+                              (str(StepUp[TrialNum][LR]["HipForce"][axis])[1:-1]),
+                              (str(StepUp[TrialNum][LR]["HipPower"][axis])[1:-1]),
+                              (str(StepUp[TrialNum][LR]["AnkleMoment"][axis])[1:-1]),
+                              (str(StepUp[TrialNum][LR]["AnkleForce"][axis])[1:-1]),
+                              (str(StepUp[TrialNum][LR]["AnklePower"][axis])[1:-1]),
+                              filename
+                              ))
+            except:
+                pass
 
 
-# #Step Down
-# def create_StepDown_Max_Min_Table():
-#         c.execute("""CREATE TABLE IF NOT EXISTS StepDown_Max_Min_Table
-#               (ID TEXT, Dominant_Limb TEXT, Patient_Type TEXT, 
-#                Sex TEXT, Month TEXT, Affected_Limb TEXT, Trial_Type TEXT)""")            
-# def columns_StepDown_Max_Min_Table():
-#     for limb in ["Left", "Right"]:
-#         for axis in ["x", "y", "z"]:
-#             for function in ["max", "min"]:
-#                c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_Knee_Angle_{axis} REAL""")
-#                c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_Knee_Moment_{axis} REAL""")
-#                c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_Knee_Force_{axis} REAL""")
-#                c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_Knee_Power_{axis} REAL""")
-#                c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_Hip_Angle_{axis} REAL""")
-#                c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_Hip_Moment_{axis} REAL""")
-#                c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_Hip_Force_{axis} REAL""")
-#                c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_Hip_Power_{axis} REAL""")
-#                c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Angle_{axis} REAL""")
-#                c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Moment_{axis} REAL""")
-#                c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Force_{axis} REAL""")
-#                c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Power_{axis} REAL""")
-#                c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_Foot_Progression_Angle_{axis} REAL""")
-#                c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_pelvis_Angle_{axis} REAL""")
-#                c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_COM_{axis} REAL""")   
-# def enter_StepDown_extrema ():  
-#     c.execute("""INSERT INTO StepDown_Max_Min_Table 
-#               (ID, Dominant_Limb, Patient_Type, 
-#               Sex, Month, Affected_Limb, Trial_Type)VALUES (?,?,?,?,?,?,?)""", 
-#              (ID, dom_limb, pattype, sex, mon, aff_limb,
-#               str(StepUp["Trial 1"]["Testing Type"])))
-#     for limb in ["Left", "Right"]:
-#         for axis in ["x", "y", "z"]:
-#             for function in ["max", "min"]:
-#                 c.execute(f"""UPDATE StepDown_Max_Min_Table
-#                           SET 
-#                           {function}_{limb}_Knee_Angle_{axis} = ?,
-#                           {function}_{limb}_Knee_Moment_{axis} = ?,
-#                           {function}_{limb}_Knee_Force_{axis} = ?,
-#                           {function}_{limb}_Knee_Power_{axis} = ?,
-#                           {function}_{limb}_Hip_Angle_{axis} = ?,
-#                           {function}_{limb}_Hip_Moment_{axis} = ?,
-#                           {function}_{limb}_Hip_Force_{axis} = ?,
-#                           {function}_{limb}_Hip_Power_{axis} = ?,
-#                           {function}_{limb}_Ankle_Angle_{axis} = ?,
-#                           {function}_{limb}_Ankle_Moment_{axis} = ?,
-#                           {function}_{limb}_Ankle_Force_{axis} = ?,
-#                           {function}_{limb}_Ankle_Power_{axis} =  ?,
-#                           {function}_{limb}_Foot_Progression_Angle_{axis} = ?,
-#                           {function}_{limb}_pelvis_Angle_{axis} =  ?,
-#                           {function}_{limb}_COM_{axis} =  ?
-#                           WHERE ID = ?
-#                           """,(
-#                           (StepDown[function][limb]["KneeAngle"][axis]),
-#                           (StepDown[function][limb]["KneeMoment"][axis]),
-#                           (StepDown[function][limb]["KneeForce"][axis]),
-#                           (StepDown[function][limb]["KneePower"][axis]),
-#                           (StepDown[function][limb]["HipAngle"][axis]),
-#                           (StepDown[function][limb]["HipMoment"][axis]),
-#                           (StepDown[function][limb]["HipForce"][axis]),
-#                           (StepDown[function][limb]["HipPower"][axis]),
-#                           (StepDown[function][limb]["AnkleAngle"][axis]),
-#                           (StepDown[function][limb]["AnkleMoment"][axis]),
-#                           (StepDown[function][limb]["AnkleForce"][axis]),
-#                           (StepDown[function][limb]["AnklePower"][axis]),
-#                           (StepDown[function][limb]["FootProgressAngle"][axis]),
-#                           (StepDown[function][limb]["pelvisAngle"][axis]),
-#                           (StepDown[function][limb]["COM"][axis]),
-#                           ID
-#                           ))
+#Step Down
+def enter_StepDown_extrema ():  
+    c.execute("""INSERT INTO StepDown_Max_Min_Table 
+              (ID, Dominant_Limb, Patient_Type, 
+              Sex, Month, Affected_Limb, Trial_Type, Visit_Number)VALUES (?,?,?,?,?,?,?,?)""", 
+              (ID, dom_limb, pattype, sex, mon, aff_limb,
+              str(StepUp["Trial 1"]["Testing Type"]), visit))
+    for limb in ["Left", "Right"]:
+        for axis in ["x", "y", "z"]:
+            for function in ["max", "min"]:
+                c.execute(f"""UPDATE StepDown_Max_Min_Table
+                          SET 
+                          {function}_{limb}_Knee_Angle_{axis} = ?,
+                          {function}_{limb}_Knee_Moment_{axis} = ?,
+                          {function}_{limb}_Knee_Force_{axis} = ?,
+                          {function}_{limb}_Knee_Power_{axis} = ?,
+                          {function}_{limb}_Hip_Angle_{axis} = ?,
+                          {function}_{limb}_Hip_Moment_{axis} = ?,
+                          {function}_{limb}_Hip_Force_{axis} = ?,
+                          {function}_{limb}_Hip_Power_{axis} = ?,
+                          {function}_{limb}_Ankle_Angle_{axis} = ?,
+                          {function}_{limb}_Ankle_Moment_{axis} = ?,
+                          {function}_{limb}_Ankle_Force_{axis} = ?,
+                          {function}_{limb}_Ankle_Power_{axis} =  ?,
+                          {function}_{limb}_Foot_Progression_Angle_{axis} = ?,
+                          {function}_{limb}_pelvis_Angle_{axis} =  ?,
+                          {function}_{limb}_COM_{axis} =  ?
+                          WHERE ID = ? and Visit_Number = ?
+                          """,(
+                          (StepDown[function][limb]["KneeAngle"][axis]),
+                          (StepDown[function][limb]["KneeMoment"][axis]),
+                          (StepDown[function][limb]["KneeForce"][axis]),
+                          (StepDown[function][limb]["KneePower"][axis]),
+                          (StepDown[function][limb]["HipAngle"][axis]),
+                          (StepDown[function][limb]["HipMoment"][axis]),
+                          (StepDown[function][limb]["HipForce"][axis]),
+                          (StepDown[function][limb]["HipPower"][axis]),
+                          (StepDown[function][limb]["AnkleAngle"][axis]),
+                          (StepDown[function][limb]["AnkleMoment"][axis]),
+                          (StepDown[function][limb]["AnkleForce"][axis]),
+                          (StepDown[function][limb]["AnklePower"][axis]),
+                          (StepDown[function][limb]["FootProgressAngle"][axis]),
+                          (StepDown[function][limb]["pelvisAngle"][axis]),
+                          (StepDown[function][limb]["COM"][axis]),
+                          ID, visit
+                          ))
              
-# def create_StepDown_Table():
-#         c.execute("""CREATE TABLE IF NOT EXISTS StepDown_Table
-#               (ID TEXT, Dominant_Limb TEXT, Patient_Type TEXT, 
-#               Sex TEXT, Month TEXT, Affected_Limb TEXT,
-#               Filename TEXT, Trial_Type TEXT, Complete_Left_Cycle TEXT, Complete_Right_Cycle TEXT,
-#               Left_Footstrike_Index TEXT, Left_FootOff_Index TEXT,
-#               Right_Footstrike_Index TEXT, Right_FootOff_Index TEXT)""")            
-# def columns_StepDown_Table():
-#      for LR in ["Left", "Right"]:
-#          for axis in ["x", "y", "z"]:
-#              c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Knee_Angle_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Knee_Moment_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Knee_Force_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Knee_Power_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Hip_Angle_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Hip_Moment_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Hip_Force_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Hip_Power_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Ankle_Angle_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Ankle_Moment_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Ankle_Force_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Ankle_Power_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Foot_Progression_Angle_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_pelvis_Angle_{axis} TEXT""")
-#              c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_COM_{axis} TEXT""")             
-# def enter_StepDown_Table (numTrials):
-#     for TrialNum in numTrials:
-#         filename = StepDown[TrialNum]["Filename"] 
-#         c.execute("""INSERT INTO StepDown_Table 
-#                   (ID, Dominant_Limb, Patient_Type, 
-#                   Sex, Month, Affected_Limb, Filename, Trial_Type) 
-#                   VALUES (?,?,?,?,?,?,?,?)""", 
-#                   (ID, dom_limb, pattype, sex, mon, aff_limb, 
-#                    filename, str(StepUp["Trial 1"]["Testing Type"])))
-#         for LR in ["Left", "Right"]:
-#             try:
-#                 for axis in ["x", "y", "z"]:
-#                     c.execute(f"""UPDATE StepDown_Table
-#                               SET 
-#                               {LR}_Knee_Angle_{axis} = ?,
-#                               {LR}_Hip_Angle_{axis} = ?,
-#                               {LR}_Ankle_Angle_{axis} = ?,
-#                               {LR}_Foot_Progression_Angle_{axis} = ?,
-#                               {LR}_pelvis_Angle_{axis} =  ?,
-#                               {LR}_COM_{axis} =  ?,
-#                               {LR}_Knee_Moment_{axis} = ?,
-#                               {LR}_Knee_Force_{axis} = ?,
-#                               {LR}_Knee_Power_{axis} = ?,
-#                               {LR}_Hip_Moment_{axis} = ?,
-#                               {LR}_Hip_Force_{axis} = ?,
-#                               {LR}_Hip_Power_{axis} = ?,
-#                               {LR}_Ankle_Moment_{axis} = ?,
-#                               {LR}_Ankle_Force_{axis} = ?,
-#                               {LR}_Ankle_Power_{axis} =  ?
-#                               WHERE Filename = ?
-#                               """,(
-#                               (str(StepDown[TrialNum][LR]["KneeAngle"][axis])[1:-1]),
-#                               (str(StepDown[TrialNum][LR]["HipAngle"][axis])[1:-1]),
-#                               (str(StepDown[TrialNum][LR]["AnkleAngle"][axis])[1:-1]),
-#                               (str(StepDown[TrialNum][LR]["FootProgressAngle"][axis])[1:-1]),
-#                               (str(StepDown[TrialNum][LR]["pelvisAngle"][axis])[1:-1]),
-#                               (str(StepDown[TrialNum][LR]["COM"][axis])[1:-1]),
-#                               (str(StepDown[TrialNum][LR]["KneeMoment"][axis])[1:-1]),
-#                               (str(StepDown[TrialNum][LR]["KneeForce"][axis])[1:-1]),
-#                               (str(StepDown[TrialNum][LR]["KneePower"][axis])[1:-1]),
-#                               (str(StepDown[TrialNum][LR]["HipMoment"][axis])[1:-1]),
-#                               (str(StepDown[TrialNum][LR]["HipForce"][axis])[1:-1]),
-#                               (str(StepDown[TrialNum][LR]["HipPower"][axis])[1:-1]),
-#                               (str(StepDown[TrialNum][LR]["AnkleMoment"][axis])[1:-1]),
-#                               (str(StepDown[TrialNum][LR]["AnkleForce"][axis])[1:-1]),
-#                               (str(StepDown[TrialNum][LR]["AnklePower"][axis])[1:-1]),
-#                               filename
-#                               ))
-#             except:
-#                 pass
+def enter_StepDown_Table (numTrials):
+    for TrialNum in numTrials:
+        filename = StepDown[TrialNum]["Filename"] 
+        c.execute("""INSERT INTO StepDown_Table 
+                  (ID, Dominant_Limb, Patient_Type, 
+                  Sex, Month, Affected_Limb, Filename, Trial_Type, Visit_Number) 
+                  VALUES (?,?,?,?,?,?,?,?,?)""", 
+                  (ID, dom_limb, pattype, sex, mon, aff_limb, 
+                    filename, str(StepUp["Trial 1"]["Testing Type"]), visit))
+        for LR in ["Left", "Right"]:
+            try:
+                for axis in ["x", "y", "z"]:
+                    c.execute(f"""UPDATE StepDown_Table
+                              SET 
+                              {LR}_Knee_Angle_{axis} = ?,
+                              {LR}_Hip_Angle_{axis} = ?,
+                              {LR}_Ankle_Angle_{axis} = ?,
+                              {LR}_Foot_Progression_Angle_{axis} = ?,
+                              {LR}_pelvis_Angle_{axis} =  ?,
+                              {LR}_COM_{axis} =  ?,
+                              {LR}_Knee_Moment_{axis} = ?,
+                              {LR}_Knee_Force_{axis} = ?,
+                              {LR}_Knee_Power_{axis} = ?,
+                              {LR}_Hip_Moment_{axis} = ?,
+                              {LR}_Hip_Force_{axis} = ?,
+                              {LR}_Hip_Power_{axis} = ?,
+                              {LR}_Ankle_Moment_{axis} = ?,
+                              {LR}_Ankle_Force_{axis} = ?,
+                              {LR}_Ankle_Power_{axis} =  ?
+                              WHERE Filename = ?
+                              """,(
+                              (str(StepDown[TrialNum][LR]["KneeAngle"][axis])[1:-1]),
+                              (str(StepDown[TrialNum][LR]["HipAngle"][axis])[1:-1]),
+                              (str(StepDown[TrialNum][LR]["AnkleAngle"][axis])[1:-1]),
+                              (str(StepDown[TrialNum][LR]["FootProgressAngle"][axis])[1:-1]),
+                              (str(StepDown[TrialNum][LR]["pelvisAngle"][axis])[1:-1]),
+                              (str(StepDown[TrialNum][LR]["COM"][axis])[1:-1]),
+                              (str(StepDown[TrialNum][LR]["KneeMoment"][axis])[1:-1]),
+                              (str(StepDown[TrialNum][LR]["KneeForce"][axis])[1:-1]),
+                              (str(StepDown[TrialNum][LR]["KneePower"][axis])[1:-1]),
+                              (str(StepDown[TrialNum][LR]["HipMoment"][axis])[1:-1]),
+                              (str(StepDown[TrialNum][LR]["HipForce"][axis])[1:-1]),
+                              (str(StepDown[TrialNum][LR]["HipPower"][axis])[1:-1]),
+                              (str(StepDown[TrialNum][LR]["AnkleMoment"][axis])[1:-1]),
+                              (str(StepDown[TrialNum][LR]["AnkleForce"][axis])[1:-1]),
+                              (str(StepDown[TrialNum][LR]["AnklePower"][axis])[1:-1]),
+                              filename
+                              ))
+            except:
+                pass
 
 
-# #Stand to Sit
-# def create_StandtoSit_Max_Min_Table():
-#         c.execute("""CREATE TABLE IF NOT EXISTS StandtoSit_Max_Min_Table
-#               (ID TEXT, Dominant_Limb TEXT, Patient_Type TEXT, 
-#                 Sex TEXT, Month TEXT, Affected_Limb TEXT)""")            
-# def columns_StandtoSit_Max_Min_Table():
-#     for limb in ["Left", "Right"]:
-#         for axis in ["x", "y", "z"]:
-#             for function in ["max", "min"]:
-#                 c.execute(f"""ALTER TABLE StandtoSit_Max_Min_Table ADD COLUMN {function}_{limb}_Knee_Angle_{axis} REAL""")
-#                 c.execute(f"""ALTER TABLE StandtoSit_Max_Min_Table ADD COLUMN {function}_{limb}_Knee_Moment_{axis} REAL""")
-#                 c.execute(f"""ALTER TABLE StandtoSit_Max_Min_Table ADD COLUMN {function}_{limb}_Knee_Force_{axis} REAL""")
-#                 c.execute(f"""ALTER TABLE StandtoSit_Max_Min_Table ADD COLUMN {function}_{limb}_Knee_Power_{axis} REAL""")
-#                 c.execute(f"""ALTER TABLE StandtoSit_Max_Min_Table ADD COLUMN {function}_{limb}_Hip_Angle_{axis} REAL""")
-#                 c.execute(f"""ALTER TABLE StandtoSit_Max_Min_Table ADD COLUMN {function}_{limb}_Hip_Moment_{axis} REAL""")
-#                 c.execute(f"""ALTER TABLE StandtoSit_Max_Min_Table ADD COLUMN {function}_{limb}_Hip_Force_{axis} REAL""")
-#                 c.execute(f"""ALTER TABLE StandtoSit_Max_Min_Table ADD COLUMN {function}_{limb}_Hip_Power_{axis} REAL""")
-#                 c.execute(f"""ALTER TABLE StandtoSit_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Angle_{axis} REAL""")
-#                 c.execute(f"""ALTER TABLE StandtoSit_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Moment_{axis} REAL""")
-#                 c.execute(f"""ALTER TABLE StandtoSit_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Force_{axis} REAL""")
-#                 c.execute(f"""ALTER TABLE StandtoSit_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Power_{axis} REAL""")
-#                 c.execute(f"""ALTER TABLE StandtoSit_Max_Min_Table ADD COLUMN {function}_{limb}_Foot_Progression_Angle_{axis} REAL""")
-#                 c.execute(f"""ALTER TABLE StandtoSit_Max_Min_Table ADD COLUMN {function}_{limb}_pelvis_Angle_{axis} REAL""")
-#                 c.execute(f"""ALTER TABLE StandtoSit_Max_Min_Table ADD COLUMN {function}_{limb}_COM_{axis} REAL""")   
-#                 c.execute(f"""ALTER TABLE StandtoSit_Max_Min_Table ADD COLUMN {function}_{limb}_C7_{axis} REAL""")
-# def enter_StandtoSit_extrema ():  
-#     c.execute("""INSERT INTO StandtoSit_Max_Min_Table 
-#               (ID, Dominant_Limb, Patient_Type, 
-#               Sex, Month, Affected_Limb)VALUES (?,?,?,?,?,?)""", 
-#               (ID, dom_limb, pattype, sex, mon, aff_limb))
-#     for limb in ["Left", "Right"]:
-#         for axis in ["x", "y", "z"]:
-#             for function in ["max", "min"]:
-#                 c.execute(f"""UPDATE StandtoSit_Max_Min_Table
-#                           SET 
-#                           {function}_{limb}_Knee_Angle_{axis} = ?,
-#                           {function}_{limb}_Knee_Moment_{axis} = ?,
-#                           {function}_{limb}_Knee_Force_{axis} = ?,
-#                           {function}_{limb}_Knee_Power_{axis} = ?,
-#                           {function}_{limb}_Hip_Angle_{axis} = ?,
-#                           {function}_{limb}_Hip_Moment_{axis} = ?,
-#                           {function}_{limb}_Hip_Force_{axis} = ?,
-#                           {function}_{limb}_Hip_Power_{axis} = ?,
-#                           {function}_{limb}_Ankle_Angle_{axis} = ?,
-#                           {function}_{limb}_Ankle_Moment_{axis} = ?,
-#                           {function}_{limb}_Ankle_Force_{axis} = ?,
-#                           {function}_{limb}_Ankle_Power_{axis} =  ?,
-#                           {function}_{limb}_Foot_Progression_Angle_{axis} = ?,
-#                           {function}_{limb}_pelvis_Angle_{axis} =  ?,
-#                           {function}_{limb}_COM_{axis} =  ?,
-#                           {function}_{limb}_C7_{axis} =  ?
-#                           WHERE ID = ?
-#                           """,(
-#                           (STS["StandtoSit"][function][limb]["KneeAngle"][axis]),
-#                           (STS["StandtoSit"][function][limb]["KneeMoment"][axis]),
-#                           (STS["StandtoSit"][function][limb]["KneeForce"][axis]),
-#                           (STS["StandtoSit"][function][limb]["KneePower"][axis]),
-#                           (STS["StandtoSit"][function][limb]["HipAngle"][axis]),
-#                           (STS["StandtoSit"][function][limb]["HipMoment"][axis]),
-#                           (STS["StandtoSit"][function][limb]["HipForce"][axis]),
-#                           (STS["StandtoSit"][function][limb]["HipPower"][axis]),
-#                           (STS["StandtoSit"][function][limb]["AnkleAngle"][axis]),
-#                           (STS["StandtoSit"][function][limb]["AnkleMoment"][axis]),
-#                           (STS["StandtoSit"][function][limb]["AnkleForce"][axis]),
-#                           (STS["StandtoSit"][function][limb]["AnklePower"][axis]),
-#                           (STS["StandtoSit"][function][limb]["FootProgressAngle"][axis]),
-#                           (STS["StandtoSit"][function][limb]["pelvisAngle"][axis]),
-#                           (STS["StandtoSit"][function][limb]["COM"][axis]),
-#                           (STS["StandtoSit"][function][limb]["C7"][axis]),
-#                           ID
-#                           ))
+#Stand to Sit
+def enter_StandtoSit_extrema ():  
+    c.execute("""INSERT INTO StandtoSit_Max_Min_Table 
+              (ID, Dominant_Limb, Patient_Type, 
+              Sex, Month, Affected_Limb, Visit_Number)VALUES (?,?,?,?,?,?,?)""", 
+              (ID, dom_limb, pattype, sex, mon, aff_limb, visit))
+    for limb in ["Left", "Right"]:
+        for axis in ["x", "y", "z"]:
+            for function in ["max", "min"]:
+                c.execute(f"""UPDATE StandtoSit_Max_Min_Table
+                          SET 
+                          {function}_{limb}_Knee_Angle_{axis} = ?,
+                          {function}_{limb}_Knee_Moment_{axis} = ?,
+                          {function}_{limb}_Knee_Force_{axis} = ?,
+                          {function}_{limb}_Knee_Power_{axis} = ?,
+                          {function}_{limb}_Hip_Angle_{axis} = ?,
+                          {function}_{limb}_Hip_Moment_{axis} = ?,
+                          {function}_{limb}_Hip_Force_{axis} = ?,
+                          {function}_{limb}_Hip_Power_{axis} = ?,
+                          {function}_{limb}_Ankle_Angle_{axis} = ?,
+                          {function}_{limb}_Ankle_Moment_{axis} = ?,
+                          {function}_{limb}_Ankle_Force_{axis} = ?,
+                          {function}_{limb}_Ankle_Power_{axis} =  ?,
+                          {function}_{limb}_Foot_Progression_Angle_{axis} = ?,
+                          {function}_{limb}_pelvis_Angle_{axis} =  ?,
+                          {function}_{limb}_COM_{axis} =  ?,
+                          {function}_{limb}_C7_{axis} =  ?
+                          WHERE ID = ? and Visit_Number =?
+                          """,(
+                          (STS["StandtoSit"][function][limb]["KneeAngle"][axis]),
+                          (STS["StandtoSit"][function][limb]["KneeMoment"][axis]),
+                          (STS["StandtoSit"][function][limb]["KneeForce"][axis]),
+                          (STS["StandtoSit"][function][limb]["KneePower"][axis]),
+                          (STS["StandtoSit"][function][limb]["HipAngle"][axis]),
+                          (STS["StandtoSit"][function][limb]["HipMoment"][axis]),
+                          (STS["StandtoSit"][function][limb]["HipForce"][axis]),
+                          (STS["StandtoSit"][function][limb]["HipPower"][axis]),
+                          (STS["StandtoSit"][function][limb]["AnkleAngle"][axis]),
+                          (STS["StandtoSit"][function][limb]["AnkleMoment"][axis]),
+                          (STS["StandtoSit"][function][limb]["AnkleForce"][axis]),
+                          (STS["StandtoSit"][function][limb]["AnklePower"][axis]),
+                          (STS["StandtoSit"][function][limb]["FootProgressAngle"][axis]),
+                          (STS["StandtoSit"][function][limb]["pelvisAngle"][axis]),
+                          (STS["StandtoSit"][function][limb]["COM"][axis]),
+                          (STS["StandtoSit"][function][limb]["C7"][axis]),
+                          ID, visit
+                          ))
 
+def enter_StandtoSit_Table (numTrials):
+    for TrialNum in numTrials:
+        filename = STS[TrialNum]["Filename"] 
+        c.execute("""INSERT INTO StandtoSit_Table 
+                  (ID, Dominant_Limb, Patient_Type, 
+                  Sex, Month, Affected_Limb, Filename, Visit_Number) 
+                  VALUES (?,?,?,?,?,?,?,?)""", 
+                  (ID, dom_limb, pattype, sex, mon, aff_limb, 
+                    filename, visit))
+        for LR in ["Left", "Right"]:
+            try:
+                for axis in ["x", "y", "z"]:
+                    c.execute(f"""UPDATE StandtoSit_Table
+                              SET 
+                              {LR}_Knee_Angle_{axis} = ?,
+                              {LR}_Hip_Angle_{axis} = ?,
+                              {LR}_Ankle_Angle_{axis} = ?,
+                              {LR}_Foot_Progression_Angle_{axis} = ?,
+                              {LR}_pelvis_Angle_{axis} =  ?,
+                              {LR}_COM_{axis} =  ?,
+                              {LR}_Knee_Moment_{axis} = ?,
+                              {LR}_Knee_Force_{axis} = ?,
+                              {LR}_Knee_Power_{axis} = ?,
+                              {LR}_Hip_Moment_{axis} = ?,
+                              {LR}_Hip_Force_{axis} = ?,
+                              {LR}_Hip_Power_{axis} = ?,
+                              {LR}_Ankle_Moment_{axis} = ?,
+                              {LR}_Ankle_Force_{axis} = ?,
+                              {LR}_Ankle_Power_{axis} =  ?,
+                              {LR}_C7_{axis} = ?
+                              WHERE Filename = ?
+                              """,(
+                              (str(STS["StandtoSit"][TrialNum][LR]["KneeAngle"][axis])[1:-1]),
+                              (str(STS["StandtoSit"][TrialNum][LR]["HipAngle"][axis])[1:-1]),
+                              (str(STS["StandtoSit"][TrialNum][LR]["AnkleAngle"][axis])[1:-1]),
+                              (str(STS["StandtoSit"][TrialNum][LR]["FootProgressAngle"][axis])[1:-1]),
+                              (str(STS["StandtoSit"][TrialNum][LR]["pelvisAngle"][axis])[1:-1]),
+                              (str(STS["StandtoSit"][TrialNum][LR]["COM"][axis])[1:-1]),
+                              (str(STS["StandtoSit"][TrialNum][LR]["KneeMoment"][axis])[1:-1]),
+                              (str(STS["StandtoSit"][TrialNum][LR]["KneeForce"][axis])[1:-1]),
+                              (str(STS["StandtoSit"][TrialNum][LR]["KneePower"][axis])[1:-1]),
+                              (str(STS["StandtoSit"][TrialNum][LR]["HipMoment"][axis])[1:-1]),
+                              (str(STS["StandtoSit"][TrialNum][LR]["HipForce"][axis])[1:-1]),
+                              (str(STS["StandtoSit"][TrialNum][LR]["HipPower"][axis])[1:-1]),
+                              (str(STS["StandtoSit"][TrialNum][LR]["AnkleMoment"][axis])[1:-1]),
+                              (str(STS["StandtoSit"][TrialNum][LR]["AnkleForce"][axis])[1:-1]),
+                              (str(STS["StandtoSit"][TrialNum][LR]["AnklePower"][axis])[1:-1]),
+                              (str(STS["StandtoSit"][TrialNum][LR]["C7"][axis])[1:-1]),
+                              filename
+                              ))
+            except:
+                pass
 
-# def create_StandtoSit_Table():
-#         c.execute("""CREATE TABLE IF NOT EXISTS StandtoSit_Table
-#               (ID TEXT, Dominant_Limb TEXT, Patient_Type TEXT, 
-#               Sex TEXT, Month TEXT, Affected_Limb TEXT,
-#               Filename TEXT, Complete_Left_Cycle TEXT, Complete_Right_Cycle TEXT,
-#               Left_Footstrike_Index TEXT, Left_FootOff_Index TEXT,
-#               Right_Footstrike_Index TEXT, Right_FootOff_Index TEXT)""")            
-# def columns_StandtoSit_Table():
-#       for LR in ["Left", "Right"]:
-#           for axis in ["x", "y", "z"]:
-#               c.execute(f"""ALTER TABLE StandtoSit_Table ADD COLUMN {LR}_Knee_Angle_{axis} TEXT""")
-#               c.execute(f"""ALTER TABLE StandtoSit_Table ADD COLUMN {LR}_Knee_Moment_{axis} TEXT""")
-#               c.execute(f"""ALTER TABLE StandtoSit_Table ADD COLUMN {LR}_Knee_Force_{axis} TEXT""")
-#               c.execute(f"""ALTER TABLE StandtoSit_Table ADD COLUMN {LR}_Knee_Power_{axis} TEXT""")
-#               c.execute(f"""ALTER TABLE StandtoSit_Table ADD COLUMN {LR}_Hip_Angle_{axis} TEXT""")
-#               c.execute(f"""ALTER TABLE StandtoSit_Table ADD COLUMN {LR}_Hip_Moment_{axis} TEXT""")
-#               c.execute(f"""ALTER TABLE StandtoSit_Table ADD COLUMN {LR}_Hip_Force_{axis} TEXT""")
-#               c.execute(f"""ALTER TABLE StandtoSit_Table ADD COLUMN {LR}_Hip_Power_{axis} TEXT""")
-#               c.execute(f"""ALTER TABLE StandtoSit_Table ADD COLUMN {LR}_Ankle_Angle_{axis} TEXT""")
-#               c.execute(f"""ALTER TABLE StandtoSit_Table ADD COLUMN {LR}_Ankle_Moment_{axis} TEXT""")
-#               c.execute(f"""ALTER TABLE StandtoSit_Table ADD COLUMN {LR}_Ankle_Force_{axis} TEXT""")
-#               c.execute(f"""ALTER TABLE StandtoSit_Table ADD COLUMN {LR}_Ankle_Power_{axis} TEXT""")
-#               c.execute(f"""ALTER TABLE StandtoSit_Table ADD COLUMN {LR}_Foot_Progression_Angle_{axis} TEXT""")
-#               c.execute(f"""ALTER TABLE StandtoSit_Table ADD COLUMN {LR}_pelvis_Angle_{axis} TEXT""")
-#               c.execute(f"""ALTER TABLE StandtoSit_Table ADD COLUMN {LR}_COM_{axis} TEXT""")
-#               c.execute(f"""ALTER TABLE StandtoSit_Table ADD COLUMN {LR}_C7_{axis} TEXT""")
-# def enter_StandtoSit_Table (numTrials):
-#     for TrialNum in numTrials:
-#         filename = STS[TrialNum]["Filename"] 
-#         c.execute("""INSERT INTO StandtoSit_Table 
-#                   (ID, Dominant_Limb, Patient_Type, 
-#                   Sex, Month, Affected_Limb, Filename) 
-#                   VALUES (?,?,?,?,?,?,?)""", 
-#                   (ID, dom_limb, pattype, sex, mon, aff_limb, 
-#                     filename))
-#         for LR in ["Left", "Right"]:
-#             try:
-#                 for axis in ["x", "y", "z"]:
-#                     c.execute(f"""UPDATE StandtoSit_Table
-#                               SET 
-#                               {LR}_Knee_Angle_{axis} = ?,
-#                               {LR}_Hip_Angle_{axis} = ?,
-#                               {LR}_Ankle_Angle_{axis} = ?,
-#                               {LR}_Foot_Progression_Angle_{axis} = ?,
-#                               {LR}_pelvis_Angle_{axis} =  ?,
-#                               {LR}_COM_{axis} =  ?,
-#                               {LR}_Knee_Moment_{axis} = ?,
-#                               {LR}_Knee_Force_{axis} = ?,
-#                               {LR}_Knee_Power_{axis} = ?,
-#                               {LR}_Hip_Moment_{axis} = ?,
-#                               {LR}_Hip_Force_{axis} = ?,
-#                               {LR}_Hip_Power_{axis} = ?,
-#                               {LR}_Ankle_Moment_{axis} = ?,
-#                               {LR}_Ankle_Force_{axis} = ?,
-#                               {LR}_Ankle_Power_{axis} =  ?,
-#                               {LR}_C7_{axis} = ?
-#                               WHERE Filename = ?
-#                               """,(
-#                               (str(STS["StandtoSit"][TrialNum][LR]["KneeAngle"][axis])[1:-1]),
-#                               (str(STS["StandtoSit"][TrialNum][LR]["HipAngle"][axis])[1:-1]),
-#                               (str(STS["StandtoSit"][TrialNum][LR]["AnkleAngle"][axis])[1:-1]),
-#                               (str(STS["StandtoSit"][TrialNum][LR]["FootProgressAngle"][axis])[1:-1]),
-#                               (str(STS["StandtoSit"][TrialNum][LR]["pelvisAngle"][axis])[1:-1]),
-#                               (str(STS["StandtoSit"][TrialNum][LR]["COM"][axis])[1:-1]),
-#                               (str(STS["StandtoSit"][TrialNum][LR]["KneeMoment"][axis])[1:-1]),
-#                               (str(STS["StandtoSit"][TrialNum][LR]["KneeForce"][axis])[1:-1]),
-#                               (str(STS["StandtoSit"][TrialNum][LR]["KneePower"][axis])[1:-1]),
-#                               (str(STS["StandtoSit"][TrialNum][LR]["HipMoment"][axis])[1:-1]),
-#                               (str(STS["StandtoSit"][TrialNum][LR]["HipForce"][axis])[1:-1]),
-#                               (str(STS["StandtoSit"][TrialNum][LR]["HipPower"][axis])[1:-1]),
-#                               (str(STS["StandtoSit"][TrialNum][LR]["AnkleMoment"][axis])[1:-1]),
-#                               (str(STS["StandtoSit"][TrialNum][LR]["AnkleForce"][axis])[1:-1]),
-#                               (str(STS["StandtoSit"][TrialNum][LR]["AnklePower"][axis])[1:-1]),
-#                               (str(STS["StandtoSit"][TrialNum][LR]["C7"][axis])[1:-1]),
-#                               filename
-#                               ))
-#             except:
-#                 pass
-
-# #Sit to Stand
-# def create_SittoStand_Max_Min_Table():
-#         c.execute("""CREATE TABLE IF NOT EXISTS SittoStand_Max_Min_Table
-#               (ID TEXT, Dominant_Limb TEXT, Patient_Type TEXT, 
-#                 Sex TEXT, Month TEXT, Affected_Limb TEXT)""")            
-# def columns_SittoStand_Max_Min_Table():
-#     for limb in ["Left", "Right"]:
-#         for axis in ["x", "y", "z"]:
-#             for function in ["max", "min"]:
-#                 c.execute(f"""ALTER TABLE SittoStand_Max_Min_Table ADD COLUMN {function}_{limb}_Knee_Angle_{axis} REAL""")
-#                 c.execute(f"""ALTER TABLE SittoStand_Max_Min_Table ADD COLUMN {function}_{limb}_Knee_Moment_{axis} REAL""")
-#                 c.execute(f"""ALTER TABLE SittoStand_Max_Min_Table ADD COLUMN {function}_{limb}_Knee_Force_{axis} REAL""")
-#                 c.execute(f"""ALTER TABLE SittoStand_Max_Min_Table ADD COLUMN {function}_{limb}_Knee_Power_{axis} REAL""")
-#                 c.execute(f"""ALTER TABLE SittoStand_Max_Min_Table ADD COLUMN {function}_{limb}_Hip_Angle_{axis} REAL""")
-#                 c.execute(f"""ALTER TABLE SittoStand_Max_Min_Table ADD COLUMN {function}_{limb}_Hip_Moment_{axis} REAL""")
-#                 c.execute(f"""ALTER TABLE SittoStand_Max_Min_Table ADD COLUMN {function}_{limb}_Hip_Force_{axis} REAL""")
-#                 c.execute(f"""ALTER TABLE SittoStand_Max_Min_Table ADD COLUMN {function}_{limb}_Hip_Power_{axis} REAL""")
-#                 c.execute(f"""ALTER TABLE SittoStand_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Angle_{axis} REAL""")
-#                 c.execute(f"""ALTER TABLE SittoStand_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Moment_{axis} REAL""")
-#                 c.execute(f"""ALTER TABLE SittoStand_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Force_{axis} REAL""")
-#                 c.execute(f"""ALTER TABLE SittoStand_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Power_{axis} REAL""")
-#                 c.execute(f"""ALTER TABLE SittoStand_Max_Min_Table ADD COLUMN {function}_{limb}_Foot_Progression_Angle_{axis} REAL""")
-#                 c.execute(f"""ALTER TABLE SittoStand_Max_Min_Table ADD COLUMN {function}_{limb}_pelvis_Angle_{axis} REAL""")
-#                 c.execute(f"""ALTER TABLE SittoStand_Max_Min_Table ADD COLUMN {function}_{limb}_COM_{axis} REAL""")  
-#                 c.execute(f"""ALTER TABLE SittoStand_Max_Min_Table ADD COLUMN {function}_{limb}_C7_{axis} REAL""")
-# def enter_SittoStand_extrema ():  
-#     c.execute("""INSERT INTO SittoStand_Max_Min_Table 
-#               (ID, Dominant_Limb, Patient_Type, 
-#               Sex, Month, Affected_Limb)VALUES (?,?,?,?,?,?)""", 
-#               (ID, dom_limb, pattype, sex, mon, aff_limb))
-#     for limb in ["Left", "Right"]:
-#         for axis in ["x", "y", "z"]:
-#             for function in ["max", "min"]:
-#                 c.execute(f"""UPDATE SittoStand_Max_Min_Table
-#                           SET 
-#                           {function}_{limb}_Knee_Angle_{axis} = ?,
-#                           {function}_{limb}_Knee_Moment_{axis} = ?,
-#                           {function}_{limb}_Knee_Force_{axis} = ?,
-#                           {function}_{limb}_Knee_Power_{axis} = ?,
-#                           {function}_{limb}_Hip_Angle_{axis} = ?,
-#                           {function}_{limb}_Hip_Moment_{axis} = ?,
-#                           {function}_{limb}_Hip_Force_{axis} = ?,
-#                           {function}_{limb}_Hip_Power_{axis} = ?,
-#                           {function}_{limb}_Ankle_Angle_{axis} = ?,
-#                           {function}_{limb}_Ankle_Moment_{axis} = ?,
-#                           {function}_{limb}_Ankle_Force_{axis} = ?,
-#                           {function}_{limb}_Ankle_Power_{axis} =  ?,
-#                           {function}_{limb}_Foot_Progression_Angle_{axis} = ?,
-#                           {function}_{limb}_pelvis_Angle_{axis} =  ?,
-#                           {function}_{limb}_COM_{axis} =  ?,
-#                           {function}_{limb}_C7_{axis} =  ?
-#                           WHERE ID = ?
-#                           """,(
-#                           (STS["SittoStand"][function][limb]["KneeAngle"][axis]),
-#                           (STS["SittoStand"][function][limb]["KneeMoment"][axis]),
-#                           (STS["SittoStand"][function][limb]["KneeForce"][axis]),
-#                           (STS["SittoStand"][function][limb]["KneePower"][axis]),
-#                           (STS["SittoStand"][function][limb]["HipAngle"][axis]),
-#                           (STS["SittoStand"][function][limb]["HipMoment"][axis]),
-#                           (STS["SittoStand"][function][limb]["HipForce"][axis]),
-#                           (STS["SittoStand"][function][limb]["HipPower"][axis]),
-#                           (STS["SittoStand"][function][limb]["AnkleAngle"][axis]),
-#                           (STS["SittoStand"][function][limb]["AnkleMoment"][axis]),
-#                           (STS["SittoStand"][function][limb]["AnkleForce"][axis]),
-#                           (STS["SittoStand"][function][limb]["AnklePower"][axis]),
-#                           (STS["SittoStand"][function][limb]["FootProgressAngle"][axis]),
-#                           (STS["SittoStand"][function][limb]["pelvisAngle"][axis]),
-#                           (STS["SittoStand"][function][limb]["COM"][axis]),
-#                           (STS["SittoStand"][function][limb]["C7"][axis]),
-#                           ID
-#                           ))
-
-# def create_SittoStand_Table():
-#         c.execute("""CREATE TABLE IF NOT EXISTS SittoStand_Table
-#               (ID TEXT, Dominant_Limb TEXT, Patient_Type TEXT, 
-#               Sex TEXT, Month TEXT, Affected_Limb TEXT,
-#               Filename TEXT, Complete_Left_Cycle TEXT, Complete_Right_Cycle TEXT,
-#               Left_Footstrike_Index TEXT, Left_FootOff_Index TEXT,
-#               Right_Footstrike_Index TEXT, Right_FootOff_Index TEXT)""")            
-# def columns_SittoStand_Table():
-#       for LR in ["Left", "Right"]:
-#           for axis in ["x", "y", "z"]:
-#               c.execute(f"""ALTER TABLE SittoStand_Table ADD COLUMN {LR}_Knee_Angle_{axis} TEXT""")
-#               c.execute(f"""ALTER TABLE SittoStand_Table ADD COLUMN {LR}_Knee_Moment_{axis} TEXT""")
-#               c.execute(f"""ALTER TABLE SittoStand_Table ADD COLUMN {LR}_Knee_Force_{axis} TEXT""")
-#               c.execute(f"""ALTER TABLE SittoStand_Table ADD COLUMN {LR}_Knee_Power_{axis} TEXT""")
-#               c.execute(f"""ALTER TABLE SittoStand_Table ADD COLUMN {LR}_Hip_Angle_{axis} TEXT""")
-#               c.execute(f"""ALTER TABLE SittoStand_Table ADD COLUMN {LR}_Hip_Moment_{axis} TEXT""")
-#               c.execute(f"""ALTER TABLE SittoStand_Table ADD COLUMN {LR}_Hip_Force_{axis} TEXT""")
-#               c.execute(f"""ALTER TABLE SittoStand_Table ADD COLUMN {LR}_Hip_Power_{axis} TEXT""")
-#               c.execute(f"""ALTER TABLE SittoStand_Table ADD COLUMN {LR}_Ankle_Angle_{axis} TEXT""")
-#               c.execute(f"""ALTER TABLE SittoStand_Table ADD COLUMN {LR}_Ankle_Moment_{axis} TEXT""")
-#               c.execute(f"""ALTER TABLE SittoStand_Table ADD COLUMN {LR}_Ankle_Force_{axis} TEXT""")
-#               c.execute(f"""ALTER TABLE SittoStand_Table ADD COLUMN {LR}_Ankle_Power_{axis} TEXT""")
-#               c.execute(f"""ALTER TABLE SittoStand_Table ADD COLUMN {LR}_Foot_Progression_Angle_{axis} TEXT""")
-#               c.execute(f"""ALTER TABLE SittoStand_Table ADD COLUMN {LR}_pelvis_Angle_{axis} TEXT""")
-#               c.execute(f"""ALTER TABLE SittoStand_Table ADD COLUMN {LR}_COM_{axis} TEXT""")
-#               c.execute(f"""ALTER TABLE SittoStand_Table ADD COLUMN {LR}_C7_{axis} TEXT""")
-# def enter_SittoStand_Table (numTrials):
-#     for TrialNum in numTrials:
-#         filename = STS[TrialNum]["Filename"] 
-#         c.execute("""INSERT INTO SittoStand_Table 
-#                   (ID, Dominant_Limb, Patient_Type, 
-#                   Sex, Month, Affected_Limb, Filename) 
-#                   VALUES (?,?,?,?,?,?,?)""", 
-#                   (ID, dom_limb, pattype, sex, mon, aff_limb, 
-#                     filename))
-#         for LR in ["Left", "Right"]:
-#             try:
-#                 for axis in ["x", "y", "z"]:
-#                     c.execute(f"""UPDATE SittoStand_Table
-#                               SET 
-#                               {LR}_Knee_Angle_{axis} = ?,
-#                               {LR}_Hip_Angle_{axis} = ?,
-#                               {LR}_Ankle_Angle_{axis} = ?,
-#                               {LR}_Foot_Progression_Angle_{axis} = ?,
-#                               {LR}_pelvis_Angle_{axis} =  ?,
-#                               {LR}_COM_{axis} =  ?,
-#                               {LR}_Knee_Moment_{axis} = ?,
-#                               {LR}_Knee_Force_{axis} = ?,
-#                               {LR}_Knee_Power_{axis} = ?,
-#                               {LR}_Hip_Moment_{axis} = ?,
-#                               {LR}_Hip_Force_{axis} = ?,
-#                               {LR}_Hip_Power_{axis} = ?,
-#                               {LR}_Ankle_Moment_{axis} = ?,
-#                               {LR}_Ankle_Force_{axis} = ?,
-#                               {LR}_Ankle_Power_{axis} =  ?,
-#                               {LR}_C7_{axis} = ?
-#                               WHERE Filename = ?
-#                               """,(
-#                               (str(STS["SittoStand"][TrialNum][LR]["KneeAngle"][axis])[1:-1]),
-#                               (str(STS["SittoStand"][TrialNum][LR]["HipAngle"][axis])[1:-1]),
-#                               (str(STS["SittoStand"][TrialNum][LR]["AnkleAngle"][axis])[1:-1]),
-#                               (str(STS["SittoStand"][TrialNum][LR]["FootProgressAngle"][axis])[1:-1]),
-#                               (str(STS["SittoStand"][TrialNum][LR]["pelvisAngle"][axis])[1:-1]),
-#                               (str(STS["SittoStand"][TrialNum][LR]["COM"][axis])[1:-1]),
-#                               (str(STS["SittoStand"][TrialNum][LR]["KneeMoment"][axis])[1:-1]),
-#                               (str(STS["SittoStand"][TrialNum][LR]["KneeForce"][axis])[1:-1]),
-#                               (str(STS["SittoStand"][TrialNum][LR]["KneePower"][axis])[1:-1]),
-#                               (str(STS["SittoStand"][TrialNum][LR]["HipMoment"][axis])[1:-1]),
-#                               (str(STS["SittoStand"][TrialNum][LR]["HipForce"][axis])[1:-1]),
-#                               (str(STS["SittoStand"][TrialNum][LR]["HipPower"][axis])[1:-1]),
-#                               (str(STS["SittoStand"][TrialNum][LR]["AnkleMoment"][axis])[1:-1]),
-#                               (str(STS["SittoStand"][TrialNum][LR]["AnkleForce"][axis])[1:-1]),
-#                               (str(STS["SittoStand"][TrialNum][LR]["AnklePower"][axis])[1:-1]),
-#                               (str(STS["SittoStand"][TrialNum][LR]["C7"][axis])[1:-1]),
-#                               filename
-#                               ))
-#             except:
-#                 pass
+#Sit to Stand
+def enter_SittoStand_extrema ():  
+    c.execute("""INSERT INTO SittoStand_Max_Min_Table 
+              (ID, Dominant_Limb, Patient_Type, 
+              Sex, Month, Affected_Limb, Visit_Number)VALUES (?,?,?,?,?,?,?)""", 
+              (ID, dom_limb, pattype, sex, mon, aff_limb, visit))
+    for limb in ["Left", "Right"]:
+        for axis in ["x", "y", "z"]:
+            for function in ["max", "min"]:
+                c.execute(f"""UPDATE SittoStand_Max_Min_Table
+                          SET 
+                          {function}_{limb}_Knee_Angle_{axis} = ?,
+                          {function}_{limb}_Knee_Moment_{axis} = ?,
+                          {function}_{limb}_Knee_Force_{axis} = ?,
+                          {function}_{limb}_Knee_Power_{axis} = ?,
+                          {function}_{limb}_Hip_Angle_{axis} = ?,
+                          {function}_{limb}_Hip_Moment_{axis} = ?,
+                          {function}_{limb}_Hip_Force_{axis} = ?,
+                          {function}_{limb}_Hip_Power_{axis} = ?,
+                          {function}_{limb}_Ankle_Angle_{axis} = ?,
+                          {function}_{limb}_Ankle_Moment_{axis} = ?,
+                          {function}_{limb}_Ankle_Force_{axis} = ?,
+                          {function}_{limb}_Ankle_Power_{axis} =  ?,
+                          {function}_{limb}_Foot_Progression_Angle_{axis} = ?,
+                          {function}_{limb}_pelvis_Angle_{axis} =  ?,
+                          {function}_{limb}_COM_{axis} =  ?,
+                          {function}_{limb}_C7_{axis} =  ?
+                          WHERE ID = ? and Visit_Number = ?
+                          """,(
+                          (STS["SittoStand"][function][limb]["KneeAngle"][axis]),
+                          (STS["SittoStand"][function][limb]["KneeMoment"][axis]),
+                          (STS["SittoStand"][function][limb]["KneeForce"][axis]),
+                          (STS["SittoStand"][function][limb]["KneePower"][axis]),
+                          (STS["SittoStand"][function][limb]["HipAngle"][axis]),
+                          (STS["SittoStand"][function][limb]["HipMoment"][axis]),
+                          (STS["SittoStand"][function][limb]["HipForce"][axis]),
+                          (STS["SittoStand"][function][limb]["HipPower"][axis]),
+                          (STS["SittoStand"][function][limb]["AnkleAngle"][axis]),
+                          (STS["SittoStand"][function][limb]["AnkleMoment"][axis]),
+                          (STS["SittoStand"][function][limb]["AnkleForce"][axis]),
+                          (STS["SittoStand"][function][limb]["AnklePower"][axis]),
+                          (STS["SittoStand"][function][limb]["FootProgressAngle"][axis]),
+                          (STS["SittoStand"][function][limb]["pelvisAngle"][axis]),
+                          (STS["SittoStand"][function][limb]["COM"][axis]),
+                          (STS["SittoStand"][function][limb]["C7"][axis]),
+                          ID, visit
+                          ))
+def enter_SittoStand_Table (numTrials):
+    for TrialNum in numTrials:
+        filename = STS[TrialNum]["Filename"] 
+        c.execute("""INSERT INTO SittoStand_Table 
+                  (ID, Dominant_Limb, Patient_Type, 
+                  Sex, Month, Affected_Limb, Filename, Visit_Number) 
+                  VALUES (?,?,?,?,?,?,?)""", 
+                  (ID, dom_limb, pattype, sex, mon, aff_limb, 
+                    filename, visit))
+        for LR in ["Left", "Right"]:
+            try:
+                for axis in ["x", "y", "z"]:
+                    c.execute(f"""UPDATE SittoStand_Table
+                              SET 
+                              {LR}_Knee_Angle_{axis} = ?,
+                              {LR}_Hip_Angle_{axis} = ?,
+                              {LR}_Ankle_Angle_{axis} = ?,
+                              {LR}_Foot_Progression_Angle_{axis} = ?,
+                              {LR}_pelvis_Angle_{axis} =  ?,
+                              {LR}_COM_{axis} =  ?,
+                              {LR}_Knee_Moment_{axis} = ?,
+                              {LR}_Knee_Force_{axis} = ?,
+                              {LR}_Knee_Power_{axis} = ?,
+                              {LR}_Hip_Moment_{axis} = ?,
+                              {LR}_Hip_Force_{axis} = ?,
+                              {LR}_Hip_Power_{axis} = ?,
+                              {LR}_Ankle_Moment_{axis} = ?,
+                              {LR}_Ankle_Force_{axis} = ?,
+                              {LR}_Ankle_Power_{axis} =  ?,
+                              {LR}_C7_{axis} = ?
+                              WHERE Filename = ?
+                              """,(
+                              (str(STS["SittoStand"][TrialNum][LR]["KneeAngle"][axis])[1:-1]),
+                              (str(STS["SittoStand"][TrialNum][LR]["HipAngle"][axis])[1:-1]),
+                              (str(STS["SittoStand"][TrialNum][LR]["AnkleAngle"][axis])[1:-1]),
+                              (str(STS["SittoStand"][TrialNum][LR]["FootProgressAngle"][axis])[1:-1]),
+                              (str(STS["SittoStand"][TrialNum][LR]["pelvisAngle"][axis])[1:-1]),
+                              (str(STS["SittoStand"][TrialNum][LR]["COM"][axis])[1:-1]),
+                              (str(STS["SittoStand"][TrialNum][LR]["KneeMoment"][axis])[1:-1]),
+                              (str(STS["SittoStand"][TrialNum][LR]["KneeForce"][axis])[1:-1]),
+                              (str(STS["SittoStand"][TrialNum][LR]["KneePower"][axis])[1:-1]),
+                              (str(STS["SittoStand"][TrialNum][LR]["HipMoment"][axis])[1:-1]),
+                              (str(STS["SittoStand"][TrialNum][LR]["HipForce"][axis])[1:-1]),
+                              (str(STS["SittoStand"][TrialNum][LR]["HipPower"][axis])[1:-1]),
+                              (str(STS["SittoStand"][TrialNum][LR]["AnkleMoment"][axis])[1:-1]),
+                              (str(STS["SittoStand"][TrialNum][LR]["AnkleForce"][axis])[1:-1]),
+                              (str(STS["SittoStand"][TrialNum][LR]["AnklePower"][axis])[1:-1]),
+                              (str(STS["SittoStand"][TrialNum][LR]["C7"][axis])[1:-1]),
+                              filename
+                              ))
+            except:
+                pass
 
 
 
 
 
-# def close_window():
-#     root.destroy()
-# #FRAME 3: CANCEL/ACCEPT
-# buttoncancel = Button(FrameClose, text = "Cancel", command = lambda: close_window())
-# buttoncancel.pack(side = RIGHT, anchor = CENTER, padx = 10)
-# buttonaccept = Button(FrameClose, text = "Accept", command = lambda: [close_window(),
-#                                                                       create_Mean_Gait_Table(),
-#                                                                       columns_Mean_Gait_Table(),
-#                                                                       enter_Mean_Gait_Table(Gait["Left Average"],Gait["Right Average"]),
-#                                                                       create_Gait_Max_Min_Table(),
-#                                                                       columns_Gait_Max_Min_Table(),
-#                                                                       enter_Gait_extrema(),
-#                                                                       create_Gait_Table(),
-#                                                                       columns_Gait_Table(),
-#                                                                       enter_Gait_Table(TriallistGait),
-#                                                                       create_StepUp_Max_Min_Table(),
-#                                                                       columns_StepUp_Max_Min_Table(),
-#                                                                       enter_StepUp_extrema(),
-#                                                                       create_StepUp_Table(),
-#                                                                       columns_StepUp_Table(),
-#                                                                       enter_StepUp_Table(TriallistStepUp),
-#                                                                       create_StepDown_Max_Min_Table(),
-#                                                                       columns_StepDown_Max_Min_Table(),
-#                                                                       enter_StepDown_extrema(),
-#                                                                       create_StepDown_Table(),
-#                                                                       columns_StepDown_Table(),
-#                                                                       enter_StepDown_Table(TriallistStepDown),
-#                                                                       create_StandtoSit_Max_Min_Table(),
-#                                                                       columns_StandtoSit_Max_Min_Table(),
-#                                                                       enter_StandtoSit_extrema(),
-#                                                                       create_StandtoSit_Table(),
-#                                                                       columns_StandtoSit_Table(),
-#                                                                       enter_StandtoSit_Table(TriallistSTS),
-#                                                                     create_SittoStand_Max_Min_Table(),
-#                                                                     columns_SittoStand_Max_Min_Table(),
-#                                                                     enter_SittoStand_extrema(),
-                                                                    
-#                                                                     create_SittoStand_Table(),
-#                                                                     columns_SittoStand_Table(),
-#                                                                     enter_SittoStand_Table(TriallistSTS)])
-# buttonaccept.pack(side = RIGHT, anchor = CENTER, padx = 10, pady = 20)
+def close_window():
+    root.destroy()
+#FRAME 3: CANCEL/ACCEPT
+buttoncancel = Button(FrameClose, text = "Cancel", command = lambda: close_window())
+buttoncancel.pack(side = RIGHT, anchor = CENTER, padx = 10)
+buttonaccept = Button(FrameClose, text = "Accept", command = lambda: [variable(), 
+                                                                      close_window(),
+                                                                      enter_Mean_Gait_Table(Gait["Left Average"],Gait["Right Average"]),
+                                                                      enter_Gait_extrema(),
+                                                                      enter_Gait_Table(TriallistGait),
+                                                                      enter_StepUp_extrema(),
+                                                                      enter_StepUp_Table(TriallistStepUp),
+                                                                      enter_StepDown_extrema(),
+                                                                      enter_StepDown_Table(TriallistStepDown),
+                                                                      enter_StandtoSit_extrema(),
+                                                                      enter_StandtoSit_Table(TriallistSTS),
+                                                                      enter_SittoStand_extrema(),
+                                                                      enter_SittoStand_Table(TriallistSTS)])
+buttonaccept.pack(side = RIGHT, anchor = CENTER, padx = 10, pady = 20)
 
 
 
@@ -2479,69 +2222,33 @@ conn.close()
 
 
 
+Month = str(vMonth.get()) + " Month(s)"
+
+patient = {}
+patient["ID"] = ID
+patient["Sex"]= sex
+patient["Dominant Limb"] = dom_limb
+patient["Affected Limb"] = aff_limb
+patient["Visit Number"] = 2
+patient[visit]={}
+patient[visit]["Gait"]= Gait
+patient[visit]["StepUp"]= StepUp
+patient[visit]["StepDown"]= StepDown
+patient[visit]["STS"] = STS
+patient[visit]["Type"] = pattype
+patient[visit]["Months postop"] = mon
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# ID = vID.get()
-# Type = vType.get()
-# Month = str(vMonth.get()) + " Month(s)"
-
-# patient = {}
-# patient["ID"] = vID.get()
-# patient["Sex"]= vSex.get()
-# patient["Dominant Limb"] = vDom.get()
-# patient["Affected Limb"] = vAffect.get()
-# patient["Type"] = Type
-
-
-# patient["Gait"]= Gait
-# patient["StepUp"]= StepUp
-# patient["StepDown"]= StepDown
-# # patient["StandUp"]= StandUp
-# # patient["SitDown"]= SitDown
-# # patient["RampGait"]= RampGait
-
-# if Type == "Post-op":
-#     patient["Month"] = vMonth.get()
 
     
 
 
 
-# def writetodict():
-#     name = ID + Type + str(vMonth.get()) + ".json"
-#     with open(name, 'w') as f:
-#         json.dump(patient, f, indent = 5)    
-# writetodict()
+def writetodict():
+    name = ID + "visit" + visit + ".json"
+    with open(name, 'w') as f:
+        json.dump(patient, f, indent = 5)    
+writetodict()
 
 
