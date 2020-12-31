@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 """connect to SQLite Database. For testing purposes, connect to "memory" """
 
 #conn = sqlite3.connect(':memory:')
-conn = sqlite3.connect('MotionAnalysis.db')
+conn = sqlite3.connect('MotionAnalysis2.db')
 c=conn.cursor()
 
 """begin Tkinter GUI window.
@@ -306,20 +306,19 @@ def browseFilesGait():
     for i in range(length):
         TriallistGait.append("Trial "+str(i+1))
         Gait[TriallistGait[i]]={}
-        filelistGait[i]=os.path.basename(filelistGait[i])
         Gait[TriallistGait[i]].update({"Filename": filelistGait[i]})
         if i == 0:
-            label_file_explorer1Gait.configure(text="File Opened: "+filelistGait[i])
+            label_file_explorer1Gait.configure(text="File Opened: "+ os.path.basename(filelistGait[i]))
         if i == 1:
-            label_file_explorer2Gait.configure(text="File Opened: "+filelistGait[i])
+            label_file_explorer2Gait.configure(text="File Opened: "+os.path.basename(filelistGait[i]))
         if i == 2:
-            label_file_explorer3Gait.configure(text="File Opened: "+filelistGait[i])
+            label_file_explorer3Gait.configure(text="File Opened: "+os.path.basename(filelistGait[i]))
         if i == 3:
-            label_file_explorer4Gait.configure(text="File Opened: "+filelistGait[i])
+            label_file_explorer4Gait.configure(text="File Opened: "+os.path.basename(filelistGait[i]))
         if i == 4:
-            label_file_explorer5Gait.configure(text="File Opened: "+filelistGait[i])
+            label_file_explorer5Gait.configure(text="File Opened: "+os.path.basename(filelistGait[i]))
         if i == 5:
-            label_file_explorer6Gait.configure(text="File Opened: "+filelistGait[i])
+            label_file_explorer6Gait.configure(text="File Opened: "+os.path.basename(filelistGait[i]))
             
             
 """the following definitions are all interconnected so will be explained together below"""            
@@ -623,6 +622,8 @@ def extractintoDict(filename, TrialNum):
 def extract_all_Gait_files():
     for i in range(len(TriallistGait)):
         extractintoDict(filelistGait[i], TriallistGait[i])
+        filelistGait[i]=os.path.basename(filelistGait[i])
+        Gait[TriallistGait[i]].update({"Filename": filelistGait[i]})
 
 """The button for selecting the trials is created and calls two fucntions. The first is the 
 "Browse files function already described. This outputs two lists f equal length: one with the filenames
@@ -811,20 +812,19 @@ def browseFilesStepUp():
     for i in range(length):
         TriallistStepUp.append("Trial "+str(i+1))
         StepUp[TriallistStepUp[i]]={}
-        filelistStepUp[i]=os.path.basename(filelistStepUp[i])
         StepUp[TriallistStepUp[i]].update({"Filename": filelistStepUp[i]})
         if i == 0:
-            label_file_explorer1StepUp.configure(text="File Opened: "+filelistStepUp[i])
+            label_file_explorer1StepUp.configure(text="File Opened: "+os.path.basename(filelistStepUp[i]))
         if i == 1:
-            label_file_explorer2StepUp.configure(text="File Opened: "+filelistStepUp[i])
+            label_file_explorer2StepUp.configure(text="File Opened: "+os.path.basename(filelistStepUp[i]))
         if i == 2:
-            label_file_explorer3StepUp.configure(text="File Opened: "+filelistStepUp[i])
+            label_file_explorer3StepUp.configure(text="File Opened: "+os.path.basename(filelistStepUp[i]))
         if i == 3:
-            label_file_explorer4StepUp.configure(text="File Opened: "+filelistStepUp[i])
+            label_file_explorer4StepUp.configure(text="File Opened: "+os.path.basename(filelistStepUp[i]))
         if i == 4:
-            label_file_explorer5StepUp.configure(text="File Opened: "+filelistStepUp[i])
+            label_file_explorer5StepUp.configure(text="File Opened: "+os.path.basename(filelistStepUp[i]))
         if i == 5:
-            label_file_explorer6StepUp.configure(text="File Opened: "+filelistStepUp[i])
+            label_file_explorer6StepUp.configure(text="File Opened: "+os.path.basename(filelistStepUp[i]))
 
 """The following fucntions are intercnnected and explained below"""
 def extractintoDictStepUp(filename, TrialNum, Limb):     
@@ -974,6 +974,9 @@ def add_max_min_to_dict():
     StepUp["max"].update({"Right":  meanmaxminvals("Right", TriallistStepUpr, "max")})
     StepUp["min"].update({"Left":  meanmaxminvals("Left", TriallistStepUpl, "min")})
     StepUp["min"].update({"Right":  meanmaxminvals("Right", TriallistStepUpr, "min")})
+    for i in range(len(filelistStepUp)):    
+        filelistStepUp[i]=os.path.basename(filelistStepUp[i])
+        StepUp[TriallistStepUp[i]].update({"Filename": filelistStepUp[i]})
      
             
 """The selct function calls the browse files function( explained above) but DOES NOT
@@ -1146,20 +1149,19 @@ def browseFilesStepDown():
     for i in range(length):
         TriallistStepDown.append("Trial "+str(i+1))
         StepDown[TriallistStepDown[i]]={}
-        filelistStepDown[i]=os.path.basename(filelistStepDown[i])
         StepDown[TriallistStepDown[i]].update({"Filename": filelistStepDown[i]})
         if i == 0:
-            label_file_explorer1StepDown.configure(text="File Opened: "+filelistStepDown[i])
+            label_file_explorer1StepDown.configure(text="File Opened: "+os.path.basename(filelistStepDown[i]))
         if i == 1:
-            label_file_explorer2StepDown.configure(text="File Opened: "+filelistStepDown[i])
+            label_file_explorer2StepDown.configure(text="File Opened: "+os.path.basename(filelistStepDown[i]))
         if i == 2:
-            label_file_explorer3StepDown.configure(text="File Opened: "+filelistStepDown[i])
+            label_file_explorer3StepDown.configure(text="File Opened: "+os.path.basename(filelistStepDown[i]))
         if i == 3:
-            label_file_explorer4StepDown.configure(text="File Opened: "+filelistStepDown[i])
+            label_file_explorer4StepDown.configure(text="File Opened: "+os.path.basename(filelistStepDown[i]))
         if i == 4:
-            label_file_explorer5StepDown.configure(text="File Opened: "+filelistStepDown[i])
+            label_file_explorer5StepDown.configure(text="File Opened: "+os.path.basename(filelistStepDown[i]))
         if i == 5:
-            label_file_explorer6StepDown.configure(text="File Opened: "+filelistStepDown[i])
+            label_file_explorer6StepDown.configure(text="File Opened: "+os.path.basename(filelistStepDown[i]))
 
             
 def extractintoDictStepDown(filename, TrialNum, Limb):     
@@ -1310,6 +1312,9 @@ def add_max_min_to_dictStepDown():
     StepDown["max"].update({"Right":  meanmaxminvalsStepDown("Right", TriallistStepDownr, "max")})
     StepDown["min"].update({"Left":  meanmaxminvalsStepDown("Left", TriallistStepDownl, "min")})
     StepDown["min"].update({"Right":  meanmaxminvalsStepDown("Right", TriallistStepDownr, "min")})
+    for i in range(len(filelistStepDown)):
+        filelistStepDown[i]=os.path.basename(filelistStepDown[i])
+        StepDown[TriallistStepDown[i]].update({"Filename": filelistStepDown[i]})
             
 button_exploreStepDown = Button(SelectFrameStepDown, text = "Select Trials",  width = 40, bg = "ghost white",
                           command = lambda : [browseFilesStepDown()])  
@@ -1410,14 +1415,13 @@ def browseFilesSTS():
     for i in range(length):
         TriallistSTS.append("Trial "+str(i+1))
         STS[TriallistSTS[i]]={}
-        filelistSTS[i]=os.path.basename(filelistSTS[i])
         STS[TriallistSTS[i]].update({"Filename": filelistSTS[i]})
         if i == 0:
-            label_file_explorer1STS.configure(text="File Opened: "+filelistSTS[i])
+            label_file_explorer1STS.configure(text="File Opened: "+os.path.basename(filelistSTS[i]))
         if i == 1:
-            label_file_explorer2STS.configure(text="File Opened: "+filelistSTS[i])
+            label_file_explorer2STS.configure(text="File Opened: "+os.path.basename(filelistSTS[i]))
         if i == 2:
-            label_file_explorer3STS.configure(text="File Opened: "+filelistSTS[i])
+            label_file_explorer3STS.configure(text="File Opened: "+os.path.basename(filelistSTS[i]))
 
 def extractintoDictSTS(filename, TrialNum, Limb):     
     reader = btk.btkAcquisitionFileReader()
@@ -1639,6 +1643,10 @@ def add_max_min_to_dict_STS():
     STS["SittoStand"]["min"].update({"Left":  meanmaxminvalsSTS("Left", "min", "SittoStand")})
     STS["SittoStand"]["max"].update({"Right":  meanmaxminvalsSTS("Right", "max", "SittoStand")})
     STS["SittoStand"]["min"].update({"Right":  meanmaxminvalsSTS("Right", "min", "SittoStand")})
+    
+    for i in range(len(filelistSTS)):
+        filelistSTS[i]=os.path.basename(filelistSTS[i])
+        STS[TriallistSTS[i]].update({"Filename": filelistSTS[i]})
 
 
            
@@ -1907,10 +1915,10 @@ def enter_Gait_Table (numTrials):
                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", 
                   (ID, dom_limb, pattype, sex, mon, aff_limb, visit,
                     filename, cleanleft, cleanright,
-                  (str(Gait[TrialNum]["lfootstrikeFrame"])),
-                  (str(Gait[TrialNum]["lfootoffFrame"])),
-                  (str(Gait[TrialNum]["rfootstrikeFrame"])),
-                  (str(Gait[TrialNum]["rfootoffFrame"]))))
+                  (str(Gait[TrialNum]["lfootstrikeFrame"])[1:-1]),
+                  (str(Gait[TrialNum]["lfootoffFrame"])[1:-1]),
+                  (str(Gait[TrialNum]["rfootstrikeFrame"])[1:-1]),
+                  (str(Gait[TrialNum]["rfootoffFrame"])[1:-1])))
         for LR in ["Left", "Right"]:
             for axis in ["x", "y", "z"]:
                 c.execute(f"""UPDATE Gait_Table
@@ -2506,7 +2514,6 @@ def enter_Mean_SittoStand_Table ():
                   (str(STS["SittoStand"]["mean"]["Right"]["COM"][axis])[1:-1]),
                   ID, visit
                   ))
-        print("function is called")
 """The accept button runs all the SWLite functions so if you click cancel the database 
 will not be changed in any way. Both buttons will close the window. It also creates a JSON file"""
 patient = {}
@@ -2540,8 +2547,6 @@ label_save.pack(pady = 10)
 buttoncancel = Button(FrameClose, text = "Cancel", command = lambda: close_window())
 buttoncancel.pack(side = RIGHT, anchor = CENTER, padx = 10)
 
-buttoncancel = Button(FrameClose, text = "Cancel", command = lambda: close_window())
-buttoncancel.pack(side = RIGHT, anchor = CENTER, padx = 10)
 # commandsgait = []
 # commandsStepUp = [enter_StepUp_extrema(),enter_StepUp_Table(TriallistStepUp)]
 # commandsStepDown = [enter_StepDown_extrema(), enter_StepDown_Table(TriallistStepDown)]
