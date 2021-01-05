@@ -27,7 +27,7 @@ Setup Tabs within root window"""
 root = Tk()
 root.title("Enter Motion Analysis Data")
 root.geometry("600x750")
-myFont = font.Font(family = "Helvetica", size=20)
+myFont = font.Font(family = "Helvetica", size=30)
 tab_parent = ttk.Notebook(root)
 tab1 = ttk.Frame(tab_parent)
 tab2 = ttk.Frame(tab_parent)
@@ -54,17 +54,18 @@ The bottom Frame has buttons for accept or cancel once all files have been selec
 FrameTop = Frame(tab1, bg = "DodgerBlue3", bd = 6)
 FrameTop.pack(expand = 1, fill = BOTH)
 FrameTitle = Frame(FrameTop, bg = "DodgerBlue3", bd = 6)
-FrameTitle.grid(row = 0, column  =0, columnspan = 2)
-FrameInfo = Frame(FrameTop, bg = "DodgerBlue3", bd = 6)
-FrameInfo.grid(row =1, column = 0, padx = 20, pady = 20)
-FrameMovement = Frame(FrameTop, bg = "DodgerBlue2", bd = 6)
-FrameMovement.grid(row = 1, column = 1, padx = 20)
-FrameNext = Frame(tab1, bg = "DeepSkyBlue2")
-FrameNext.pack(expand = 2, fill = BOTH)
+FrameTitle.pack(fill = X)
+FrameInfo = Frame(FrameTop,bd = 6, bg = "SlateGray4")
+FrameInfo.pack()
+
+FrameNext = Frame(tab1 )
+FrameNext.pack(fill = BOTH, pady  =10)
 FrameClose = Frame(tab1, bg = "DodgerBlue3")
-FrameClose.pack(expand = 2, fill = BOTH, side = BOTTOM)
-label_title = Label(FrameTitle, text = "Input Motion Analysis Data")
-label_title.pack()
+FrameClose.pack(expand = 2, fill = BOTH)
+
+
+label_title = Label(FrameTitle, text = "Input Motion Analysis Data", bg = "white")
+label_title.pack(pady = 20, padx = 20, fill= X)
 label_title["font"] = myFont
 
  
@@ -72,12 +73,12 @@ label_title["font"] = myFont
 If the preop option is selected, the month entry box is dissabled as this is
  for number of months post op. If the control option is selected, both month 
  and affected limb are dissabled as the control will have no damaged knee"""
-labelID = Label(FrameInfo,  text = "Patient ID: ", bg = "ivory3") 
+labelID = Label(FrameInfo,  text = "Patient ID: ") 
 labelID.grid(column = 1, row = 1, pady = 5)
 vID = StringVar()
-entryID = Entry(FrameInfo,  textvariable = vID,   fg = "purple4", width = 20) 
+entryID = Entry(FrameInfo,  textvariable = vID,   fg = "RoyalBlue4", width = 20) 
 entryID.grid(column = 2, row = 1, columnspan = 3)
-labelSex = Label(FrameInfo,  text = "Sex: ", bg = "ivory3") 
+labelSex = Label(FrameInfo,  text = "Sex: ") 
 labelSex.grid(column = 1, row = 2, pady = 5)
 vSex = StringVar()
 vSex.set(0)
@@ -85,7 +86,7 @@ radiomale = Radiobutton(FrameInfo, text="Male",variable= vSex, value="Male")
 radiomale.grid(column = 2, row = 2)
 radiofemale = Radiobutton(FrameInfo, text="Female",variable= vSex, value="Female")
 radiofemale.grid(column = 3, row = 2)
-labelDom = Label(FrameInfo,  text = "Dominant Limb: ", bg = "ivory3") 
+labelDom = Label(FrameInfo,  text = "Dominant Limb: ") 
 labelDom.grid(column = 1, row = 3, pady = 5)
 vDom = StringVar()
 vDom.set(0)
@@ -104,6 +105,8 @@ class Pattype:
             self.radioleft.configure(state = "normal")
             self.radioright.configure(state = "normal")
             self.radioboth.configure(state = "normal")
+            self.labelvisit.configure(state = "normal")
+            self.entryVisit.configure(state = "normal")
         if vType.get() == "Control":
             self.month_entry.configure(state = "disabled")
             self.date_label.configure(state = "disabled")
@@ -111,6 +114,8 @@ class Pattype:
             self.radioleft.configure(state = "disabled")
             self.radioright.configure(state = "disabled")
             self.radioboth.configure(state = "disabled")
+            self.labelvisit.configure(state = "disabled")
+            self.entryVisit.configure(state = "disabled")
         if vType.get() == "Pre-op":
             self.month_entry.configure(state = "disabled")
             self.date_label.configure(state = "disabled")    
@@ -118,9 +123,11 @@ class Pattype:
             self.radioleft.configure(state = "normal")
             self.radioright.configure(state = "normal")
             self.radioboth.configure(state = "normal")
+            self.labelvisit.configure(state = "normal")
+            self.entryVisit.configure(state = "normal")
            
     def __init__(self, master):
-        self.label_type = Label(FrameInfo, text = "Patient Type: ", bg = "ivory3")
+        self.label_type = Label(FrameInfo, text = "Patient Type: ")
         self.label_type.grid(column = 1, row = 4, pady = 5)
         global vType
         vType = StringVar()
@@ -129,13 +136,13 @@ class Pattype:
         self.optiontype.config(width = 20)
         self.optiontype.grid(column = 2, row = 4, columnspan  =3)
         
-        self.date_label = Label(FrameInfo, text = "Number of months Post - Op: ", bg = "ivory3")
+        self.date_label = Label(FrameInfo, text = "Number of months Post - Op: ")
         self.date_label.grid(column = 1, row  = 5, pady = 5)
         global vMonth
         vMonth = IntVar() 
-        self.month_entry = Entry(FrameInfo, textvariable = vMonth, width = 20, fg = "purple4")
+        self.month_entry = Entry(FrameInfo, textvariable = vMonth, width = 20, fg = "RoyalBlue4")
         self.month_entry.grid(column = 2, row = 5, columnspan  = 3)
-        self.limb_label = Label(FrameInfo, text = "Affected Limb: ", bg = "ivory3")
+        self.limb_label = Label(FrameInfo, text = "Affected Limb: ")
         self.limb_label.grid(column = 1, row  = 6, pady = 5)
         global vAffect
         vAffect = StringVar()
@@ -145,51 +152,63 @@ class Pattype:
         self.radioright = Radiobutton(FrameInfo, text="Right",variable=vAffect, value="Right")
         self.radioright.grid(column = 3, row = 6)
         self.radioboth = Radiobutton(FrameInfo, text="Both",variable=vAffect, value="Both")
-        self.radioboth.grid(column = 4, row = 6)             
+        self.radioboth.grid(column = 4, row = 6)      
+        global vVisit
+        vVisit = IntVar()
+        self.labelvisit = Label(FrameInfo,  text = "Patient Visit: ") 
+        self.labelvisit.grid(column = 1, row = 7, pady = 5)
+        self.entryVisit = Entry(FrameInfo,  textvariable = vVisit,   fg = "RoyalBlue4", width = 20) 
+        self.entryVisit.grid(column = 2, row = 7, columnspan = 3)
+
 Pattype(FrameInfo)
-labelvisit = Label(FrameInfo,  text = "Patient Visit: ", bg = "ivory3") 
-labelvisit.grid(column = 1, row = 7, pady = 5)
-vVisit = IntVar()
-entryVisit = Entry(FrameInfo,  textvariable = vVisit,   fg = "purple4", width = 20) 
-entryVisit.grid(column = 2, row = 7, columnspan = 3)
 
 """This Frame contains checkboxes for each of the movement that are automatically 
 checked when files are selected. This is not fucntional and purely aesthetic at
 the moment"""
 gc = IntVar()
-Gaitlabel = Label(FrameMovement, text = "Gait")
-Gaitlabel.grid(column = 10, row  = 2, padx = 5, pady = 7)
-Gaitcheck = Checkbutton(FrameMovement, variable = gc)
-Gaitcheck.grid(column  = 11, row  = 2)
-
 suc = IntVar()
-StepUplabel = Label(FrameMovement, text = "StepUp")
-StepUplabel.grid(column = 10, row  = 3,padx = 5, pady = 7)
-StepUpcheck = Checkbutton(FrameMovement, variable = suc)
-StepUpcheck.grid(column  = 11, row  = 3)
-
 sdc = IntVar()
-StepDownlabel = Label(FrameMovement, text = "StepDown")
-StepDownlabel.grid(column = 10, row  = 4, padx = 5,pady = 7)
-StepDowncheck = Checkbutton(FrameMovement, variable = sdc)
-StepDowncheck.grid(column  = 11, row  = 4)
-
 stsc = IntVar()
-SitStandSitlabel = Label(FrameMovement, text = "SitStandSit")
-SitStandSitlabel.grid(column = 10, row  = 5, padx = 5,pady = 7)
-SitStandSitcheck = Checkbutton(FrameMovement, variable = stsc)
-SitStandSitcheck.grid(column  = 11, row  = 5)
+class checkboxes:
+    def __init__(self, tab):
+        self.tab = tab
+    def boxes(self):
+        self.FrameMovement = Frame(self.tab, height = 10, bg = "DodgerBlue2", bd = 6)
+        self.FrameMovement.pack(fill = BOTH, side = BOTTOM)
+        self.movelabel = Label(self.FrameMovement, text = "Completed File Upload:")
+        self.movelabel.pack(side = LEFT, fill = BOTH, expand  = 2)
+        
+        self.Gaitlabel = Label(self.FrameMovement, text = "Gait")
+        self.Gaitlabel.pack(side = LEFT, fill = BOTH, expand  = 2)
+        self.Gaitcheck = Checkbutton(self.FrameMovement, variable = gc, state = "disabled")
+        self.Gaitcheck.pack(side = LEFT, fill = BOTH, expand  = 2)
+        
+        self.StepUplabel = Label(self.FrameMovement, text = "StepUp")
+        self.StepUplabel.pack(side = LEFT, fill = BOTH, expand  = 2)
+        self.StepUpcheck = Checkbutton(self.FrameMovement, variable = suc, state = "disabled")
+        self.StepUpcheck.pack(side = LEFT, fill = BOTH, expand  = 2)
+        
+        self.StepDownlabel = Label(self.FrameMovement, text = "StepDown")
+        self.StepDownlabel.pack(side = LEFT, fill = BOTH, expand  = 2)
+        self.StepDowncheck = Checkbutton(self.FrameMovement, variable = sdc, state = "disabled")
+        self.StepDowncheck.pack(side = LEFT, fill = BOTH, expand  = 2)
+        
+        self.SitStandSitlabel = Label(self.FrameMovement, text = "SitStandSit")
+        self.SitStandSitlabel.pack(side = LEFT, fill = BOTH, expand  = 2)
+        self.SitStandSitcheck = Checkbutton(self.FrameMovement, variable = stsc, state = "disabled")
+        self.SitStandSitcheck.pack(side = LEFT, fill = BOTH, expand  = 2)
 
+checkboxes(tab1).boxes()
 
 """The FrameNext gives a label to select next to continue to file selection, 
 as well as th "Next" button to the totab2 function which switches to the next tab"""
 def totab2():
     tab_parent.select(tab2)
     
-label_Next = Label(FrameNext, text = """"Select 'Next' to Save and Continue to File Selection.""")
+label_Next = Label(FrameNext, text = """Select to Save and Continue to File Selection.""")
 label_Next.pack(pady = 10)   
     
-button_next1 = Button(FrameNext, text = "Next", command  = lambda:[totab2()] )
+button_next1 = Button(FrameNext, bg = "RoyalBlue4",fg = "white", text = "Save and Continue", command  = lambda:[totab2()] )
 button_next1.pack()
 
 
@@ -215,35 +234,38 @@ TrialFrameGait= Frame(tab2,bg = "DodgerBlue3")
 TrialFrameGait.pack(expand =1, fill = BOTH)
 
 #Display filenames + whether clean or not    
-FrameTrial1Gait = Frame(TrialFrameGait, bg = "ivory3", bd = 6)
+FrameTrial1Gait = Frame(TrialFrameGait, bg = "SlateGray4", bd = 6)
 FrameTrial1Gait.pack()
 FrameTrial2Gait = Frame(TrialFrameGait, bg = "ghost white", bd = 6)
 FrameTrial2Gait.pack()
-FrameTrial3Gait = Frame(TrialFrameGait, bg = "ivory3", bd = 6)
+FrameTrial3Gait = Frame(TrialFrameGait, bg = "SlateGray4", bd = 6)
 FrameTrial3Gait.pack()
 FrameTrial4Gait = Frame(TrialFrameGait, bg = "ghost white", bd = 6)
 FrameTrial4Gait.pack()
-FrameTrial5Gait = Frame(TrialFrameGait, bg = "ivory3", bd = 6)
+FrameTrial5Gait = Frame(TrialFrameGait, bg = "SlateGray4", bd = 6)
 FrameTrial5Gait.pack()
 FrameTrial6Gait = Frame(TrialFrameGait, bg = "ghost white", bd = 6)
 FrameTrial6Gait.pack()
 FramebottomGait = Frame(TrialFrameGait, bg = "DodgerBlue3", bd = 6)
 FramebottomGait.pack()
 
-labelGait = Label(InfoFrameGait, text = "Gait")
+labelGait = Label(InfoFrameGait, text = "Gait", bg = "white")
 labelGait["font"] = myFont
-labelGait.pack(pady = 10)
+labelGait.pack(pady = 10, padx= 20, fill = X)
+labelGait2 = Label(InfoFrameGait, text = "Ensure selected files include a minimum of three clean gait cycles per limb", bg = "white")
+labelGait2.pack(padx = 20,  side = BOTTOM)
+
 labelbottomGait = Label(FramebottomGait, height = 1,  bg = "DodgerBlue3")
 labelbottomGait.pack()
 
 label_file_explorer1Gait = Label(FrameTrial1Gait,  text = "", width = 50, height = 3 ,  fg = "blue" , bg = "ghost white") 
 label_file_explorer1Gait.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
-label_clean1Gait = Label(FrameTrial1Gait, text="",  width = 25, bg = "ivory3")
+label_clean1Gait = Label(FrameTrial1Gait, text="",  width = 25, bg = "SlateGray4")
 label_clean1Gait.grid(column = 2, row = 1)
-label_clean1rGait = Label(FrameTrial1Gait, text="",  width = 25, bg = "ivory3")
+label_clean1rGait = Label(FrameTrial1Gait, text="",  width = 25, bg = "SlateGray4")
 label_clean1rGait.grid(column = 2, row = 2)
 
-label_file_explorer2Gait = Label(FrameTrial2Gait,  text = "", width = 50, height = 3,  fg = "blue", bg = "ivory2") 
+label_file_explorer2Gait = Label(FrameTrial2Gait,  text = "", width = 50, height = 3,  fg = "blue", bg = "gray80") 
 label_file_explorer2Gait.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
 label_clean2Gait = Label(FrameTrial2Gait, text=" ",  width = 25, bg = "ghost white")
 label_clean2Gait.grid(column = 2, row = 1)
@@ -252,12 +274,12 @@ label_clean2rGait.grid(column = 2, row = 2)
 
 label_file_explorer3Gait = Label(FrameTrial3Gait,  text = "", width = 50, height = 3,  fg = "blue", bg = "ghost white") 
 label_file_explorer3Gait.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
-label_clean3Gait = Label(FrameTrial3Gait, text=" ",  width = 25, bg = "ivory3")
+label_clean3Gait = Label(FrameTrial3Gait, text=" ",  width = 25, bg = "SlateGray4")
 label_clean3Gait.grid(column = 2, row = 1)
-label_clean3rGait = Label(FrameTrial3Gait, text="",  width = 25, bg = "ivory3")
+label_clean3rGait = Label(FrameTrial3Gait, text="",  width = 25, bg = "SlateGray4")
 label_clean3rGait.grid(column = 2, row = 2)
 
-label_file_explorer4Gait = Label(FrameTrial4Gait,  text = "", width = 50, height = 3,  fg = "blue", bg = "ivory2") 
+label_file_explorer4Gait = Label(FrameTrial4Gait,  text = "", width = 50, height = 3,  fg = "blue", bg = "gray80") 
 label_file_explorer4Gait.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
 label_clean4Gait = Label(FrameTrial4Gait, text=" ",  width = 25, bg = "ghost white")
 label_clean4Gait.grid(column = 2, row = 1)
@@ -266,12 +288,12 @@ label_clean4rGait.grid(column = 2, row = 2)
 
 label_file_explorer5Gait = Label(FrameTrial5Gait,  text = "", width = 50, height = 3,  fg = "blue", bg = "ghost white") 
 label_file_explorer5Gait.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
-label_clean5Gait = Label(FrameTrial5Gait, text=" ",  width = 25, bg = "ivory3")
+label_clean5Gait = Label(FrameTrial5Gait, text=" ",  width = 25, bg = "SlateGray4")
 label_clean5Gait.grid(column = 2, row = 1)
-label_clean5rGait = Label(FrameTrial5Gait, text="",  width = 25, bg = "ivory3")
+label_clean5rGait = Label(FrameTrial5Gait, text="",  width = 25, bg = "SlateGray4")
 label_clean5rGait.grid(column = 2, row = 2)
 
-label_file_explorer6Gait = Label(FrameTrial6Gait,  text = "", width = 50, height = 3,  fg = "blue", bg = "ivory2") 
+label_file_explorer6Gait = Label(FrameTrial6Gait,  text = "", width = 50, height = 3,  fg = "blue", bg = "gray80") 
 label_file_explorer6Gait.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
 label_clean6Gait = Label(FrameTrial6Gait, text=" ",  width = 25, bg = "ghost white")
 label_clean6Gait.grid(column = 2, row = 1)
@@ -293,7 +315,6 @@ list in the form of "Trial 1", "Trial 2", etc.
 Starting at the first Trial Gait Frame, the labels are populated with the filename ie,
 the first filename will be shown in the label of the top Frame etc """
 def browseFilesGait(): 
-    gc.set(1)
     global filelistGait
     global TriallistGait
     TriallistGait = []
@@ -324,6 +345,7 @@ def browseFilesGait():
             
 """the following definitions are all interconnected so will be explained together below"""            
 def cutcycle(footstrike, data):
+    
     footstrike1 = footstrike[0]
     footstrike2 = footstrike[1]
     datacut = (data[footstrike1:footstrike2])
@@ -664,7 +686,7 @@ data for each variable.
 
     
       
-button_exploreGait = Button(SelectFrameGait, text = "Select up to 6 Trials",  width = 40, bg = "ghost white",
+button_exploreGait = Button(SelectFrameGait, text = "Select up to 6 Trials",  width = 40, bg = "RoyalBlue4",fg= "white",
                           command = lambda : [browseFilesGait(), extract_all_Gait_files()])  
 button_exploreGait.pack(pady=10)
 
@@ -674,20 +696,18 @@ to select. For this movement, both buttons do the same thing and move to the nex
 def totab3():
     tab_parent.select(tab3)
 
-label_Next_Gait = Label(FramebottomGait, text = """Select 'Next' to Save and Continue. 
-    Do not navigate using the tabs. 
-    If this movement was not included, select 'Skip' """, justify = CENTER)
-label_Next_Gait.pack()    
+def checkboxGait():  
+    gc.set(1)
 
 
-button_skip2 = Button(FramebottomGait, text = "Skip", 
-                      command  = lambda:[totab3()])
-button_skip2.pack(pady = 10)                    
-button_nextGait = Button(FramebottomGait, text = "Next", command  = lambda:[ totab3()])
+                    
+button_nextGait = Button(FramebottomGait, bg = "RoyalBlue4",fg = "white", text = "Import Files to System", command  = lambda:[ totab3(), checkboxGait()])
 button_nextGait.pack(pady = 10)
 
+button_skip2 = Button(FramebottomGait, fg = "gray", text = "Skip", command  = lambda:[totab3()])
+button_skip2.pack(pady = 10)
 
-
+checkboxes(tab2).boxes()
 
 """Tab 3: Stepup
 Very similar to Gait but no cycles to normalise
@@ -706,23 +726,26 @@ TrialFrameStepUp1.pack(expand =1, fill = BOTH)
 TrialFrameStepUp2= Frame(tab3,bg = "DodgerBlue3")
 TrialFrameStepUp2.pack(expand =1, fill = BOTH)
 
-FrameTrial1StepUp = Frame(TrialFrameStepUp1, bg = "ivory3", bd = 6)
+FrameTrial1StepUp = Frame(TrialFrameStepUp1, bg = "SlateGray4", bd = 6)
 FrameTrial1StepUp.pack()
 FrameTrial2StepUp = Frame(TrialFrameStepUp1, bg = "ghost white", bd = 6)
 FrameTrial2StepUp.pack()
-FrameTrial3StepUp = Frame(TrialFrameStepUp1, bg = "ivory3", bd = 6)
+FrameTrial3StepUp = Frame(TrialFrameStepUp1, bg = "SlateGray4", bd = 6)
 FrameTrial3StepUp.pack()
 FrameTrial4StepUp = Frame(TrialFrameStepUp1, bg = "ghost white", bd = 6)
 FrameTrial4StepUp.pack()
-FrameTrial5StepUp = Frame(TrialFrameStepUp1, bg = "ivory3", bd = 6)
+FrameTrial5StepUp = Frame(TrialFrameStepUp1, bg = "SlateGray4", bd = 6)
 FrameTrial5StepUp.pack()
 FrameTrial6StepUp = Frame(TrialFrameStepUp1, bg = "ghost white", bd = 6)
 FrameTrial6StepUp.pack()
 FramebottomStepUp = Frame(TrialFrameStepUp2, bg = "DodgerBlue3", bd = 6)
 FramebottomStepUp.pack()
-labelStepUp = Label(InfoFrameStepUp, text = "StepUp")
+labelStepUp = Label(InfoFrameStepUp, text = "StepUp", bg = "white")
 labelStepUp["font"] = myFont
-labelStepUp.pack(pady = 10)
+labelStepUp2 = Label(InfoFrameStepUp, text = "Ensure selected files include a minimum of three clean steps per limb", bg = "white")
+labelStepUp2.pack(padx = 20,  side = BOTTOM)
+
+labelStepUp.pack(pady = 10, padx = 20, fill = X)
 labelbottomStepUp = Label(FramebottomStepUp, height = 1,  bg = "DodgerBlue3")
 labelbottomStepUp.pack()
 
@@ -737,7 +760,7 @@ radio_left_1StepUp.grid(column = 2,row = 1)
 radio_right_1StepUp.grid(column = 3,row = 1)
 radio_both_1StepUp.grid(column = 4,row = 1)
 
-label_file_explorer2StepUp = Label(FrameTrial2StepUp,  text = "", width = 50, height = 3,  fg = "blue", bg = "ivory2") 
+label_file_explorer2StepUp = Label(FrameTrial2StepUp,  text = "", width = 50, height = 3,  fg = "blue", bg = "gray80") 
 label_file_explorer2StepUp.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
 vSU2=StringVar()
 vSU2.set(0)
@@ -759,7 +782,7 @@ radio_left_3StepUp.grid(column = 2,row = 1)
 radio_right_3StepUp.grid(column = 3,row = 1)
 radio_both_3StepUp.grid(column = 4,row = 1)
 
-label_file_explorer4StepUp = Label(FrameTrial4StepUp,  text = "", width = 50, height = 3,  fg = "blue", bg = "ivory2") 
+label_file_explorer4StepUp = Label(FrameTrial4StepUp,  text = "", width = 50, height = 3,  fg = "blue", bg = "gray80") 
 label_file_explorer4StepUp.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
 vSU4=StringVar()
 vSU4.set(0)
@@ -781,7 +804,7 @@ radio_left_5StepUp.grid(column = 2,row = 1)
 radio_right_5StepUp.grid(column = 3,row = 1)
 radio_both_5StepUp.grid(column = 4,row = 1)
 
-label_file_explorer6StepUp = Label(FrameTrial6StepUp,  text = "", width = 50, height = 3,  fg = "blue", bg = "ivory2") 
+label_file_explorer6StepUp = Label(FrameTrial6StepUp,  text = "", width = 50, height = 3,  fg = "blue", bg = "gray80") 
 label_file_explorer6StepUp.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
 vSU6=StringVar()
 vSU6.set(0)
@@ -798,7 +821,6 @@ StepUp = {}
 StepUp["max"]= {}
 StepUp["min"] = {}
 def browseFilesStepUp(): 
-    suc.set(1)
     global TriallistStepUp 
     global filelistStepUp
     TriallistStepUp = []
@@ -988,7 +1010,7 @@ excact the info, therefore it's vital the Next button is pressed.
 The checkbox for if the trials were strtahclyde or not is used to create the variable which
 is sved with the data for referencing when analysing."""
             
-button_exploreStepUp = Button(SelectFrameStepUp, text = "Select Trials",  width = 40, bg = "ghost white",
+button_exploreStepUp = Button(SelectFrameStepUp, text = "Select Trials",  width = 40, bg = "RoyalBlue4",fg= "white",
                           command = lambda : [browseFilesStepUp()])  
 button_exploreStepUp.pack(pady=10)
 vStrath = IntVar()
@@ -1010,22 +1032,20 @@ The next button and the skip button also call the to tab4 function which moves o
 
 def totab4():
     tab_parent.select(tab4)
-    
-label_Next_StepUp = Label(FramebottomStepUp, text = """Select 'Next' to Save and Continue. 
-    Do not navigate using the tabs. 
-    If this movement was not included, select 'Skip' """, justify = CENTER)
-label_Next_StepUp.pack() 
-button_skip3 = Button(FramebottomStepUp, text = "Skip", 
-                      command  = lambda:[totab4()])
-button_skip3.pack(pady = 10)  
-button_next3 = Button(FramebottomStepUp, text = "Next", 
+def checkboxStepUp():  
+    suc.set(1)
+  
+
+button_next3 = Button(FramebottomStepUp,bg = "RoyalBlue4",fg = "white", text = "Import Files to System", 
                       command  = lambda:[extract_all_StepUp_files(), 
-                                          add_max_min_to_dict(), totab4()] )
+                                          add_max_min_to_dict(), checkboxStepUp(), totab4()] )
 button_next3.pack(pady=10)
 
+button_skip3 = Button(FramebottomStepUp, fg = "gray", text = "Skip", 
+                      command  = lambda:[totab4()])
+button_skip3.pack(pady = 10)  
 
-
-
+checkboxes(tab3).boxes()
 
 
 """Tab 4: StepDown
@@ -1041,15 +1061,15 @@ TrialFrameStepDown1.pack(expand =1, fill = BOTH)
 TrialFrameStepDown2= Frame(tab4,bg = "DodgerBlue3")
 TrialFrameStepDown2.pack(expand =1, fill = BOTH)
 
-FrameTrial1StepDown = Frame(TrialFrameStepDown1, bg = "ivory3", bd = 6)
+FrameTrial1StepDown = Frame(TrialFrameStepDown1, bg = "SlateGray4", bd = 6)
 FrameTrial1StepDown.pack()
 FrameTrial2StepDown = Frame(TrialFrameStepDown1, bg = "ghost white", bd = 6)
 FrameTrial2StepDown.pack()
-FrameTrial3StepDown = Frame(TrialFrameStepDown1, bg = "ivory3", bd = 6)
+FrameTrial3StepDown = Frame(TrialFrameStepDown1, bg = "SlateGray4", bd = 6)
 FrameTrial3StepDown.pack()
 FrameTrial4StepDown = Frame(TrialFrameStepDown1, bg = "ghost white", bd = 6)
 FrameTrial4StepDown.pack()
-FrameTrial5StepDown = Frame(TrialFrameStepDown1, bg = "ivory3", bd = 6)
+FrameTrial5StepDown = Frame(TrialFrameStepDown1, bg = "SlateGray4", bd = 6)
 FrameTrial5StepDown.pack()
 FrameTrial6StepDown = Frame(TrialFrameStepDown1, bg = "ghost white", bd = 6)
 FrameTrial6StepDown.pack()
@@ -1057,9 +1077,11 @@ FramebottomStepDown = Frame(TrialFrameStepDown2  , bg = "DodgerBlue3", bd = 6)
 FramebottomStepDown.pack()
 
 
-labelStepDown = Label(InfoFrameStepDown, text = "StepDown")
+labelStepDown = Label(InfoFrameStepDown, text = "StepDown", bg = "white")
 labelStepDown["font"] = myFont
-labelStepDown.pack(pady = 10)
+labelStepDown.pack(pady = 10, padx = 20, fill = X)
+labelStepDown2 = Label(InfoFrameStepDown, text = "Ensure selected files include a minimum of three clean steps per limb", bg = "white")
+labelStepDown2.pack(padx = 20,  side = BOTTOM)
 
 labelbottomStepDown = Label(FramebottomStepDown, height = 1,  bg = "DodgerBlue3")
 labelbottomStepDown.pack()
@@ -1075,7 +1097,7 @@ radio_left_1StepDown.grid(column = 2,row = 1)
 radio_right_1StepDown.grid(column = 3,row = 1)
 radio_both_1StepDown.grid(column = 4,row = 1)
 
-label_file_explorer2StepDown = Label(FrameTrial2StepDown,  text = "", width = 50, height = 3,  fg = "blue", bg = "ivory2") 
+label_file_explorer2StepDown = Label(FrameTrial2StepDown,  text = "", width = 50, height = 3,  fg = "blue", bg = "gray80") 
 label_file_explorer2StepDown.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
 vSD2=StringVar()
 vSD2.set(0)
@@ -1097,7 +1119,7 @@ radio_left_3StepDown.grid(column = 2,row = 1)
 radio_right_3StepDown.grid(column = 3,row = 1)
 radio_both_3StepDown.grid(column = 4,row = 1)
 
-label_file_explorer4StepDown = Label(FrameTrial4StepDown,  text = "", width = 50, height = 3,  fg = "blue", bg = "ivory2") 
+label_file_explorer4StepDown = Label(FrameTrial4StepDown,  text = "", width = 50, height = 3,  fg = "blue", bg = "gray80") 
 label_file_explorer4StepDown.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
 vSD4=StringVar()
 vSD4.set(0)
@@ -1119,7 +1141,7 @@ radio_left_5StepDown.grid(column = 2,row = 1)
 radio_right_5StepDown.grid(column = 3,row = 1)
 radio_both_5StepDown.grid(column = 4,row = 1)
 
-label_file_explorer6StepDown = Label(FrameTrial6StepDown,  text = "", width = 50, height = 3,  fg = "blue", bg = "ivory2") 
+label_file_explorer6StepDown = Label(FrameTrial6StepDown,  text = "", width = 50, height = 3,  fg = "blue", bg = "gray80") 
 label_file_explorer6StepDown.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
 vSD6=StringVar()
 vSD6.set(0)
@@ -1135,7 +1157,6 @@ StepDown = {}
 StepDown["max"]= {}
 StepDown["min"] = {}
 def browseFilesStepDown(): 
-    sdc.set(1)
     global TriallistStepDown 
     global filelistStepDown
     TriallistStepDown = []
@@ -1319,7 +1340,7 @@ def add_max_min_to_dictStepDown():
         filelistStepDown[i]=os.path.basename(filelistStepDown[i])
         StepDown[TriallistStepDown[i]].update({"Filename": filelistStepDown[i]})
             
-button_exploreStepDown = Button(SelectFrameStepDown, text = "Select Trials",  width = 40, bg = "ghost white",
+button_exploreStepDown = Button(SelectFrameStepDown, text = "Select Trials",  width = 40, bg = "RoyalBlue4",fg= "white",
                           command = lambda : [browseFilesStepDown()])  
 button_exploreStepDown.pack(pady=10)
 vStrath2 = IntVar()
@@ -1329,19 +1350,21 @@ check_strath2.pack()
 
 def totab5():
     tab_parent.select(tab5)
-label_Next_StepDown = Label(FramebottomStepDown, text = """Select 'Next' to Save and Continue. 
-    Do not navigate using the tabs. 
-    If this movement was not included, select 'Skip' """, justify = CENTER)
-label_Next_StepDown.pack()  
-button_skip4 = Button(FramebottomStepDown, text = "Skip", 
-                      command  = lambda:[totab5()])
-button_skip4.pack(pady = 10)   
-button_next4 = Button(FramebottomStepDown, text = "Next", 
+def checkboxStepDown():  
+    sdc.set(1)
+
+ 
+button_next4 = Button(FramebottomStepDown, bg = "RoyalBlue4",fg = "white", text = "Import Files to System", 
                       command  = lambda:[totab5(),extract_all_StepDown_files(), 
-                                          add_max_min_to_dictStepDown()] )
+                                          add_max_min_to_dictStepDown(), checkboxStepDown()] )
 button_next4.pack(pady=10)
 
+button_skip4 = Button(FramebottomStepDown, fg = "gray", text = "Skip", 
+                      command  = lambda:[totab5()])
+button_skip4.pack(pady = 10)  
 
+
+checkboxes(tab4).boxes()
 
 """Tab 4: STS
 Since this is a bilateral movement, only three trials are needed.
@@ -1358,15 +1381,15 @@ TrialFrameSTS1.pack(fill = BOTH)
 TrialFrameSTS2= Frame(tab5,bg = "DodgerBlue3")
 TrialFrameSTS2.pack(fill = BOTH, expand  = 1)
 
-FrameTrial1STS = Frame(TrialFrameSTS1, bg = "ivory3", bd = 6)
+FrameTrial1STS = Frame(TrialFrameSTS1, bg = "SlateGray4", bd = 6)
 FrameTrial1STS.pack()
 FrameTrial2STS = Frame(TrialFrameSTS1, bg = "ghost white", bd = 6)
 FrameTrial2STS.pack()
-FrameTrial3STS = Frame(TrialFrameSTS1, bg = "ivory3", bd = 6)
+FrameTrial3STS = Frame(TrialFrameSTS1, bg = "SlateGray4", bd = 6)
 FrameTrial3STS.pack()
 FrameTrial4STS = Frame(TrialFrameSTS1, bg = "ghost white", bd = 6)
 FrameTrial4STS.pack()
-FrameTrial5STS = Frame(TrialFrameSTS1, bg = "ivory3", bd = 6)
+FrameTrial5STS = Frame(TrialFrameSTS1, bg = "SlateGray4", bd = 6)
 FrameTrial5STS.pack()
 FrameTrial6STS = Frame(TrialFrameSTS1, bg = "ghost white", bd = 6)
 FrameTrial6STS.pack()
@@ -1374,9 +1397,9 @@ FramebottomSTS = Frame(TrialFrameSTS2, bg = "DodgerBlue3", bd = 6)
 FramebottomSTS.pack()
 
 
-labelSTS = Label(InfoFrameSTS, text = "Sit/Stand (STS)")
+labelSTS = Label(InfoFrameSTS, text = "Sit/Stand (STS)", bg = "white")
 labelSTS["font"] = myFont
-labelSTS.pack(pady = 10)
+labelSTS.pack(pady = 10, padx = 20, fill = X)
 
 labelbottomSTS = Label(FramebottomSTS, height = 1,  bg = "DodgerBlue3")
 labelbottomSTS.pack()
@@ -1384,7 +1407,7 @@ labelbottomSTS.pack()
 label_file_explorer1STS = Label(FrameTrial1STS,  text = "", width = 50, height = 3 ,  fg = "blue" , bg = "ghost white") 
 label_file_explorer1STS.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
 
-label_file_explorer2STS = Label(FrameTrial2STS,  text = "", width = 50, height = 3,  fg = "blue", bg = "ivory2") 
+label_file_explorer2STS = Label(FrameTrial2STS,  text = "", width = 50, height = 3,  fg = "blue", bg = "gray80") 
 label_file_explorer2STS.grid(column = 1, row = 1, columnspan = 1, rowspan = 2) 
 
 label_file_explorer3STS = Label(FrameTrial3STS,  text = "", width = 50, height = 3,  fg = "blue", bg = "ghost white") 
@@ -1401,7 +1424,6 @@ STS["SittoStand"]["max"] = {}
 STS["SittoStand"]["min"]={}
 
 def browseFilesSTS(): 
-    stsc.set(1)
     global TriallistSTS 
     global filelistSTS
     TriallistSTS = []
@@ -1657,7 +1679,7 @@ def add_max_min_to_dict_STS():
 
            
             
-button_exploreSTS = Button(SelectFrameSTS, text = "Select Trials",  width = 40, bg = "ghost white",
+button_exploreSTS = Button(SelectFrameSTS, text = "Select Trials",  width = 40, bg = "RoyalBlue4",fg= "white",
                           command = lambda : [browseFilesSTS()])  
 button_exploreSTS.pack(pady=10) 
 
@@ -1694,22 +1716,23 @@ Again the next and skip values go to the next tab which in this case is back to 
 
 def totab1():
     tab_parent.select(tab1)
-label_Next_STS = Label(FramebottomSTS, text = """Select 'Next' to Save and Continue. 
-    Do not navigate using the tabs. 
-    If this movement was not included, select 'Skip' """, justify = CENTER)
-label_Next_STS.pack()   
-button_skip5 = Button(FramebottomSTS, text = "Skip", 
-                      command  = lambda:[totab1()])
-button_skip5.pack(pady = 10)   
-button_next5 = Button(FramebottomSTS, text = "Next", 
+def checkboxSTS():  
+    stsc.set(1)
+
+
+button_next5 = Button(FramebottomSTS, bg = "RoyalBlue4",fg = "white", text = "Import Files to System", 
                       command  = lambda:[extract_all_STS_files(),
                                           split_STS(), add_moves_to_dict(), 
                                           meaninterpolate(),
-                                          add_max_min_to_dict_STS(), totab1()])
+                                          add_max_min_to_dict_STS(), totab1(), checkboxSTS()])
 button_next5.pack(pady = 10)
 
+button_skip5 = Button(FramebottomSTS, fg = "gray", text = "Skip", 
+                      command  = lambda:[totab1()])
+button_skip5.pack(pady = 10)   
 SitStandSit = STS 
 
+checkboxes(tab5).boxes()
 
 
 """TABLES
@@ -1803,6 +1826,7 @@ def enter_Mean_Gait_Table (limb_avl, limb_avr):
                   (str(limb_avr["COM"][axis])[1:-1]),
                   ID, visit
                   ))
+    print("Data added to 'Mean_Gait_Table'")
 def enter_Gait_extrema ():  
     c.execute("""INSERT INTO Gait_Max_Min_Table 
               (ID, Dominant_Limb, Patient_Type, 
@@ -1900,6 +1924,7 @@ def enter_Gait_extrema ():
                           (fun((Gait["Right Average"]["COM"][axis])[startr:endr])),
                           ID, visit
                           ))
+    print("Data added to 'Gait_Extrema'")
 def enter_Gait_Table (numTrials):
     for TrialNum in numTrials:
         filename = Gait[TrialNum]["Filename"] 
@@ -1976,7 +2001,7 @@ def enter_Gait_Table (numTrials):
                           ))
                 except:
                     pass
-
+    print("Data added to 'Gait_Table'")
 
 #Step Up
 def enter_StepUp_extrema ():  
@@ -2024,6 +2049,7 @@ def enter_StepUp_extrema ():
                           (StepUp[function][limb]["COM"][axis]),
                           ID, visit
                           ))
+    print("Data added to 'StepUp_extrema'")
 def enter_StepUp_Table (numTrials):
     for TrialNum in numTrials:
         filename = StepUp[TrialNum]["Filename"] 
@@ -2074,6 +2100,7 @@ def enter_StepUp_Table (numTrials):
                               ))
             except:
                 pass
+    print("Data added to 'StepUp_Table'")
 
 
 #Step Down
@@ -2122,6 +2149,7 @@ def enter_StepDown_extrema ():
                           (StepDown[function][limb]["COM"][axis]),
                           ID, visit
                           ))
+    print("Data added to 'StepDown_extrema'")
              
 def enter_StepDown_Table (numTrials):
     for TrialNum in numTrials:
@@ -2173,6 +2201,7 @@ def enter_StepDown_Table (numTrials):
                               ))
             except:
                 pass
+    print("Data added to 'StepDown_Table'")
 
 
 #Stand to Sit
@@ -2224,6 +2253,7 @@ def enter_StandtoSit_extrema ():
                           (STS["StandtoSit"][function][limb]["NGRF"][axis]),
                           ID, visit
                           ))
+    print("Data added to 'StandtoSit_extrema'")
 
 def enter_StandtoSit_Table (numTrials):
     for TrialNum in numTrials:
@@ -2279,6 +2309,7 @@ def enter_StandtoSit_Table (numTrials):
                               ))
             except:
                 pass
+    print("Data added to 'StandtoSit_Table'")
 
 def enter_Mean_StandtoSit_Table (limb_avl, limb_avr):
     c.execute("""INSERT INTO Mean_StandtoSit_Table 
@@ -2356,6 +2387,7 @@ def enter_Mean_StandtoSit_Table (limb_avl, limb_avr):
                   (str(limb_avr["NGRF"][axis])[1:-1]),
                   ID, visit
                   ))
+    print("Data added to 'Mean_StandtoSit_Table'")
     
 def enter_SittoStand_extrema ():  
     c.execute("""INSERT INTO SittoStand_Max_Min_Table 
@@ -2405,6 +2437,7 @@ def enter_SittoStand_extrema ():
                           (STS["SittoStand"][function][limb]["NGRF"][axis]),
                           ID, visit
                           ))
+    print("Data added to 'SittoStand_Extrema'")
 def enter_SittoStand_Table (numTrials):
     for TrialNum in numTrials:
         filename = STS[TrialNum]["Filename"] 
@@ -2459,6 +2492,7 @@ def enter_SittoStand_Table (numTrials):
                               ))
             except:
                 pass
+    print("Data added to 'SittoStand_Table'")
 
 def enter_Mean_SittoStand_Table ():
     c.execute("""INSERT INTO Mean_SittoStand_Table 
@@ -2521,7 +2555,7 @@ def enter_Mean_SittoStand_Table ():
                   (str(STS["SittoStand"]["mean"]["Right"]["KneeAngle"][axis])[1:-1]),
                   (str(STS["SittoStand"]["mean"]["Right"]["KneeMoment"][axis])[1:-1]),
                   (str(STS["SittoStand"]["mean"]["Right"]["KneeForce"][axis])[1:-1]),
-                  (str(STS["SittoStand"]["mean"]["Right"]["KneePower"][axis])[1:-1]),
+                  (str(STS["SittoStand"]["mean"]["Right"]["KneePower"][axis])[1:-1]),i
                   (str(STS["SittoStand"]["mean"]["Right"]["HipAngle"][axis])[1:-1]),
                   (str(STS["SittoStand"]["mean"]["Right"]["HipMoment"][axis])[1:-1]),
                   (str(STS["SittoStand"]["mean"]["Right"]["HipForce"][axis])[1:-1]),
@@ -2536,6 +2570,7 @@ def enter_Mean_SittoStand_Table ():
                   (str(STS["SittoStand"]["mean"]["Right"]["NGRF"][axis])[1:-1]),
                   ID, visit
                   ))
+    print("Data added to 'Mean_SittoStand_Table'")
 
 """The accept button runs all the SWLite functions so if you click cancel the database 
 will not be changed in any way. Both buttons will close the window. It also creates a JSON file"""
@@ -2563,7 +2598,7 @@ label_save= Label(FrameClose, text = """Once finished selecting all files
                   If you've made an error, click "Cancel" and start again """)
 label_save.pack(pady = 10)   
 
-buttoncancel = Button(FrameClose, text = "Cancel", command = lambda: close_window())
+buttoncancel = Button(FrameClose, bg ="RoyalBlue4",fg = "white",text = "Cancel", command = lambda: close_window())
 buttoncancel.pack(side = RIGHT, anchor = CENTER, padx = 10)
 
 # commandsgait = []
@@ -2647,7 +2682,7 @@ def sqlitecommands():
 
 
 
-buttonaccept = Button(FrameClose, text = "Accept", command = sqlitecommands)
+buttonaccept = Button(FrameClose, bg ="RoyalBlue4",fg = "white", text = "Accept", command = sqlitecommands)
 
 buttonaccept.pack(side = RIGHT, anchor = CENTER, padx = 10, pady = 20)
 
