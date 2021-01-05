@@ -19,12 +19,13 @@ import matplotlib.pyplot as plt
 """connect to SQLite Database. For testing purposes, connect to "memory" """
 
 #conn = sqlite3.connect(':memory:')
-conn = sqlite3.connect('MotionAnalysis2.db')
+conn = sqlite3.connect('MotionAnalysis5.db')
 c=conn.cursor()
 
 """begin Tkinter GUI window.
 Setup Tabs within root window"""
 root = Tk()
+root.title("Enter Motion Analysis Data")
 root.geometry("600x750")
 myFont = font.Font(family = "Helvetica", size=20)
 tab_parent = ttk.Notebook(root)
@@ -350,7 +351,7 @@ def extractintoDict(filename, TrialNum):
         x["AnkleMoment"]= (trial.GetPoint("LAnkleMoment")).GetValues()
         x["AnklePower"]= (trial.GetPoint("LAnklePower")).GetValues()    
         x["FootProgressAngle"] = (trial.GetPoint("LFootProgressAngles")).GetValues()
-        x["pelvisAngle"] = (trial.GetPoint("LPelvisAngles")).GetValues() 
+        x["PelvisAngle"] = (trial.GetPoint("LPelvisAngles")).GetValues() 
         x["COM"] = (trial.GetPoint("CentreOfMass")).GetValues()
         try:
             x["GRF"] = (trial.GetPoint("LGroundReactionForce")).GetValues()
@@ -378,7 +379,7 @@ def extractintoDict(filename, TrialNum):
         x["AnkleMoment"]= (trial.GetPoint("RAnkleMoment")).GetValues()
         x["AnklePower"]= (trial.GetPoint("RAnklePower")).GetValues()    
         x["FootProgressAngle"] = (trial.GetPoint("RFootProgressAngles")).GetValues()
-        x["pelvisAngle"] = (trial.GetPoint("RPelvisAngles")).GetValues() 
+        x["PelvisAngle"] = (trial.GetPoint("RPelvisAngles")).GetValues() 
         x["COM"] = (trial.GetPoint("CentreOfMass")).GetValues()
         try:
             x["GRF"] = (trial.GetPoint("RGroundReactionForce")).GetValues()
@@ -458,7 +459,7 @@ def extractintoDict(filename, TrialNum):
             Gait[TrialNum]["Left"]["NGRF"] =cutcycle(Gait[TrialNum]["lfootstrikeFrame"], Gait[TrialNum]["Left"]["NGRF"])
         except:
             pass
-        Gait[TrialNum]["Left"]["pelvisAngle"] =cutcycle(Gait[TrialNum]["lfootstrikeFrame"], Gait[TrialNum]["Left"]["pelvisAngle"])  
+        Gait[TrialNum]["Left"]["PelvisAngle"] =cutcycle(Gait[TrialNum]["lfootstrikeFrame"], Gait[TrialNum]["Left"]["PelvisAngle"])  
         Gait[TrialNum]["Left"]["COM"] =cutcycle(Gait[TrialNum]["lfootstrikeFrame"], Gait[TrialNum]["Left"]["COM"])
 
         Gait[TrialNum]["lfootoffFrame"]=(np.array(Gait[TrialNum]["lfootoffFrame"])-(Gait[TrialNum]["lfootstrikeFrame"])[0]).tolist()
@@ -494,7 +495,7 @@ def extractintoDict(filename, TrialNum):
             Gait[TrialNum]["Right"]["NGRF"] =cutcycle(Gait[TrialNum]["rfootstrikeFrame"], Gait[TrialNum]["Right"]["NGRF"])
         except:
             pass
-        Gait[TrialNum]["Right"]["pelvisAngle"] =cutcycle(Gait[TrialNum]["rfootstrikeFrame"], Gait[TrialNum]["Right"]["pelvisAngle"])
+        Gait[TrialNum]["Right"]["PelvisAngle"] =cutcycle(Gait[TrialNum]["rfootstrikeFrame"], Gait[TrialNum]["Right"]["PelvisAngle"])
         Gait[TrialNum]["Right"]["COM"] =cutcycle(Gait[TrialNum]["rfootstrikeFrame"], Gait[TrialNum]["Right"]["COM"])
         
         Gait[TrialNum]["rfootoffFrame"]=(np.array(Gait[TrialNum]["rfootoffFrame"])-(Gait[TrialNum]["rfootstrikeFrame"])[0]).tolist()
@@ -579,7 +580,7 @@ def extractintoDict(filename, TrialNum):
         for move in ["KneeAngle", "KneeForce", "KneeMoment", "KneePower", 
                       "HipAngle", "HipForce", "HipMoment", "HipPower",
                       "AnkleAngle", "AnkleForce", "AnkleMoment", "AnklePower",
-                      "FootProgressAngle", "pelvisAngle", "COM", "GRF", "NGRF"]:
+                      "FootProgressAngle", "PelvisAngle", "COM", "GRF", "NGRF"]:
             o[move]={}
             for axis in ["x","y","z"]:
 
@@ -660,13 +661,14 @@ cycle, the data is interpolated so the same pattern is followed but in exactly 1
 Using the meanvals() function, these trials are averaged out to create the average left and average right 
 data for each variable. 
  """
-        
+
+    
+      
 button_exploreGait = Button(SelectFrameGait, text = "Select up to 6 Trials",  width = 40, bg = "ghost white",
                           command = lambda : [browseFilesGait(), extract_all_Gait_files()])  
 button_exploreGait.pack(pady=10)
 
-
-
+ 
 """The two buttons are "Next" for following selecting the files and "Skip" if you dont have Gait files 
 to select. For this movement, both buttons do the same thing and move to the next tab via the totab3() """
 def totab3():
@@ -676,12 +678,13 @@ label_Next_Gait = Label(FramebottomGait, text = """Select 'Next' to Save and Con
     Do not navigate using the tabs. 
     If this movement was not included, select 'Skip' """, justify = CENTER)
 label_Next_Gait.pack()    
+
+
 button_skip2 = Button(FramebottomGait, text = "Skip", 
                       command  = lambda:[totab3()])
 button_skip2.pack(pady = 10)                    
 button_nextGait = Button(FramebottomGait, text = "Next", command  = lambda:[ totab3()])
 button_nextGait.pack(pady = 10)
-
 
 
 
@@ -849,7 +852,7 @@ def extractintoDictStepUp(filename, TrialNum, Limb):
         x["AnkleMoment"]= (trial.GetPoint("LAnkleMoment")).GetValues()
         x["AnklePower"]= (trial.GetPoint("LAnklePower")).GetValues()    
         x["FootProgressAngle"] = (trial.GetPoint("LFootProgressAngles")).GetValues()
-        x["pelvisAngle"] = (trial.GetPoint("LPelvisAngles")).GetValues() 
+        x["PelvisAngle"] = (trial.GetPoint("LPelvisAngles")).GetValues() 
         x["COM"] = (trial.GetPoint("CentreOfMass")).GetValues()
         return x
     def extractvaluesr(trial):
@@ -869,7 +872,7 @@ def extractintoDictStepUp(filename, TrialNum, Limb):
         x["AnkleMoment"]= (trial.GetPoint("RAnkleMoment")).GetValues()
         x["AnklePower"]= (trial.GetPoint("RAnklePower")).GetValues()    
         x["FootProgressAngle"] = (trial.GetPoint("RFootProgressAngles")).GetValues()
-        x["pelvisAngle"] = (trial.GetPoint("RPelvisAngles")).GetValues() 
+        x["PelvisAngle"] = (trial.GetPoint("RPelvisAngles")).GetValues() 
         x["COM"] = (trial.GetPoint("CentreOfMass")).GetValues()
         return x
     y = {}
@@ -940,7 +943,7 @@ def meanmaxminvals(limb, cleantrials, function):
         for move in ["KneeAngle", "KneeForce", "KneeMoment", "KneePower", 
                       "HipAngle", "HipForce", "HipMoment", "HipPower",
                       "AnkleAngle", "AnkleForce", "AnkleMoment", "AnklePower",
-                      "FootProgressAngle", "pelvisAngle", "COM"]:
+                      "FootProgressAngle", "PelvisAngle", "COM"]:
             o[move]={}
             for axis in ["x","y","z"]:
                 if len(cleantrials)== 3:
@@ -1186,7 +1189,7 @@ def extractintoDictStepDown(filename, TrialNum, Limb):
         x["AnkleMoment"]= (trial.GetPoint("LAnkleMoment")).GetValues()
         x["AnklePower"]= (trial.GetPoint("LAnklePower")).GetValues()    
         x["FootProgressAngle"] = (trial.GetPoint("LFootProgressAngles")).GetValues()
-        x["pelvisAngle"] = (trial.GetPoint("LPelvisAngles")).GetValues() 
+        x["PelvisAngle"] = (trial.GetPoint("LPelvisAngles")).GetValues() 
         x["COM"] = (trial.GetPoint("CentreOfMass")).GetValues()
         return x
     def extractvaluesr(trial):
@@ -1206,7 +1209,7 @@ def extractintoDictStepDown(filename, TrialNum, Limb):
         x["AnkleMoment"]= (trial.GetPoint("RAnkleMoment")).GetValues()
         x["AnklePower"]= (trial.GetPoint("RAnklePower")).GetValues()    
         x["FootProgressAngle"] = (trial.GetPoint("RFootProgressAngles")).GetValues()
-        x["pelvisAngle"] = (trial.GetPoint("RPelvisAngles")).GetValues() 
+        x["PelvisAngle"] = (trial.GetPoint("RPelvisAngles")).GetValues() 
         x["COM"] = (trial.GetPoint("CentreOfMass")).GetValues()
         return x
     y = {}
@@ -1278,7 +1281,7 @@ def meanmaxminvalsStepDown(limb, cleantrials, function):
         for move in ["KneeAngle", "KneeForce", "KneeMoment", "KneePower", 
                       "HipAngle", "HipForce", "HipMoment", "HipPower",
                       "AnkleAngle", "AnkleForce", "AnkleMoment", "AnklePower",
-                      "FootProgressAngle", "pelvisAngle", "COM"]:
+                      "FootProgressAngle", "PelvisAngle", "COM"]:
             o[move]={}
             for axis in ["x","y","z"]:
                 if len(cleantrials)== 3:
@@ -1445,9 +1448,10 @@ def extractintoDictSTS(filename, TrialNum, Limb):
         x["AnkleMoment"]= (trial.GetPoint("LAnkleMoment")).GetValues()
         x["AnklePower"]= (trial.GetPoint("LAnklePower")).GetValues()    
         x["FootProgressAngle"] = (trial.GetPoint("LFootProgressAngles")).GetValues()
-        x["pelvisAngle"] = (trial.GetPoint("LPelvisAngles")).GetValues() 
+        x["PelvisAngle"] = (trial.GetPoint("LPelvisAngles")).GetValues() 
         x["COM"] = (trial.GetPoint("CentreOfMass")).GetValues()
         x["C7"] = (trial.GetPoint("C7")).GetValues()
+        x["NGRF"] = (trial.GetPoint("LNormalisedGRF")).GetValues()
         return x
     def extractvaluesr(trial):
         #extracts al the arrays
@@ -1466,9 +1470,10 @@ def extractintoDictSTS(filename, TrialNum, Limb):
         x["AnkleMoment"]= (trial.GetPoint("RAnkleMoment")).GetValues()
         x["AnklePower"]= (trial.GetPoint("RAnklePower")).GetValues()    
         x["FootProgressAngle"] = (trial.GetPoint("RFootProgressAngles")).GetValues()
-        x["pelvisAngle"] = (trial.GetPoint("RPelvisAngles")).GetValues() 
+        x["PelvisAngle"] = (trial.GetPoint("RPelvisAngles")).GetValues() 
         x["COM"] = (trial.GetPoint("CentreOfMass")).GetValues()
         x["C7"] = (trial.GetPoint("C7")).GetValues()
+        x["NGRF"] = (trial.GetPoint("RNormalisedGRF")).GetValues()
         return x
     
     y = {}
@@ -1555,7 +1560,8 @@ def add_moves_to_dict():
                 STS["SittoStand"][TriallistSTS[i]][LR][key]={}
                 for axis in ["x", "y", "z"]:
                     STS["SittoStand"][TriallistSTS[i]][LR][key][axis]=STS[TriallistSTS[i]][LR][key][axis][STS[TriallistSTS[i]]["SitStandInitiation"]:STS[TriallistSTS[i]]["SitStandCompletion"]]
-        
+        STS["StandtoSit"][TriallistSTS[i]].update({"Filename": STS[TriallistSTS[i]]["Filename"]})
+        STS["SittoStand"][TriallistSTS[i]].update({"Filename": STS[TriallistSTS[i]]["Filename"]})
 #Sit to stand approx 135-145 values 
 #Stand ot sit 145-155
 def meaninterpolate():
@@ -1624,7 +1630,7 @@ def meanmaxminvalsSTS(limb, function, test):
     for move in ["KneeAngle", "KneeForce", "KneeMoment", "KneePower", 
                   "HipAngle", "HipForce", "HipMoment", "HipPower",
                   "AnkleAngle", "AnkleForce", "AnkleMoment", "AnklePower",
-                  "FootProgressAngle", "pelvisAngle", "COM", "C7"]:
+                  "FootProgressAngle", "PelvisAngle", "COM", "C7", "NGRF"]:
         o[move]={}
         for axis in ["x","y","z"]:
             o[move][axis] = (((fun2(STS[test][TriallistSTS[0]][limb][move][axis]))+
@@ -1740,7 +1746,7 @@ def enter_Mean_Gait_Table (limb_avl, limb_avr):
                   Left_Foot_Progression_Angle_{axis} = ?,
                   Left_GRF_{axis} =  ?,
                   Left_NGRF_{axis} =  ?,
-                  Left_pelvis_Angle_{axis} =  ?,
+                  Left_Pelvis_Angle_{axis} =  ?,
                   Left_COM_{axis} =  ?,
                   Right_Knee_Angle_{axis} = ?,
                   Right_Knee_Moment_{axis} = ?,
@@ -1757,7 +1763,7 @@ def enter_Mean_Gait_Table (limb_avl, limb_avr):
                   Right_Foot_Progression_Angle_{axis} = ?,
                   Right_GRF_{axis} =  ?,
                   Right_NGRF_{axis} =  ?,
-                  Right_pelvis_Angle_{axis} =  ?,
+                  Right_Pelvis_Angle_{axis} =  ?,
                   Right_COM_{axis} =  ? 
                   WHERE ID = ? and Visit_Number = ?
                   """,(
@@ -1776,7 +1782,7 @@ def enter_Mean_Gait_Table (limb_avl, limb_avr):
                   (str(limb_avl["FootProgressAngle"][axis])[1:-1]),
                   (str(limb_avl["GRF"][axis])[1:-1]),
                   (str(limb_avl["NGRF"][axis])[1:-1]),
-                  (str(limb_avl["pelvisAngle"][axis])[1:-1]),
+                  (str(limb_avl["PelvisAngle"][axis])[1:-1]),
                   (str(limb_avl["COM"][axis])[1:-1]),
                   (str(limb_avr["KneeAngle"][axis])[1:-1]),
                   (str(limb_avr["KneeMoment"][axis])[1:-1]),
@@ -1793,7 +1799,7 @@ def enter_Mean_Gait_Table (limb_avl, limb_avr):
                   (str(limb_avr["FootProgressAngle"][axis])[1:-1]),
                   (str(limb_avr["GRF"][axis])[1:-1]),
                   (str(limb_avr["NGRF"][axis])[1:-1]),
-                  (str(limb_avr["pelvisAngle"][axis])[1:-1]),
+                  (str(limb_avr["PelvisAngle"][axis])[1:-1]),
                   (str(limb_avr["COM"][axis])[1:-1]),
                   ID, visit
                   ))
@@ -1837,7 +1843,7 @@ def enter_Gait_extrema ():
                           {function}_Left_Foot_Progression_Angle_{axis}_{phase} = ?,
                           {function}_Left_GRF_{axis}_{phase} =  ?,
                           {function}_Left_NGRF_{axis}_{phase} =  ?,
-                          {function}_Left_pelvis_Angle_{axis}_{phase} =  ?,
+                          {function}_Left_Pelvis_Angle_{axis}_{phase} =  ?,
                           {function}_Left_COM_{axis}_{phase} =  ?,
                           {function}_Right_Knee_Angle_{axis}_{phase} = ?,
                           {function}_Right_Knee_Moment_{axis}_{phase} = ?,
@@ -1854,7 +1860,7 @@ def enter_Gait_extrema ():
                           {function}_Right_Foot_Progression_Angle_{axis}_{phase} = ?,
                           {function}_Right_GRF_{axis}_{phase} =  ?,
                           {function}_Right_NGRF_{axis}_{phase} =  ?,
-                          {function}_Right_pelvis_Angle_{axis}_{phase} =  ?,
+                          {function}_Right_Pelvis_Angle_{axis}_{phase} =  ?,
                           {function}_Right_COM_{axis}_{phase} =  ?
                           WHERE ID = ? and Visit_Number = ?
                           """,(
@@ -1873,7 +1879,7 @@ def enter_Gait_extrema ():
                           (fun((Gait["Left Average"]["FootProgressAngle"][axis])[startl:endl])),
                           (fun((Gait["Left Average"]["GRF"][axis])[startl:endl])),
                           (fun((Gait["Left Average"]["NGRF"][axis])[startl:endl])),
-                          (fun((Gait["Left Average"]["pelvisAngle"][axis])[startl:endl])),
+                          (fun((Gait["Left Average"]["PelvisAngle"][axis])[startl:endl])),
                           (fun((Gait["Left Average"]["COM"][axis])[startl:endl])),
                           (fun((Gait["Right Average"]["KneeAngle"][axis])[startr:endr])),
                           (fun((Gait["Right Average"]["KneeMoment"][axis])[startr:endr])),
@@ -1890,7 +1896,7 @@ def enter_Gait_extrema ():
                           (fun((Gait["Right Average"]["FootProgressAngle"][axis])[startr:endr])),
                           (fun((Gait["Right Average"]["GRF"][axis])[startr:endr])),
                           (fun((Gait["Right Average"]["NGRF"][axis])[startr:endr])),
-                          (fun((Gait["Right Average"]["pelvisAngle"][axis])[startr:endr])),
+                          (fun((Gait["Right Average"]["PelvisAngle"][axis])[startr:endr])),
                           (fun((Gait["Right Average"]["COM"][axis])[startr:endr])),
                           ID, visit
                           ))
@@ -1927,7 +1933,7 @@ def enter_Gait_Table (numTrials):
                           {LR}_Hip_Angle_{axis} = ?,
                           {LR}_Ankle_Angle_{axis} = ?,
                           {LR}_Foot_Progression_Angle_{axis} = ?,
-                          {LR}_pelvis_Angle_{axis} =  ?,
+                          {LR}_Pelvis_Angle_{axis} =  ?,
                           {LR}_COM_{axis} =  ?
                           WHERE Filename = ?
                           """,(
@@ -1935,7 +1941,7 @@ def enter_Gait_Table (numTrials):
                           (str(Gait[TrialNum][LR]["HipAngle"][axis])[1:-1]),
                           (str(Gait[TrialNum][LR]["AnkleAngle"][axis])[1:-1]),
                           (str(Gait[TrialNum][LR]["FootProgressAngle"][axis])[1:-1]),
-                          (str(Gait[TrialNum][LR]["pelvisAngle"][axis])[1:-1]),
+                          (str(Gait[TrialNum][LR]["PelvisAngle"][axis])[1:-1]),
                           (str(Gait[TrialNum][LR]["COM"][axis])[1:-1]),
                           filename
                           ))
@@ -1997,7 +2003,7 @@ def enter_StepUp_extrema ():
                           {function}_{limb}_Ankle_Force_{axis} = ?,
                           {function}_{limb}_Ankle_Power_{axis} =  ?,
                           {function}_{limb}_Foot_Progression_Angle_{axis} = ?,
-                          {function}_{limb}_pelvis_Angle_{axis} =  ?,
+                          {function}_{limb}_Pelvis_Angle_{axis} =  ?,
                           {function}_{limb}_COM_{axis} =  ?
                           WHERE ID = ? and Visit_Number =?
                           """,(
@@ -2014,7 +2020,7 @@ def enter_StepUp_extrema ():
                           (StepUp[function][limb]["AnkleForce"][axis]),
                           (StepUp[function][limb]["AnklePower"][axis]),
                           (StepUp[function][limb]["FootProgressAngle"][axis]),
-                          (StepUp[function][limb]["pelvisAngle"][axis]),
+                          (StepUp[function][limb]["PelvisAngle"][axis]),
                           (StepUp[function][limb]["COM"][axis]),
                           ID, visit
                           ))
@@ -2036,7 +2042,7 @@ def enter_StepUp_Table (numTrials):
                               {LR}_Hip_Angle_{axis} = ?,
                               {LR}_Ankle_Angle_{axis} = ?,
                               {LR}_Foot_Progression_Angle_{axis} = ?,
-                              {LR}_pelvis_Angle_{axis} =  ?,
+                              {LR}_Pelvis_Angle_{axis} =  ?,
                               {LR}_COM_{axis} =  ?,
                               {LR}_Knee_Moment_{axis} = ?,
                               {LR}_Knee_Force_{axis} = ?,
@@ -2053,7 +2059,7 @@ def enter_StepUp_Table (numTrials):
                               (str(StepUp[TrialNum][LR]["HipAngle"][axis])[1:-1]),
                               (str(StepUp[TrialNum][LR]["AnkleAngle"][axis])[1:-1]),
                               (str(StepUp[TrialNum][LR]["FootProgressAngle"][axis])[1:-1]),
-                              (str(StepUp[TrialNum][LR]["pelvisAngle"][axis])[1:-1]),
+                              (str(StepUp[TrialNum][LR]["PelvisAngle"][axis])[1:-1]),
                               (str(StepUp[TrialNum][LR]["COM"][axis])[1:-1]),
                               (str(StepUp[TrialNum][LR]["KneeMoment"][axis])[1:-1]),
                               (str(StepUp[TrialNum][LR]["KneeForce"][axis])[1:-1]),
@@ -2076,7 +2082,7 @@ def enter_StepDown_extrema ():
               (ID, Dominant_Limb, Patient_Type, 
               Sex, Month, Affected_Limb, Trial_Type, Visit_Number)VALUES (?,?,?,?,?,?,?,?)""", 
               (ID, dom_limb, pattype, sex, mon, aff_limb,
-              str(StepUp["Trial 1"]["Testing Type"]), visit))
+              str(StepDown["Trial 1"]["Testing Type"]), visit))
     for limb in ["Left", "Right"]:
         for axis in ["x", "y", "z"]:
             for function in ["max", "min"]:
@@ -2095,7 +2101,7 @@ def enter_StepDown_extrema ():
                           {function}_{limb}_Ankle_Force_{axis} = ?,
                           {function}_{limb}_Ankle_Power_{axis} =  ?,
                           {function}_{limb}_Foot_Progression_Angle_{axis} = ?,
-                          {function}_{limb}_pelvis_Angle_{axis} =  ?,
+                          {function}_{limb}_Pelvis_Angle_{axis} =  ?,
                           {function}_{limb}_COM_{axis} =  ?
                           WHERE ID = ? and Visit_Number = ?
                           """,(
@@ -2112,7 +2118,7 @@ def enter_StepDown_extrema ():
                           (StepDown[function][limb]["AnkleForce"][axis]),
                           (StepDown[function][limb]["AnklePower"][axis]),
                           (StepDown[function][limb]["FootProgressAngle"][axis]),
-                          (StepDown[function][limb]["pelvisAngle"][axis]),
+                          (StepDown[function][limb]["PelvisAngle"][axis]),
                           (StepDown[function][limb]["COM"][axis]),
                           ID, visit
                           ))
@@ -2125,7 +2131,7 @@ def enter_StepDown_Table (numTrials):
                   Sex, Month, Affected_Limb, Filename, Trial_Type, Visit_Number) 
                   VALUES (?,?,?,?,?,?,?,?,?)""", 
                   (ID, dom_limb, pattype, sex, mon, aff_limb, 
-                    filename, str(StepUp["Trial 1"]["Testing Type"]), visit))
+                    filename, str(StepDown["Trial 1"]["Testing Type"]), visit))
         for LR in ["Left", "Right"]:
             try:
                 for axis in ["x", "y", "z"]:
@@ -2135,7 +2141,7 @@ def enter_StepDown_Table (numTrials):
                               {LR}_Hip_Angle_{axis} = ?,
                               {LR}_Ankle_Angle_{axis} = ?,
                               {LR}_Foot_Progression_Angle_{axis} = ?,
-                              {LR}_pelvis_Angle_{axis} =  ?,
+                              {LR}_Pelvis_Angle_{axis} =  ?,
                               {LR}_COM_{axis} =  ?,
                               {LR}_Knee_Moment_{axis} = ?,
                               {LR}_Knee_Force_{axis} = ?,
@@ -2152,7 +2158,7 @@ def enter_StepDown_Table (numTrials):
                               (str(StepDown[TrialNum][LR]["HipAngle"][axis])[1:-1]),
                               (str(StepDown[TrialNum][LR]["AnkleAngle"][axis])[1:-1]),
                               (str(StepDown[TrialNum][LR]["FootProgressAngle"][axis])[1:-1]),
-                              (str(StepDown[TrialNum][LR]["pelvisAngle"][axis])[1:-1]),
+                              (str(StepDown[TrialNum][LR]["PelvisAngle"][axis])[1:-1]),
                               (str(StepDown[TrialNum][LR]["COM"][axis])[1:-1]),
                               (str(StepDown[TrialNum][LR]["KneeMoment"][axis])[1:-1]),
                               (str(StepDown[TrialNum][LR]["KneeForce"][axis])[1:-1]),
@@ -2193,9 +2199,10 @@ def enter_StandtoSit_extrema ():
                           {function}_{limb}_Ankle_Force_{axis} = ?,
                           {function}_{limb}_Ankle_Power_{axis} =  ?,
                           {function}_{limb}_Foot_Progression_Angle_{axis} = ?,
-                          {function}_{limb}_pelvis_Angle_{axis} =  ?,
+                          {function}_{limb}_Pelvis_Angle_{axis} =  ?,
                           {function}_{limb}_COM_{axis} =  ?,
-                          {function}_{limb}_C7_{axis} =  ?
+                          {function}_{limb}_C7_{axis} =  ?,
+                          {function}_{limb}_NGRF_{axis} =  ?
                           WHERE ID = ? and Visit_Number =?
                           """,(
                           (STS["StandtoSit"][function][limb]["KneeAngle"][axis]),
@@ -2211,9 +2218,10 @@ def enter_StandtoSit_extrema ():
                           (STS["StandtoSit"][function][limb]["AnkleForce"][axis]),
                           (STS["StandtoSit"][function][limb]["AnklePower"][axis]),
                           (STS["StandtoSit"][function][limb]["FootProgressAngle"][axis]),
-                          (STS["StandtoSit"][function][limb]["pelvisAngle"][axis]),
+                          (STS["StandtoSit"][function][limb]["PelvisAngle"][axis]),
                           (STS["StandtoSit"][function][limb]["COM"][axis]),
                           (STS["StandtoSit"][function][limb]["C7"][axis]),
+                          (STS["StandtoSit"][function][limb]["NGRF"][axis]),
                           ID, visit
                           ))
 
@@ -2235,7 +2243,7 @@ def enter_StandtoSit_Table (numTrials):
                               {LR}_Hip_Angle_{axis} = ?,
                               {LR}_Ankle_Angle_{axis} = ?,
                               {LR}_Foot_Progression_Angle_{axis} = ?,
-                              {LR}_pelvis_Angle_{axis} =  ?,
+                              {LR}_Pelvis_Angle_{axis} =  ?,
                               {LR}_COM_{axis} =  ?,
                               {LR}_Knee_Moment_{axis} = ?,
                               {LR}_Knee_Force_{axis} = ?,
@@ -2246,14 +2254,15 @@ def enter_StandtoSit_Table (numTrials):
                               {LR}_Ankle_Moment_{axis} = ?,
                               {LR}_Ankle_Force_{axis} = ?,
                               {LR}_Ankle_Power_{axis} =  ?,
-                              {LR}_C7_{axis} = ?
+                              {LR}_C7_{axis} = ?,
+                              {LR}_NGRF_{axis} = ?
                               WHERE Filename = ?
                               """,(
                               (str(STS["StandtoSit"][TrialNum][LR]["KneeAngle"][axis])[1:-1]),
                               (str(STS["StandtoSit"][TrialNum][LR]["HipAngle"][axis])[1:-1]),
                               (str(STS["StandtoSit"][TrialNum][LR]["AnkleAngle"][axis])[1:-1]),
                               (str(STS["StandtoSit"][TrialNum][LR]["FootProgressAngle"][axis])[1:-1]),
-                              (str(STS["StandtoSit"][TrialNum][LR]["pelvisAngle"][axis])[1:-1]),
+                              (str(STS["StandtoSit"][TrialNum][LR]["PelvisAngle"][axis])[1:-1]),
                               (str(STS["StandtoSit"][TrialNum][LR]["COM"][axis])[1:-1]),
                               (str(STS["StandtoSit"][TrialNum][LR]["KneeMoment"][axis])[1:-1]),
                               (str(STS["StandtoSit"][TrialNum][LR]["KneeForce"][axis])[1:-1]),
@@ -2265,6 +2274,7 @@ def enter_StandtoSit_Table (numTrials):
                               (str(STS["StandtoSit"][TrialNum][LR]["AnkleForce"][axis])[1:-1]),
                               (str(STS["StandtoSit"][TrialNum][LR]["AnklePower"][axis])[1:-1]),
                               (str(STS["StandtoSit"][TrialNum][LR]["C7"][axis])[1:-1]),
+                              (str(STS["StandtoSit"][TrialNum][LR]["NGRF"][axis])[1:-1]),
                               filename
                               ))
             except:
@@ -2291,8 +2301,9 @@ def enter_Mean_StandtoSit_Table (limb_avl, limb_avr):
                   Left_Ankle_Force_{axis} = ?,
                   Left_Ankle_Power_{axis} =  ?,
                   Left_Foot_Progression_Angle_{axis} = ?,
-                  Left_pelvis_Angle_{axis} =  ?,
+                  Left_Pelvis_Angle_{axis} =  ?,
                   Left_COM_{axis} =  ?,
+                  Left_NGRF_{axis} =  ?,
                   Right_Knee_Angle_{axis} = ?,
                   Right_Knee_Moment_{axis} = ?,
                   Right_Knee_Force_{axis} = ?,
@@ -2306,8 +2317,9 @@ def enter_Mean_StandtoSit_Table (limb_avl, limb_avr):
                   Right_Ankle_Force_{axis} = ?,
                   Right_Ankle_Power_{axis} =  ?,
                   Right_Foot_Progression_Angle_{axis} = ?,
-                  Right_pelvis_Angle_{axis} =  ?,
-                  Right_COM_{axis} =  ? 
+                  Right_Pelvis_Angle_{axis} =  ?,
+                  Right_COM_{axis} =  ?,
+                  Right_NGRF_{axis} =  ? 
                   WHERE ID = ? and Visit_Number = ?
                   """,(
                   (str(limb_avl["KneeAngle"][axis])[1:-1]),
@@ -2323,8 +2335,9 @@ def enter_Mean_StandtoSit_Table (limb_avl, limb_avr):
                   (str(limb_avl["AnkleForce"][axis])[1:-1]),
                   (str(limb_avl["AnklePower"][axis])[1:-1]),
                   (str(limb_avl["FootProgressAngle"][axis])[1:-1]),
-                  (str(limb_avl["pelvisAngle"][axis])[1:-1]),
+                  (str(limb_avl["PelvisAngle"][axis])[1:-1]),
                   (str(limb_avl["COM"][axis])[1:-1]),
+                  (str(limb_avl["NGRF"][axis])[1:-1]),
                   (str(limb_avr["KneeAngle"][axis])[1:-1]),
                   (str(limb_avr["KneeMoment"][axis])[1:-1]),
                   (str(limb_avr["KneeForce"][axis])[1:-1]),
@@ -2338,8 +2351,9 @@ def enter_Mean_StandtoSit_Table (limb_avl, limb_avr):
                   (str(limb_avr["AnkleForce"][axis])[1:-1]),
                   (str(limb_avr["AnklePower"][axis])[1:-1]),
                   (str(limb_avr["FootProgressAngle"][axis])[1:-1]),
-                  (str(limb_avr["pelvisAngle"][axis])[1:-1]),
+                  (str(limb_avr["PelvisAngle"][axis])[1:-1]),
                   (str(limb_avr["COM"][axis])[1:-1]),
+                  (str(limb_avr["NGRF"][axis])[1:-1]),
                   ID, visit
                   ))
     
@@ -2366,9 +2380,10 @@ def enter_SittoStand_extrema ():
                           {function}_{limb}_Ankle_Force_{axis} = ?,
                           {function}_{limb}_Ankle_Power_{axis} =  ?,
                           {function}_{limb}_Foot_Progression_Angle_{axis} = ?,
-                          {function}_{limb}_pelvis_Angle_{axis} =  ?,
+                          {function}_{limb}_Pelvis_Angle_{axis} =  ?,
                           {function}_{limb}_COM_{axis} =  ?,
-                          {function}_{limb}_C7_{axis} =  ?
+                          {function}_{limb}_C7_{axis} =  ?,
+                          {function}_{limb}_NGRF_{axis} =  ?
                           WHERE ID = ? and Visit_Number = ?
                           """,(
                           (STS["SittoStand"][function][limb]["KneeAngle"][axis]),
@@ -2384,9 +2399,10 @@ def enter_SittoStand_extrema ():
                           (STS["SittoStand"][function][limb]["AnkleForce"][axis]),
                           (STS["SittoStand"][function][limb]["AnklePower"][axis]),
                           (STS["SittoStand"][function][limb]["FootProgressAngle"][axis]),
-                          (STS["SittoStand"][function][limb]["pelvisAngle"][axis]),
+                          (STS["SittoStand"][function][limb]["PelvisAngle"][axis]),
                           (STS["SittoStand"][function][limb]["COM"][axis]),
                           (STS["SittoStand"][function][limb]["C7"][axis]),
+                          (STS["SittoStand"][function][limb]["NGRF"][axis]),
                           ID, visit
                           ))
 def enter_SittoStand_Table (numTrials):
@@ -2407,7 +2423,7 @@ def enter_SittoStand_Table (numTrials):
                               {LR}_Hip_Angle_{axis} = ?,
                               {LR}_Ankle_Angle_{axis} = ?,
                               {LR}_Foot_Progression_Angle_{axis} = ?,
-                              {LR}_pelvis_Angle_{axis} =  ?,
+                              {LR}_Pelvis_Angle_{axis} =  ?,
                               {LR}_COM_{axis} =  ?,
                               {LR}_Knee_Moment_{axis} = ?,
                               {LR}_Knee_Force_{axis} = ?,
@@ -2418,14 +2434,15 @@ def enter_SittoStand_Table (numTrials):
                               {LR}_Ankle_Moment_{axis} = ?,
                               {LR}_Ankle_Force_{axis} = ?,
                               {LR}_Ankle_Power_{axis} =  ?,
-                              {LR}_C7_{axis} = ?
+                              {LR}_C7_{axis} = ?,
+                              {LR}_NGRF_{axis} = ?
                               WHERE Filename = ?
                               """,(
                               (str(STS["SittoStand"][TrialNum][LR]["KneeAngle"][axis])[1:-1]),
                               (str(STS["SittoStand"][TrialNum][LR]["HipAngle"][axis])[1:-1]),
                               (str(STS["SittoStand"][TrialNum][LR]["AnkleAngle"][axis])[1:-1]),
                               (str(STS["SittoStand"][TrialNum][LR]["FootProgressAngle"][axis])[1:-1]),
-                              (str(STS["SittoStand"][TrialNum][LR]["pelvisAngle"][axis])[1:-1]),
+                              (str(STS["SittoStand"][TrialNum][LR]["PelvisAngle"][axis])[1:-1]),
                               (str(STS["SittoStand"][TrialNum][LR]["COM"][axis])[1:-1]),
                               (str(STS["SittoStand"][TrialNum][LR]["KneeMoment"][axis])[1:-1]),
                               (str(STS["SittoStand"][TrialNum][LR]["KneeForce"][axis])[1:-1]),
@@ -2437,6 +2454,7 @@ def enter_SittoStand_Table (numTrials):
                               (str(STS["SittoStand"][TrialNum][LR]["AnkleForce"][axis])[1:-1]),
                               (str(STS["SittoStand"][TrialNum][LR]["AnklePower"][axis])[1:-1]),
                               (str(STS["SittoStand"][TrialNum][LR]["C7"][axis])[1:-1]),
+                              (str(STS["SittoStand"][TrialNum][LR]["NGRF"][axis])[1:-1]),
                               filename
                               ))
             except:
@@ -2463,8 +2481,9 @@ def enter_Mean_SittoStand_Table ():
                   Left_Ankle_Force_{axis} = ?,
                   Left_Ankle_Power_{axis} =  ?,
                   Left_Foot_Progression_Angle_{axis} = ?,
-                  Left_pelvis_Angle_{axis} =  ?,
+                  Left_Pelvis_Angle_{axis} =  ?,
                   Left_COM_{axis} =  ?,
+                  Left_NGRF_{axis} =  ?,
                   Right_Knee_Angle_{axis} = ?,
                   Right_Knee_Moment_{axis} = ?,
                   Right_Knee_Force_{axis} = ?,
@@ -2478,8 +2497,9 @@ def enter_Mean_SittoStand_Table ():
                   Right_Ankle_Force_{axis} = ?,
                   Right_Ankle_Power_{axis} =  ?,
                   Right_Foot_Progression_Angle_{axis} = ?,
-                  Right_pelvis_Angle_{axis} =  ?,
-                  Right_COM_{axis} =  ? 
+                  Right_Pelvis_Angle_{axis} =  ?,
+                  Right_COM_{axis} =  ?,
+                  Right_NGRF_{axis} =  ? 
                   WHERE ID = ? and Visit_Number = ?
                   """,(
                   (str(STS["SittoStand"]["mean"]["Left"]["KneeAngle"][axis])[1:-1]),
@@ -2495,8 +2515,9 @@ def enter_Mean_SittoStand_Table ():
                   (str(STS["SittoStand"]["mean"]["Left"]["AnkleForce"][axis])[1:-1]),
                   (str(STS["SittoStand"]["mean"]["Left"]["AnklePower"][axis])[1:-1]),
                   (str(STS["SittoStand"]["mean"]["Left"]["FootProgressAngle"][axis])[1:-1]),
-                  (str(STS["SittoStand"]["mean"]["Left"]["pelvisAngle"][axis])[1:-1]),
+                  (str(STS["SittoStand"]["mean"]["Left"]["PelvisAngle"][axis])[1:-1]),
                   (str(STS["SittoStand"]["mean"]["Left"]["COM"][axis])[1:-1]),
+                  (str(STS["SittoStand"]["mean"]["Left"]["NGRF"][axis])[1:-1]),
                   (str(STS["SittoStand"]["mean"]["Right"]["KneeAngle"][axis])[1:-1]),
                   (str(STS["SittoStand"]["mean"]["Right"]["KneeMoment"][axis])[1:-1]),
                   (str(STS["SittoStand"]["mean"]["Right"]["KneeForce"][axis])[1:-1]),
@@ -2510,10 +2531,12 @@ def enter_Mean_SittoStand_Table ():
                   (str(STS["SittoStand"]["mean"]["Right"]["AnkleForce"][axis])[1:-1]),
                   (str(STS["SittoStand"]["mean"]["Right"]["AnklePower"][axis])[1:-1]),
                   (str(STS["SittoStand"]["mean"]["Right"]["FootProgressAngle"][axis])[1:-1]),
-                  (str(STS["SittoStand"]["mean"]["Right"]["pelvisAngle"][axis])[1:-1]),
+                  (str(STS["SittoStand"]["mean"]["Right"]["PelvisAngle"][axis])[1:-1]),
                   (str(STS["SittoStand"]["mean"]["Right"]["COM"][axis])[1:-1]),
+                  (str(STS["SittoStand"]["mean"]["Right"]["NGRF"][axis])[1:-1]),
                   ID, visit
                   ))
+
 """The accept button runs all the SWLite functions so if you click cancel the database 
 will not be changed in any way. Both buttons will close the window. It also creates a JSON file"""
 patient = {}
@@ -2523,18 +2546,14 @@ def writetodict():
     patient["Sex"]= sex
     patient["Dominant Limb"] = dom_limb
     patient["Affected Limb"] = aff_limb
-    patient["Visit Number"] = 2
-    patient[visit]={}
-    patient[visit]["Gait"]= Gait
-    patient[visit]["StepUp"]= StepUp
-    patient[visit]["StepDown"]= StepDown
-    patient[visit]["STS"] = STS
-    patient[visit]["Type"] = pattype
-    patient[visit]["Months postop"] = mon
-
-    # name = ID + "visit" + str(visit) + ".json"
-    # with open(name, 'w') as f:
-    #     json.dump(patient, f, indent = 5) 
+    patient["Visit Number"] = visit
+    patient["Patient Type"] = pattype
+    patient["Months postop"] = mon
+    patient["Gait"]= Gait
+    patient["StepDown"]= StepDown
+    patient["STS"] = STS
+    patient["StepUp"]= StepUp
+    
         
 def close_window():
     root.destroy()
@@ -2562,6 +2581,45 @@ buttoncancel.pack(side = RIGHT, anchor = CENTER, padx = 10)
 #                                                                       commandsSTS,
 #                                                                       close_window()])
 
+patienttoJSON = patient
+def writejson():
+    if gc.get() == 1:
+        for limb in ["Left","Right"]:
+            for axis in ["x","y","z"]:
+                for trialnum in TriallistGait:
+                    for key in  patienttoJSON["Gait"][trialnum][limb].keys():
+                        patienttoJSON["Gait"][trialnum][limb][key][axis]=str(patienttoJSON["Gait"][trialnum][limb][key][axis])[1:-1]
+                        patienttoJSON["Gait"]["Left Average"][key][axis] = str(patienttoJSON["Gait"]["Left Average"][key][axis])[1:-1]
+                        patienttoJSON["Gait"]["Right Average"][key][axis] = str(patienttoJSON["Gait"]["Right Average"][key][axis])[1:-1]
+    if suc.get() == 1:
+        for limb in ["Left","Right"]:
+            for key in  patienttoJSON["StepUp"]["Trial 1"]["Left"].keys():
+                for axis in ["x","y","z"]:
+                    for trialnum in TriallistStepUp:
+                        patienttoJSON["StepUp"][trialnum][limb][key][axis]=str(patienttoJSON["StepUp"][trialnum][limb][key][axis])[1:-1]
+    if sdc.get() == 1:
+        for limb in ["Left","Right"]:
+            for key in  patienttoJSON["StepDown"]["Trial 1"]["Left"].keys():
+                for axis in ["x","y","z"]:
+                    for trialnum in TriallistStepDown:
+                        patienttoJSON["StepDown"][trialnum][limb][key][axis]=str(patienttoJSON["StepDown"][trialnum][limb][key][axis])[1:-1]
+    if stsc.get() == 1:
+        for limb in ["Left","Right"]:
+            for key in  patienttoJSON["STS"]["Trial 1"]["Left"].keys():
+                for axis in ["x","y","z"]:
+                    for trialnum in TriallistSTS:
+                        patienttoJSON["STS"]["SittoStand"][trialnum][limb][key][axis]=str(patienttoJSON["STS"]["SittoStand"][trialnum][limb][key][axis])[1:-1]
+                        patienttoJSON["STS"]["StandtoSit"][trialnum][limb][key][axis]=str(patienttoJSON["STS"]["StandtoSit"][trialnum][limb][key][axis])[1:-1]
+                    
+                    patienttoJSON["STS"]["SittoStand"]["mean"]["Left"][key][axis] = str(patienttoJSON["STS"]["SittoStand"]["mean"]["Left"][key][axis])[1:-1]
+                    patienttoJSON["STS"]["SittoStand"]["mean"]["Right"][key][axis] = str(patienttoJSON["STS"]["SittoStand"]["mean"]["Right"][key][axis])[1:-1]
+                    
+                    patienttoJSON["STS"]["StandtoSit"]["mean"]["Left"][key][axis] = str(patienttoJSON["STS"]["StandtoSit"]["mean"]["Left"][key][axis])[1:-1]
+                    patienttoJSON["STS"]["StandtoSit"]["mean"]["Right"][key][axis] = str(patienttoJSON["STS"]["StandtoSit"]["mean"]["Right"][key][axis])[1:-1]
+    name = patient["ID"] + "visit" + str(patient["Visit Number"]) + ".json"
+    with open(name, 'w') as f:
+        json.dump(patienttoJSON, f, indent = 7) 
+
 def sqlitecommands():
     variable()
     writetodict()
@@ -2585,6 +2643,8 @@ def sqlitecommands():
         enter_Mean_SittoStand_Table()
         enter_Mean_StandtoSit_Table(STS["StandtoSit"]["mean"]["Left"],
                                     STS["StandtoSit"]["mean"]["Right"])
+    writejson()
+
 
 
 buttonaccept = Button(FrameClose, text = "Accept", command = sqlitecommands)

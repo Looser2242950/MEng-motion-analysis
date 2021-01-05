@@ -15,7 +15,7 @@ import os.path
 
 """Start SQLite Connection""" 
 #conn = sqlite3.connect(':memory:')
-conn = sqlite3.connect('MotionAnalysis.db')
+conn = sqlite3.connect('MotionAnalysis5.db')
 c=conn.cursor()
 
 
@@ -42,7 +42,7 @@ def columns_Mean_Gait_Table():
               c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_Foot_Progression_Angle_{axis} TEXT""")
               c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_GRF_{axis} TEXT""")
               c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_NGRF_{axis} TEXT""")
-              c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_pelvis_Angle_{axis} TEXT""")
+              c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_Pelvis_Angle_{axis} TEXT""")
               c.execute(f"""ALTER TABLE Mean_Gait_Table ADD COLUMN {LR}_COM_{axis} TEXT""")   
 
 
@@ -70,7 +70,7 @@ def columns_Gait_Max_Min_Table():
                     c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_Foot_Progression_Angle_{axis}_{phase} REAL""")
                     c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_GRF_{axis}_{phase} REAL""")
                     c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_NGRF_{axis}_{phase} REAL""")
-                    c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_pelvis_Angle_{axis}_{phase} REAL""")
+                    c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_Pelvis_Angle_{axis}_{phase} REAL""")
                     c.execute(f"""ALTER TABLE Gait_Max_Min_Table ADD COLUMN {function}_{limb}_COM_{axis}_{phase} REAL""")   
 
           
@@ -99,7 +99,7 @@ def columns_Gait_Table():
               c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Foot_Progression_Angle_{axis} TEXT""")
               c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_GRF_{axis} TEXT""")
               c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_NGRF_{axis} TEXT""")
-              c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_pelvis_Angle_{axis} TEXT""")
+              c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_Pelvis_Angle_{axis} TEXT""")
               c.execute(f"""ALTER TABLE Gait_Table ADD COLUMN {LR}_COM_{axis} TEXT""")             
 
 
@@ -124,7 +124,7 @@ def columns_StepUp_Max_Min_Table():
                 c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Force_{axis} REAL""")
                 c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Power_{axis} REAL""")
                 c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_Foot_Progression_Angle_{axis} REAL""")
-                c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_pelvis_Angle_{axis} REAL""")
+                c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_Pelvis_Angle_{axis} REAL""")
                 c.execute(f"""ALTER TABLE StepUp_Max_Min_Table ADD COLUMN {function}_{limb}_COM_{axis} REAL""")   
 
           
@@ -149,7 +149,7 @@ def columns_StepUp_Table():
               c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Ankle_Force_{axis} TEXT""")
               c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Ankle_Power_{axis} TEXT""")
               c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Foot_Progression_Angle_{axis} TEXT""")
-              c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_pelvis_Angle_{axis} TEXT""")
+              c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_Pelvis_Angle_{axis} TEXT""")
               c.execute(f"""ALTER TABLE StepUp_Table ADD COLUMN {LR}_COM_{axis} TEXT""")             
 
 def create_StepDown_Max_Min_Table():
@@ -174,7 +174,7 @@ def columns_StepDown_Max_Min_Table():
                 c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Force_{axis} REAL""")
                 c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Power_{axis} REAL""")
                 c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_Foot_Progression_Angle_{axis} REAL""")
-                c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_pelvis_Angle_{axis} REAL""")
+                c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_Pelvis_Angle_{axis} REAL""")
                 c.execute(f"""ALTER TABLE StepDown_Max_Min_Table ADD COLUMN {function}_{limb}_COM_{axis} REAL""")   
 
 def create_StepDown_Table():
@@ -198,7 +198,7 @@ def columns_StepDown_Table():
               c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Ankle_Force_{axis} TEXT""")
               c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Ankle_Power_{axis} TEXT""")
               c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Foot_Progression_Angle_{axis} TEXT""")
-              c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_pelvis_Angle_{axis} TEXT""")
+              c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_Pelvis_Angle_{axis} TEXT""")
               c.execute(f"""ALTER TABLE StepDown_Table ADD COLUMN {LR}_COM_{axis} TEXT""")             
 
 def create_StandtoSit_Max_Min_Table():
@@ -222,10 +222,10 @@ def columns_StandtoSit_Max_Min_Table():
                 c.execute(f"""ALTER TABLE StandtoSit_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Force_{axis} REAL""")
                 c.execute(f"""ALTER TABLE StandtoSit_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Power_{axis} REAL""")
                 c.execute(f"""ALTER TABLE StandtoSit_Max_Min_Table ADD COLUMN {function}_{limb}_Foot_Progression_Angle_{axis} REAL""")
-                c.execute(f"""ALTER TABLE StandtoSit_Max_Min_Table ADD COLUMN {function}_{limb}_pelvis_Angle_{axis} REAL""")
+                c.execute(f"""ALTER TABLE StandtoSit_Max_Min_Table ADD COLUMN {function}_{limb}_Pelvis_Angle_{axis} REAL""")
                 c.execute(f"""ALTER TABLE StandtoSit_Max_Min_Table ADD COLUMN {function}_{limb}_COM_{axis} REAL""")   
                 c.execute(f"""ALTER TABLE StandtoSit_Max_Min_Table ADD COLUMN {function}_{limb}_C7_{axis} REAL""")
-
+                c.execute(f"""ALTER TABLE StandtoSit_Max_Min_Table ADD COLUMN {function}_{limb}_NGRF_{axis} REAL""")
 
 def create_StandtoSit_Table():
         c.execute("""CREATE TABLE IF NOT EXISTS StandtoSit_Table
@@ -248,9 +248,10 @@ def columns_StandtoSit_Table():
               c.execute(f"""ALTER TABLE StandtoSit_Table ADD COLUMN {LR}_Ankle_Force_{axis} TEXT""")
               c.execute(f"""ALTER TABLE StandtoSit_Table ADD COLUMN {LR}_Ankle_Power_{axis} TEXT""")
               c.execute(f"""ALTER TABLE StandtoSit_Table ADD COLUMN {LR}_Foot_Progression_Angle_{axis} TEXT""")
-              c.execute(f"""ALTER TABLE StandtoSit_Table ADD COLUMN {LR}_pelvis_Angle_{axis} TEXT""")
+              c.execute(f"""ALTER TABLE StandtoSit_Table ADD COLUMN {LR}_Pelvis_Angle_{axis} TEXT""")
               c.execute(f"""ALTER TABLE StandtoSit_Table ADD COLUMN {LR}_COM_{axis} TEXT""")
               c.execute(f"""ALTER TABLE StandtoSit_Table ADD COLUMN {LR}_C7_{axis} TEXT""")
+              c.execute(f"""ALTER TABLE StandtoSit_Table ADD COLUMN {LR}_NGRF_{axis} TEXT""")
 def create_Mean_StandtoSit_Table():
         c.execute("""CREATE TABLE IF NOT EXISTS Mean_StandtoSit_Table
               (ID TEXT, Dominant_Limb TEXT, Patient_Type TEXT, 
@@ -272,8 +273,9 @@ def columns_Mean_StandtoSit_Table():
               c.execute(f"""ALTER TABLE Mean_StandtoSit_Table ADD COLUMN {LR}_Ankle_Force_{axis} TEXT""")
               c.execute(f"""ALTER TABLE Mean_StandtoSit_Table ADD COLUMN {LR}_Ankle_Power_{axis} TEXT""")
               c.execute(f"""ALTER TABLE Mean_StandtoSit_Table ADD COLUMN {LR}_Foot_Progression_Angle_{axis} TEXT""")
-              c.execute(f"""ALTER TABLE Mean_StandtoSit_Table ADD COLUMN {LR}_pelvis_Angle_{axis} TEXT""")
+              c.execute(f"""ALTER TABLE Mean_StandtoSit_Table ADD COLUMN {LR}_Pelvis_Angle_{axis} TEXT""")
               c.execute(f"""ALTER TABLE Mean_StandtoSit_Table ADD COLUMN {LR}_COM_{axis} TEXT""")  
+              c.execute(f"""ALTER TABLE Mean_StandtoSit_Table ADD COLUMN {LR}_NGRF_{axis} TEXT""")
 def create_SittoStand_Max_Min_Table():
         c.execute("""CREATE TABLE IF NOT EXISTS SittoStand_Max_Min_Table
               (ID TEXT, Dominant_Limb TEXT, Patient_Type TEXT, 
@@ -295,9 +297,10 @@ def columns_SittoStand_Max_Min_Table():
                 c.execute(f"""ALTER TABLE SittoStand_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Force_{axis} REAL""")
                 c.execute(f"""ALTER TABLE SittoStand_Max_Min_Table ADD COLUMN {function}_{limb}_Ankle_Power_{axis} REAL""")
                 c.execute(f"""ALTER TABLE SittoStand_Max_Min_Table ADD COLUMN {function}_{limb}_Foot_Progression_Angle_{axis} REAL""")
-                c.execute(f"""ALTER TABLE SittoStand_Max_Min_Table ADD COLUMN {function}_{limb}_pelvis_Angle_{axis} REAL""")
+                c.execute(f"""ALTER TABLE SittoStand_Max_Min_Table ADD COLUMN {function}_{limb}_Pelvis_Angle_{axis} REAL""")
                 c.execute(f"""ALTER TABLE SittoStand_Max_Min_Table ADD COLUMN {function}_{limb}_COM_{axis} REAL""")  
                 c.execute(f"""ALTER TABLE SittoStand_Max_Min_Table ADD COLUMN {function}_{limb}_C7_{axis} REAL""")
+                c.execute(f"""ALTER TABLE SittoStand_Max_Min_Table ADD COLUMN {function}_{limb}_NGRF_{axis} REAL""")
 
 
 def create_SittoStand_Table():
@@ -321,9 +324,10 @@ def columns_SittoStand_Table():
               c.execute(f"""ALTER TABLE SittoStand_Table ADD COLUMN {LR}_Ankle_Force_{axis} TEXT""")
               c.execute(f"""ALTER TABLE SittoStand_Table ADD COLUMN {LR}_Ankle_Power_{axis} TEXT""")
               c.execute(f"""ALTER TABLE SittoStand_Table ADD COLUMN {LR}_Foot_Progression_Angle_{axis} TEXT""")
-              c.execute(f"""ALTER TABLE SittoStand_Table ADD COLUMN {LR}_pelvis_Angle_{axis} TEXT""")
+              c.execute(f"""ALTER TABLE SittoStand_Table ADD COLUMN {LR}_Pelvis_Angle_{axis} TEXT""")
               c.execute(f"""ALTER TABLE SittoStand_Table ADD COLUMN {LR}_COM_{axis} TEXT""")
               c.execute(f"""ALTER TABLE SittoStand_Table ADD COLUMN {LR}_C7_{axis} TEXT""")
+              c.execute(f"""ALTER TABLE SittoStand_Table ADD COLUMN {LR}_NGRF_{axis} TEXT""")
 
 def create_Mean_SittoStand_Table():
         c.execute("""CREATE TABLE IF NOT EXISTS Mean_SittoStand_Table
@@ -346,8 +350,9 @@ def columns_Mean_SittoStand_Table():
               c.execute(f"""ALTER TABLE Mean_SittoStand_Table ADD COLUMN {LR}_Ankle_Force_{axis} TEXT""")
               c.execute(f"""ALTER TABLE Mean_SittoStand_Table ADD COLUMN {LR}_Ankle_Power_{axis} TEXT""")
               c.execute(f"""ALTER TABLE Mean_SittoStand_Table ADD COLUMN {LR}_Foot_Progression_Angle_{axis} TEXT""")
-              c.execute(f"""ALTER TABLE Mean_SittoStand_Table ADD COLUMN {LR}_pelvis_Angle_{axis} TEXT""")
-              c.execute(f"""ALTER TABLE Mean_SittoStand_Table ADD COLUMN {LR}_COM_{axis} TEXT""")  
+              c.execute(f"""ALTER TABLE Mean_SittoStand_Table ADD COLUMN {LR}_Pelvis_Angle_{axis} TEXT""")
+              c.execute(f"""ALTER TABLE Mean_SittoStand_Table ADD COLUMN {LR}_COM_{axis} TEXT""")
+              c.execute(f"""ALTER TABLE Mean_SittoStand_Table ADD COLUMN {LR}_NGRF_{axis} TEXT""")
 
 
 create_Gait_Max_Min_Table()
