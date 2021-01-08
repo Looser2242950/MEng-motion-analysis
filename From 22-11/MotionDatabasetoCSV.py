@@ -10,7 +10,7 @@ import csv
 """Start SQLite Connection
 
 Make sure this matches the database file where the data is stored""" 
-conn = sqlite3.connect('MotionAnalysis5.db')
+conn = sqlite3.connect('MAD.db')
 c=conn.cursor()
 
 "All functions are commented out. Uncomment the function you would like to use"""
@@ -27,6 +27,7 @@ Tablelist= []
 def export_all_tables_to_csv():
     c.execute("SELECT name FROM sqlite_master WHERE type='table'")
     rows = c.fetchall()
+    print("Table Names: ")
     for row in rows:
         Tablelist.append(row[0])
         print(row)
@@ -41,7 +42,7 @@ def export_all_tables_to_csv():
         dirpath = os.getcwd() + """/{table}.csv"""
         print ("Data exported Successfully into {}".format(dirpath))
 
-#export_all_tables_to_csv()
+# export_all_tables_to_csv()
 
 
 
@@ -98,28 +99,26 @@ def select_column_names(Table):
 
 
 """Select and print the values of all rows in a certain column and table"""
-def select_column_data(colname, tablename):
-    c.execute("SELECT {} FROM {}".format(colname, tablename))
+def select_column_data():
+    c.execute(f"""SELECT {variable} FROM {table}""")
     coldata = c.fetchall()
     return coldata
-colname = "min_Right_pelvis_Angle_z_swing"
-tablename = "Gait_Max_Min_Table"
-
-columndata = select_column_data(colname, tablename)
-
+variable = "min_Right_Hip_Angle_x_swing"
+table = "Gait_Max_Min_Table"
+columndata = select_column_data()
 
 
 """Select and print the all values in a row and table
 in which a value in a collumn is a specifc value.
 For example, view everythign from a certian ID"""
-def select_column_data(tablename, colname, value):
-    c.execute("SELECT * FROM {} WHERE {} =={}".format( tablename, colname, value))
+def select_data_conditional():
+    c.execute(f"""SELECT * FROM {table} WHERE {variable} == {value}""")
     coldata = c.fetchall()
     return coldata
-colname = "min_Right_pelvis_Angle_x_swing"
-tablename = "Gait_Max_Min_Table"
-value = ""
-columndata = select_column_data(tablename, colname, value)
+# variable = "ID"
+# table = "Gait_Table"
+# value = "123"
+# data = select_data_conditional()
 
 
 
@@ -127,17 +126,28 @@ columndata = select_column_data(tablename, colname, value)
 
 """Delete Data based on two criteria
 Example, delete from table where ID = x and vistnumber =y"""
-def delete(tablename, colname1, val1, colname2, val2):
-   c.execute("DELETE FROM {} WHERE {} = {} AND {} = {}".format( tablename, colname1, val1, colname2, val2)) 
-# tablename = ""
-# colname1 = ""
-# val1 = ""
-# colname2 = ""
-# val2 = ""
-#delete(tablename, colname1, val1, colname2, val2)
+def delete():
+   c.execute(f"""DELETE FROM {table} WHERE {variable1} == {value1} AND {variable2}== {value2}""") 
+# table = "Gait_Table"
+# variable1 = "ID"
+# value1 = "1234"
+# variable2 = "Visit_Number"
+# value2 = 3
+# delete()
 
 
 
+"""----------CONVRTING BACK TO FLOATING POINT NUMBERS--------"""
+"""this converts the values to a dictionary where each value is a list of float numbers
+used for selecting an entire column where each cell contains a dataset (ie not maxmin)"""
+data={}
+def splitdata():
+    for i in range(len(columndata)):
+        data.update({i: columndata[i][0].split(", ")})
+    for key in data.keys():
+        for i in range(len(data[key])):
+              data[key][i] = float(data[key][i])
+# splitdata()
 
 """Close SQLite Connection"""
 conn.commit()

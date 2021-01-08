@@ -15,7 +15,7 @@ import os.path
 
 """Start SQLite Connection""" 
 #conn = sqlite3.connect(':memory:')
-conn = sqlite3.connect('MotionAnalysis5.db')
+conn = sqlite3.connect('MAD.db')
 c=conn.cursor()
 
 
