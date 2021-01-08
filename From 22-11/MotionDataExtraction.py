@@ -19,13 +19,13 @@ import matplotlib.pyplot as plt
 """connect to SQLite Database. For testing purposes, connect to "memory" """
 
 #conn = sqlite3.connect(':memory:')
-conn = sqlite3.connect('MotionAnalysis5.db')
+conn = sqlite3.connect('MAD.db')
 c=conn.cursor()
 
 """begin Tkinter GUI window.
 Setup Tabs within root window"""
 root = Tk()
-root.title("Enter Motion Analysis Data")
+root.title("Motion Analysis Database Interface")
 root.geometry("600x750")
 myFont = font.Font(family = "Helvetica", size=30)
 tab_parent = ttk.Notebook(root)
@@ -155,6 +155,7 @@ class Pattype:
         self.radioboth.grid(column = 4, row = 6)      
         global vVisit
         vVisit = IntVar()
+        vVisit.set(1)
         self.labelvisit = Label(FrameInfo,  text = "Patient Visit: ") 
         self.labelvisit.grid(column = 1, row = 7, pady = 5)
         self.entryVisit = Entry(FrameInfo,  textvariable = vVisit,   fg = "RoyalBlue4", width = 20) 
@@ -647,6 +648,7 @@ def extract_all_Gait_files():
         extractintoDict(filelistGait[i], TriallistGait[i])
         filelistGait[i]=os.path.basename(filelistGait[i])
         Gait[TriallistGait[i]].update({"Filename": filelistGait[i]})
+    print("Uploaded Gait Files: " + str(filelistGait))
 
 """The button for selecting the trials is created and calls two fucntions. The first is the 
 "Browse files function already described. This outputs two lists f equal length: one with the filenames
@@ -1002,6 +1004,7 @@ def add_max_min_to_dict():
     for i in range(len(filelistStepUp)):    
         filelistStepUp[i]=os.path.basename(filelistStepUp[i])
         StepUp[TriallistStepUp[i]].update({"Filename": filelistStepUp[i]})
+    print("Uploaded StepUp Files: " + str(filelistStepUp))
      
             
 """The selct function calls the browse files function( explained above) but DOES NOT
@@ -1339,6 +1342,7 @@ def add_max_min_to_dictStepDown():
     for i in range(len(filelistStepDown)):
         filelistStepDown[i]=os.path.basename(filelistStepDown[i])
         StepDown[TriallistStepDown[i]].update({"Filename": filelistStepDown[i]})
+    print("Uploaded StepDown Files: " + str(filelistStepDown))
             
 button_exploreStepDown = Button(SelectFrameStepDown, text = "Select Trials",  width = 40, bg = "RoyalBlue4",fg= "white",
                           command = lambda : [browseFilesStepDown()])  
@@ -1675,6 +1679,7 @@ def add_max_min_to_dict_STS():
     for i in range(len(filelistSTS)):
         filelistSTS[i]=os.path.basename(filelistSTS[i])
         STS[TriallistSTS[i]].update({"Filename": filelistSTS[i]})
+    print("Uploaded STS Files: " + str(filelistSTS))
 
 
            
@@ -2555,7 +2560,7 @@ def enter_Mean_SittoStand_Table ():
                   (str(STS["SittoStand"]["mean"]["Right"]["KneeAngle"][axis])[1:-1]),
                   (str(STS["SittoStand"]["mean"]["Right"]["KneeMoment"][axis])[1:-1]),
                   (str(STS["SittoStand"]["mean"]["Right"]["KneeForce"][axis])[1:-1]),
-                  (str(STS["SittoStand"]["mean"]["Right"]["KneePower"][axis])[1:-1]),i
+                  (str(STS["SittoStand"]["mean"]["Right"]["KneePower"][axis])[1:-1]),
                   (str(STS["SittoStand"]["mean"]["Right"]["HipAngle"][axis])[1:-1]),
                   (str(STS["SittoStand"]["mean"]["Right"]["HipMoment"][axis])[1:-1]),
                   (str(STS["SittoStand"]["mean"]["Right"]["HipForce"][axis])[1:-1]),
@@ -2631,13 +2636,19 @@ def writejson():
             for key in  patienttoJSON["StepUp"]["Trial 1"]["Left"].keys():
                 for axis in ["x","y","z"]:
                     for trialnum in TriallistStepUp:
-                        patienttoJSON["StepUp"][trialnum][limb][key][axis]=str(patienttoJSON["StepUp"][trialnum][limb][key][axis])[1:-1]
+                        try:
+                            patienttoJSON["StepUp"][trialnum][limb][key][axis]=str(patienttoJSON["StepUp"][trialnum][limb][key][axis])[1:-1]
+                        except:
+                            pass
     if sdc.get() == 1:
         for limb in ["Left","Right"]:
             for key in  patienttoJSON["StepDown"]["Trial 1"]["Left"].keys():
                 for axis in ["x","y","z"]:
                     for trialnum in TriallistStepDown:
-                        patienttoJSON["StepDown"][trialnum][limb][key][axis]=str(patienttoJSON["StepDown"][trialnum][limb][key][axis])[1:-1]
+                        try: 
+                            patienttoJSON["StepDown"][trialnum][limb][key][axis]=str(patienttoJSON["StepDown"][trialnum][limb][key][axis])[1:-1]
+                        except:
+                            pass
     if stsc.get() == 1:
         for limb in ["Left","Right"]:
             for key in  patienttoJSON["STS"]["Trial 1"]["Left"].keys():
