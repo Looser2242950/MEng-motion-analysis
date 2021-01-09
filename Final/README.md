@@ -26,7 +26,7 @@ MADS_SQLTutorial.py
   
   
   
-MAD.db
+MAD.db (not included in Github)
 
   Motion Analysis Database
   
